@@ -1,0 +1,286 @@
+/* Quiet editorial site. One accent, no shadows, no gradients. */
+:root {
+  --bg: #f4efe6;
+  --ink: #161616;
+  --muted: #3d3a36;
+  --line: #d9d1c4;
+  --accent: #1f4d3a;
+  --serif: "Noto Naskh Arabic", "Amiri", Georgia, serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 112.5%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.85;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: min(40rem, calc(100% - 2.5rem));
+  margin-inline: auto;
+}
+
+.site-header {
+  padding-block: 2.25rem 0;
+}
+
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-name {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+.site-name:hover {
+  color: var(--accent);
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+nav a:hover {
+  color: var(--accent);
+}
+
+nav a[aria-current="page"] {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+}
+
+main {
+  flex: 1;
+  padding-block: 4.5rem 5.5rem;
+}
+
+h1 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2.1rem, 6vw, 3.15rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.lede {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+
+.featured {
+  margin: 2.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.featured li {
+  border-bottom: 1px solid var(--line);
+}
+
+.featured a {
+  display: block;
+  padding-block: 0.85rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.15rem;
+}
+
+.featured a:hover {
+  color: var(--accent);
+}
+
+.more {
+  margin: 2rem 0 0;
+  font-size: 1.05rem;
+}
+
+.prose p {
+  margin: 0 0 1.15rem;
+  max-width: 36rem;
+}
+
+.tools {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+}
+
+.tools li + li {
+  margin-top: 0.15rem;
+}
+
+.project {
+  padding-block: 1.75rem 1.9rem;
+  border-top: 1px solid var(--line);
+}
+
+.project:last-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+.project h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.project p {
+  margin: 0;
+  max-width: 36rem;
+}
+
+.project .status {
+  margin-top: 0.55rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.contact-mail {
+  margin: 1.5rem 0 0;
+  font-size: 1.05rem;
+}
+
+form {
+  margin-top: 2.5rem;
+  max-width: 32rem;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.7rem 0.15rem;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+}
+
+textarea {
+  min-height: 8.5rem;
+  resize: vertical;
+}
+
+button {
+  margin-top: 0.4rem;
+  padding: 0.55rem 1.35rem;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--bg);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+.site-footer {
+  padding-block: 1.5rem 2.25rem;
+}
+
+.site-footer .wrap {
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--line);
+}
+
+.site-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 36rem) {
+  html {
+    font-size: 106%;
+  }
+
+  .wrap {
+    width: min(40rem, calc(100% - 1.75rem));
+  }
+
+  main {
+    padding-block: 3rem 4rem;
+  }
+
+  .site-header .wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+}

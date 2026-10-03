@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>تواصل — مروان الزهراني</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital@0;1&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="site-name" href="index.html">مروان الزهراني</a>
+        <nav aria-label="التنقل">
+          <ul>
+          <li><a href="index.html">الرئيسية</a></li>
+          <li><a href="about.html">عني</a></li>
+          <li><a href="projects.html">المشاريع</a></li>
+          <li><a href="contact.html" aria-current="page">تواصل</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <div class="wrap">
+        <h1>تواصل</h1>
+        <p class="lede">عندك فكرة أو تبي نشتغل على شيء؟ اكتب لي.</p>
+        <p class="contact-mail"><a href="mailto:Vexa702@gmail.com">Vexa702@gmail.com</a></p>
+        <form id="contact-form" action="mailto:Vexa702@gmail.com" method="post" enctype="text/plain">
+          <div class="field">
+            <label for="name">الاسم</label>
+            <input id="name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="message">الرسالة</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <button type="submit">إرسال</button>
+        </form>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>مروان الزهراني · 2026</p>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var form = document.getElementById("contact-form");
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          var name = document.getElementById("name").value.trim();
+          var message = document.getElementById("message").value.trim();
+          var href = "mailto:Vexa702@gmail.com?subject=" + encodeURIComponent(name) + "&body=" + encodeURIComponent(message);
+          window.location.href = href;
+        });
+      })();
+    </script>
+
+  </body>
+</html>
