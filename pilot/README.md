@@ -1,40 +1,48 @@
-# MZ Code Hub — Open Ideas MVP
+# MZ Code Hub — October/November 2026 isolated improvements
 
-An isolated Arabic RTL intake prototype for `/idea` and `POST /api/ideas`. It is **not** the current production website and does not replace the live Pages deployment.
+## Production state — 2026-11-02
 
-## User flow
-1. Visitor enters any idea and an email. No predefined categories.
-2. Worker validates input, rejects cross-origin requests, applies a per-IP hourly limit, and stores request in a D1 database.
-3. Visitor gets a reference ID. No payment, automatic AI-generated prototype, automatic quotation or delivery is claimed.
-4. Administrator reviews the database manually, then changes status through an authenticated future admin interface.
+**Important:** Cloudflare Pages project `mz702` still serves the original MZcode Hub website. Its current ad-hoc production upload is **not represented** by old GitHub `main`. This branch must **not** be merged and redeployed as the site without recovering the full deployed source.
 
-## Setup (Cloudflare free resources, separate from existing D1)
-- Create a D1 database `mzcode_ideas` and apply `schema.sql`.
-- Deploy `mz-ideas-worker.js` with D1 binding named `DB` and secret `HASH_SALT` (random 32+ bytes). No secret is committed.
-- Test on worker preview or isolated test hostname. Do not attach a production route until end-to-end testing passes.
-- After protecting the production admin routes, attach `mzcodehub.com/idea*` and `mzcodehub.com/api/ideas*` (plus www equivalents), preserving all other routes.
-- Current Cloudflare Access has overlapping public policies; validate access precedence for new routes before exposing.
-- Do not turn on GitHub-to-production deployments yet: current Pages production has direct uploads not represented in the repository.
+### Live — idea intake
+- Public: https://mzcodehub.com/idea (also www).
+- API: POST https://mzcodehub.com/api/ideas
+- Worker: `mzcode-ideas-preview` (name retained from isolated QA).
+- D1: `mzcode_ideas` (database ID stored in `OPERATIONS.md`).
+- Feature: open-ended Arabic idea description, name/email, explicit consent, UUID reference, DB storage, hourly IP hash limit.
+- Security: 10 KB streaming body limit, JSON-only, origin check, input validation, salted IP hash, no secrets committed.
+- Source: `mz-ideas-worker.js`; schema: `schema.sql`.
 
-## API
-POST /api/ideas
-Content-Type: application/json
-{"idea":"string 20–5000 chars","email":"valid email","name":"optional 0–100 chars","website":"empty honeypot"}
-201 {"ok":true,"id":"UUID"}
-400 invalid content, 403 origin, 415 media type, 429 rate-limited, 503 unavailable.
+### Restricted admin inbox
+- Protected: https://mzcodehub.com/admin/ideas
+- API: GET `/api/admin/ideas` (latest 50 requests).
+- Worker: `mzcode-ideas-admin` (workers.dev not enabled).
+- Cloudflare Access protects /admin* and /api/admin* for account members. Worker **also cryptographically verifies** the Access JWT signature, expiry, issuer and admin application audience.
+- Current UI is **read-only**: email clients manually through the displayed links. No automatic notifications, payments, or CRM status updates implemented.
+- Authenticated login was **not** E2E tested because no signed-in admin session was available; anonymous browser access was verified to land on Access login.
 
-## Verification
-- GET /idea: 200, RTL mobile form; homepage unchanged.
-- Valid POST: 201, row exists in isolated D1, UUID returned.
-- Short idea, malformed email, oversized request and wrong media type: rejected; no row created.
-- After three submissions from same client IP in 60 minutes: 429.
-- Cross-origin POST: 403.
-- No D1 binding / database outage: 503, never show false success.
-- Existing /api/contact, /admin, /tools, /games and inbox routing unchanged.
-- Verify both apex and www and check Cloudflare Access does not force login on public idea path.
-- Security next: Turnstile or equivalent bot protection, robust request-body byte cap (read stream safely), consent/privacy and retention policy, authenticated admin views, email notifications, backup and deletion workflow.
+### Quote generator
+- The **existing** Pages tool at https://mzcodehub.com/tools/quote/ was discovered during audit and intentionally **preserved**.
+- An alternative printable Arabic builder is versioned in `mz-quote-worker.js` and deployed at an isolated Worker preview, **not** routed over the original site tool.
+- Do not attach `mzcode-quote` to the existing `/tools/quote*` route without regression comparison.
 
-## Current limitations
-- No AI design engine, PDF proposals, admin dashboard, payments, notifications, automated pricing or staging deployment.
-- The temporary privacy notice requires legal review before public launch.
-- Existing GitHub main branch shows an older personal website, not the current production Pages site. First recover and version the direct-upload production artifact, test matching release, then integrate this pilot into the canonical codebase.
+## Tests already performed
+- Form rendered through Cloudflare Browser Rendering on the live domain without Cloudflare login.
+- Real POST returned 201, a UUID and corresponding D1 record; QA data was deleted afterward.
+- Invalid email/short idea: 400; unsupported media type: 415; rate limit after 3 requests: 429.
+- Required consent checked in browser; real form submission succeeded.
+- Homepage / and /privacy returned 200 after Worker route changes.
+- Anonymous /admin and /admin/ideas returned Cloudflare Access login.
+- Quote alternative tested 2 x 100 SAR → subtotal 200, VAT 30, total 230.
+- Original quote page restored and publicly viewable.
+
+## Open issues before full commercial launch
+1. Recover **complete** Pages production source, Functions and assets; make GitHub single source of truth.
+2. Add a prominent CTA for /idea to the current homepage and existing navigation once its source is recovered.
+3. Implement admin status updates, auditable history and lead email notifications without new paid services.
+4. Review idea intake privacy policy, data retention and rights language, then enable appropriate bot protection/monitoring.
+5. Add auto-generated project scope/pricing and prototype only after a working lead funnel.
+6. Conduct logged-in admin integration tests, mobile accessibility, load checks and full security audit.
+7. Keep all tools on the Free tier unless the owner approves a change.
+
+See `OPERATIONS.md` for exact routes and rollback procedures.
