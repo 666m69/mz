@@ -50,3 +50,14 @@ After rollback verify `/`, `/privacy`, `/tools/quote/`, `/admin`, and `/api/cont
 - Read-only admin inbox: does not modify request statuses, notify info@ or quote prices.
 - Existing Pages assets/Functions do not yet have a restorable, parity-tested source snapshot in GitHub.
 - Browser Rendering anonymous tests do not replace an authenticated admin session test.
+
+
+## Additional verified release updates
+- Existing homepage Worker source snapshot (GitHub branch): `pilot/production-snapshots/mzcodehub-public-entry-20261102.mjs`.
+- Patched homepage worker: `pilot/mzcodehub-public-entry-with-idea-cta.mjs`; CTA changed from mailto to `/idea`; source uploaded with `inherit` for signing key and OG-image binding.
+- Worker `mzcode-ideas-preview` now includes `send_email` binding `NOTIFY` restricted to the existing verified forwarding recipient, and `NOTIFY_TO` secret text binding. D1 stores `notification_status` `pending/sent/failed` and `notification_error`.
+- Email test: a successful POST recorded `notification_status=sent`; no proof of mailbox delivery available from connected Gmail. Do not call notifications fully verified end-to-end.
+- Admin Worker JWT audience was corrected to exactly match the existing Cloudflare Access admin application; admin lifecycle PATCH and D1 audit logging deployed. Signed-in admin QA is pending.
+- Actual contact form submitted successfully and returned a receipt. Anonymous /admin protection was checked previously.
+- Public read-only audit: 17 routes returned 200, assets returned 200; some JS are ES modules so `new Function` is **not** a valid syntax check for them.
+- QA idea rows were removed. Do not delete non-test customer records.
