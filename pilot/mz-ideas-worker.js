@@ -30,9 +30,9 @@ export default {async fetch(request,env){
   if((n?.n||0)>=3)return json({error:"تجاوزت حد الطلبات لهذه الساعة"},429);
   await env.DB.prepare("INSERT INTO idea_requests(id,idea,email,name,ip_hash,created_ms,status) VALUES(?,?,?,?,?,?,?)").bind(id,idea,email,name,ipHash,now,"new").run();
   // Email failure must never discard a saved lead. Status remains pending for later retry.
-  if(env.NOTIFY){
+  if(env.NOTIFY&&env.NOTIFY_TO){
    try{
-    await env.NOTIFY.send({from:"info@mzcodehub.com",to:null,subject:"[MZ Code Hub] New project idea — "+id.slice(0,8),
+    await env.NOTIFY.send({from:"info@mzcodehub.com",to:env.NOTIFY_TO,subject:"[MZ Code Hub] New project idea — "+id.slice(0,8),
      text:"New idea received\nRequest: "+id+"\nName: "+name+"\nReply: "+email+"\n\n"+idea.slice(0,5000)});
     await env.DB.prepare("UPDATE idea_requests SET notification_status='sent' WHERE id=?").bind(id).run();
    }catch(e){console.error("idea email notification failed");try{await env.DB.prepare("UPDATE idea_requests SET notification_status='failed',notification_error=? WHERE id=?").bind(String(e?.message||e).slice(0,250),id).run()}catch{}}
