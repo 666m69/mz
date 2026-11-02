@@ -46,3 +46,14 @@
 7. Keep all tools on the Free tier unless the owner approves a change.
 
 See `OPERATIONS.md` for exact routes and rollback procedures.
+
+
+## New production changes verified on 2026-11-02
+- Current homepage Worker source saved at `pilot/production-snapshots/mzcodehub-public-entry-20261102.mjs` before modification.
+- Patched source in `pilot/mzcodehub-public-entry-with-idea-cta.mjs`. **Live homepage CTA now points to `/idea`**, verified in an anonymous browser with inherited signing and OG-image bindings intact.
+- `POST /api/ideas` attempts an email notification via the Cloudflare `send_email` binding to the verified account destination. A live QA request was recorded as `notification_status='sent'` after the send call; this is an API send result, **not independent proof of inbox delivery**. Earlier attempts failed before the address-binding fix, and test rows were subsequently deleted.
+- New authenticated `PATCH /api/admin/ideas/:id` changes status with an audit log. Deployed behind Cloudflare Access, but **signed-in browser acceptance testing is still outstanding**.
+- Validated 17 public URLs (home, privacy, terms, all six listed tools, both games, idea intake, contact token, robots, sitemap, OG image) returned HTTP 200. Valid contact-form submission returned reference `MZ-CABAEDFC972243F7`.
+- The existing quote tool remains intact and is the live default; our alternative prototype remains isolated.
+- Main branch still does **not** reproduce the Pages deployment. Do not auto-deploy the old GitHub project.
+- No paid plan or paid AI model activated.
