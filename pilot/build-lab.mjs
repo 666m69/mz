@@ -2,7 +2,7 @@ import {readFile,writeFile,mkdir} from "node:fs/promises";
 const file = name => new URL(name,import.meta.url);
 const assets = {};
 for(const [url,name,type] of [
-  ["/idea","index.html","text/html"],["/idea/lab.js","lab.js","text/javascript"],
+  ["/idea","index.html","text/html"],["/idea/demo","demo.html","text/html"],["/idea/lab.js","lab.js","text/javascript"],
   ["/idea/prototype.js","prototype.js","text/javascript"],["/idea/lab.css","lab.css","text/css"],["/idea/engine.js","engine.js","text/javascript"]]){
   assets[url]=[await readFile(file("./lab/"+name),"utf8"),type];
 }

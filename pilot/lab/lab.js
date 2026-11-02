@@ -52,7 +52,17 @@ field("design").addEventListener("submit",event=>{
   const base=E.buildSpec(raw);field("project-title").value=base.title;field("features").value=base.features.slice(0,8).map(s=>s.slice(0,125)).join("\n");
   field("scope-state").textContent="";field("trial").hidden=true;field("workspace").hidden=false;field("scope-title").focus();
 });
-field("example").onclick=()=>{field("idea").value="أريد أن يحجز الزائر موعدًا متاحًا لجولة في المدينة، ويتلقى تنبيهًا إذا امتلأت المواعيد.";field("idea").dispatchEvent(new Event("input"));field("idea").focus();};
+let copiedIdea;
+field("direct-request").onclick=event=>{
+  if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button>0)return;
+  event.preventDefault();
+  const brief=field("brief");
+  if(!brief.value.trim()||brief.value===copiedIdea){
+    copiedIdea=field("idea").value.trim();
+    brief.value=copiedIdea;
+  }
+  brief.focus();
+};
 field("idea").oninput=()=>{field("idea").setCustomValidity("");field("workspace").hidden=true;};
 for (const id of ["project-title","features"]) field(id).oninput=()=>{field("trial").hidden=true;field("scope-state").textContent="اعتمد التعديلات لتحديث التجربة.";};
 field("apply").onclick=updateSpec;field("case").onchange=()=>{field("outcome").textContent="";renderRule();};

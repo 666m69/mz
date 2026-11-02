@@ -3,8 +3,15 @@ const publicHeaders={"cache-control":"no-store","x-content-type-options":"nosnif
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname;
- const asset=assets[path==="/idea/"?"/idea":path];
- if(asset&&["GET","HEAD"].includes(request.method))return new Response(request.method==="HEAD"?null:asset[0],{headers:{...publicHeaders,"content-type":asset[1]+"; charset=utf-8"}});
+ const assetPath=path==="/idea/"||path==="/idea/demo/"?path.slice(0,-1):path;
+ const asset=Object.hasOwn(assets,assetPath)?assets[assetPath]:null;
+ if(asset&&["GET","HEAD"].includes(request.method)){
+   const headers=new Headers(publicHeaders);
+   headers.set("content-type",asset[1]+"; charset=utf-8");
+   if(assetPath==="/idea/demo")headers.set("content-security-policy",publicHeaders["content-security-policy"].replace("connect-src 'self'","connect-src 'none'"));
+   return new Response(request.method==="HEAD"?null:asset[0],{headers});
+ }
+
 
  if(path!=="/api/ideas")return json({error:"Not found"},404);
  if(request.method!=="POST")return json({error:"Method not allowed"},405);

@@ -16,8 +16,8 @@
       field.id=label;field.maxLength=70;field.placeholder="مثلًا: تجربة ١";field.value="تجربة "+(i+1);
       const stock=node("p",""),status=node("p","");status.setAttribute("role","status");
       const draw=()=>{stock.textContent=feature.resource+" · "+remaining[i];};
-      const submit=node("button","نفّذ الخطوة");
-      const restore=node("button","أعد توفير الشرط");restore.className="secondary";
+      const submit=node("button",get("cards").dataset?.runLabel || "نفّذ الخطوة");
+      const restore=node("button",get("cards").dataset?.restoreLabel || "أعد توفير الشرط");restore.className="secondary";
       submit.onclick=()=>{
         const name=field.value.trim();if(!name){status.textContent="أدخل اسمًا للحالة.";field.focus();return;}
         const accepted=remaining[i]>0;if(accepted)remaining[i]--;
@@ -41,4 +41,5 @@
     return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${digest}'; style-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نموذج MZcode</title><style>${css}</style></head><body><small>MZcode / نموذج تفاعلي محلي</small><h1 id="title"></h1><p id="idea"></p><p>جرّب الوظائف بحالات افتراضية. تستهلك كل عملية ناجحة فرصة واحدة. أعد المحاولة لتختبر التعطّل ثم أعد توفير الشرط. ينتهي سجل التجربة عند إغلاق الملف.</p><main id="cards"></main><section><h2>سجل التجربة</h2><ol id="events"></ol></section><noscript>يتطلب النموذج تفعيل JavaScript في المتصفح.</noscript><script type="application/json" id="spec">${json}</script><script>${script}</script></body></html>`;
   }
   root.MZPrototype=Object.freeze({documentFor});
+  if(typeof document!=="undefined" && document.getElementById("demo-booking"))start();
 })(typeof window!=="undefined"?window:globalThis);
