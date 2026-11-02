@@ -1,0 +1,1 @@
+{"name":"mzcode-hub","private":true,"type":"module","engines":{"node":">=22.13"},"scripts":{"build":"node catalog.mjs && node build.mjs && node pilot/build-lab.mjs","test":"npm run build && node --test tests/*.test.mjs pilot/tests/*.test.mjs"}}

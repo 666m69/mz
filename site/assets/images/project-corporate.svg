@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="corp-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" rx="16" fill="url(#corp-bg)"/>
+  <rect x="30" y="30" width="740" height="440" rx="12" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+  
+  <circle cx="60" cy="55" r="6" fill="#ef4444"/>
+  <circle cx="80" cy="55" r="6" fill="#f59e0b"/>
+  <circle cx="100" cy="55" r="6" fill="#10b981"/>
+  <rect x="130" y="44" width="450" height="22" rx="6" fill="#020617"/>
+  <text x="145" y="59" fill="#94a3b8" font-family="sans-serif" font-size="11">https://rawadcapital.com • Enterprise Portfolio</text>
+
+  <!-- Navbar -->
+  <rect x="50" y="85" width="700" height="45" rx="8" fill="#1e293b"/>
+  <text x="75" y="113" fill="#f59e0b" font-family="sans-serif" font-weight="bold" font-size="16">RAWAD CAPITAL</text>
+  <rect x="480" y="97" width="60" height="20" rx="4" fill="#334155"/>
+  <rect x="555" y="97" width="60" height="20" rx="4" fill="#334155"/>
+  <rect x="630" y="93" width="100" height="28" rx="6" fill="url(#gold)"/>
+  <text x="645" y="112" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="11">طلب استشارة</text>
+
+  <!-- Hero Banner -->
+  <rect x="50" y="150" width="400" height="180" rx="12" fill="#1e293b" stroke="#334155"/>
+  <text x="75" y="190" fill="#f8fafc" font-family="sans-serif" font-weight="bold" font-size="20">نبني استثمارات المستقبل</text>
+  <rect x="75" y="215" width="280" height="12" rx="3" fill="#64748b"/>
+  <rect x="75" y="235" width="220" height="12" rx="3" fill="#64748b"/>
+  <rect x="75" y="270" width="140" height="38" rx="6" fill="url(#gold)"/>
+  <text x="95" y="294" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="13">استكشف المحفظة</text>
+
+  <!-- ROI Calculator Widget -->
+  <rect x="470" y="150" width="280" height="180" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="495" y="180" fill="#f59e0b" font-family="sans-serif" font-weight="bold" font-size="13">حاسبة العائد الاستثماري ROI</text>
+  <rect x="495" y="200" width="230" height="30" rx="6" fill="#0f172a"/>
+  <text x="510" y="220" fill="#94a3b8" font-family="sans-serif" font-size="12">مبلغ الاستثمار: $100,000</text>
+  <rect x="495" y="245" width="230" height="65" rx="8" fill="#0f172a"/>
+  <text x="510" y="270" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="16">العائد التقديري: 28.5%</text>
+  <text x="510" y="295" fill="#64748b" font-family="sans-serif" font-size="11">بناءً على أداء الصناديق السابقة</text>
+
+  <!-- Trust Badges -->
+  <rect x="50" y="350" width="700" height="90" rx="10" fill="#1e293b"/>
+  <text x="75" y="380" fill="#94a3b8" font-family="sans-serif" font-size="12">المؤشرات والإنجازات</text>
+  <rect x="75" y="395" width="140" height="32" rx="6" fill="#0f172a"/>
+  <text x="90" y="416" fill="#f8fafc" font-family="sans-serif" font-weight="bold" font-size="13">+240% طلبات جديدة</text>
+  
+  <rect x="235" y="395" width="140" height="32" rx="6" fill="#0f172a"/>
+  <text x="250" y="416" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="13">98/100 سرعة Google</text>
+
+  <rect x="395" y="395" width="140" height="32" rx="6" fill="#0f172a"/>
+  <text x="410" y="416" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="13">$150M+ أصول مدارة</text>
+</svg>

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="b2b-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b132b"/>
+      <stop offset="100%" stop-color="#1c2541"/>
+    </linearGradient>
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" rx="16" fill="url(#b2b-bg)"/>
+  <rect x="30" y="30" width="740" height="440" rx="12" fill="#0f172a" stroke="#334155" stroke-width="1.8"/>
+
+  <!-- Browser Dots -->
+  <circle cx="60" cy="55" r="6" fill="#ef4444"/>
+  <circle cx="80" cy="55" r="6" fill="#f59e0b"/>
+  <circle cx="100" cy="55" r="6" fill="#10b981"/>
+  <rect x="130" y="44" width="450" height="22" rx="6" fill="#0b132b"/>
+  <text x="145" y="59" fill="#38bdf8" font-family="sans-serif" font-size="11">https://apex-supply.b2b/portal • ZATCA Compliant Wholesale</text>
+
+  <!-- B2B Header -->
+  <rect x="50" y="85" width="700" height="42" rx="8" fill="#1e293b"/>
+  <text x="75" y="111" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="14">APEX B2B WHOLESALE</text>
+  <rect x="420" y="93" width="90" height="26" rx="4" fill="#0f172a"/>
+  <text x="432" y="110" fill="#94a3b8" font-family="sans-serif" font-size="10">كتالوج الشركات</text>
+  <rect x="520" y="93" width="110" height="26" rx="4" fill="#0f172a"/>
+  <text x="530" y="110" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="10">ائتمان: $250,000</text>
+  <rect x="640" y="93" width="95" height="26" rx="6" fill="url(#cyan-glow)"/>
+  <text x="652" y="110" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">طلب جملة سريع</text>
+
+  <!-- B2B Tiered Order Matrix Table Mockup -->
+  <rect x="50" y="140" width="450" height="200" rx="10" fill="#1e293b" stroke="#334155"/>
+  <text x="70" y="168" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="13">جدول أسعار الجملة المتدرجة (Tiered Pricing)</text>
+
+  <!-- Table rows -->
+  <rect x="70" y="185" width="410" height="30" rx="4" fill="#0f172a"/>
+  <text x="85" y="205" fill="#94a3b8" font-family="sans-serif" font-size="11">الكمية: 100 - 499 كرتون</text>
+  <text x="320" y="205" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="11">45.00 ر.س (خصم 15%)</text>
+
+  <rect x="70" y="222" width="410" height="30" rx="4" fill="#0f172a"/>
+  <text x="85" y="242" fill="#94a3b8" font-family="sans-serif" font-size="11">الكمية: 500 - 1,999 كرتون</text>
+  <text x="320" y="242" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="11">38.00 ر.س (خصم 28%)</text>
+
+  <rect x="70" y="259" width="410" height="30" rx="4" fill="#0f172a" stroke="#06b6d4"/>
+  <text x="85" y="279" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="11">الكمية: 2,000+ كرتون (كونتينر)</text>
+  <text x="320" y="279" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="11">29.50 ر.س (خصم 45%) ✓</text>
+
+  <rect x="70" y="298" width="410" height="32" rx="6" fill="url(#cyan-glow)"/>
+  <text x="175" y="318" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="11">إصدار أمر الشراء المباشر PO</text>
+
+  <!-- Right: Automated ZATCA Tax Invoice Widget -->
+  <rect x="515" y="140" width="235" height="200" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="1.2"/>
+  <text x="535" y="168" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="12">فاتورة ضريبية مؤتمتة (ZATCA)</text>
+  
+  <rect x="535" y="185" width="195" height="40" rx="6" fill="#0f172a"/>
+  <text x="545" y="202" fill="#94a3b8" font-family="sans-serif" font-size="10">رقم الفاتورة: INV-2026-9042</text>
+  <text x="545" y="218" fill="#cbd5e1" font-family="sans-serif" font-size="10">الضريبة 15%: 21,750 ر.س</text>
+
+  <!-- QR Code Mockup -->
+  <rect x="535" y="235" width="55" height="55" rx="6" fill="#ffffff"/>
+  <rect x="545" y="245" width="12" height="12" fill="#000000"/>
+  <rect x="568" y="245" width="12" height="12" fill="#000000"/>
+  <rect x="545" y="268" width="12" height="12" fill="#000000"/>
+
+  <rect x="600" y="235" width="130" height="55" rx="6" fill="#0f172a"/>
+  <text x="610" y="255" fill="#a7f3d0" font-family="sans-serif" font-size="10">معتمدة إلكترونياً</text>
+  <text x="610" y="275" fill="#34d399" font-family="sans-serif" font-weight="bold" font-size="12">166,750 ر.س</text>
+
+  <rect x="535" y="300" width="195" height="30" rx="6" fill="#059669"/>
+  <text x="575" y="320" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="11">تحميل الفاتورة PDF</text>
+
+  <!-- Bottom Metric Cards -->
+  <rect x="50" y="355" width="700" height="90" rx="10" fill="#1e293b"/>
+  <rect x="70" y="370" width="205" height="60" rx="8" fill="#0f172a"/>
+  <text x="85" y="395" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="20">+$1.4M</text>
+  <text x="85" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">حجم مبيعات B2B شهرياً</text>
+
+  <rect x="295" y="370" width="205" height="60" rx="8" fill="#0f172a"/>
+  <text x="310" y="395" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="20">-96%</text>
+  <text x="310" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">انخفاض أخطاء الطلبيات اليدوية</text>
+
+  <rect x="520" y="370" width="210" height="60" rx="8" fill="#0f172a"/>
+  <text x="535" y="395" fill="#fbbf24" font-family="sans-serif" font-weight="bold" font-size="20">18 يوماً</text>
+  <text x="535" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">تسريع تحصيل الدفعات والائتمان</text>
+</svg>

@@ -1,0 +1,280 @@
+/* ========================================================
+   MZ702 Luxury Web Portfolio & Client Attraction Engine
+   Custom Styles, Glassmorphism, Theme Variables & RTL
+   ======================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Readex+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --font-primary: 'Readex Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Light Theme Variables */
+  --bg-main: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --border-color: rgba(226, 232, 240, 0.8);
+  --border-color-glow: rgba(59, 130, 246, 0.4);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-accent: #2563eb;
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(16px);
+}
+
+.dark {
+  /* Dark Luxury Theme Variables */
+  --bg-main: #0b0f19;
+  --bg-card: rgba(17, 24, 39, 0.7);
+  --bg-card-hover: rgba(24, 34, 53, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-glow: rgba(59, 130, 246, 0.5);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-accent: #60a5fa;
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-color-glow);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px rgba(59, 130, 246, 0.15);
+}
+
+/* Gradient Text Effect */
+.gradient-text {
+  background: linear-gradient(135deg, #d4af37 0%, #fef08a 40%, #b45309 80%, #fef08a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #8C5C2B 0%, #F7DFAB 25%, #C5954C 50%, #FFF0CE 75%, #B58135 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Royal Luxury Gold Elements */
+.royal-gold-border {
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 25px -5px rgba(212, 175, 55, 0.2);
+}
+
+.royal-gold-btn {
+  background: linear-gradient(135deg, #8C5C2B 0%, #d4af37 35%, #F7DFAB 60%, #B58135 100%);
+  color: #0b0c10 !important;
+  font-weight: 800;
+  box-shadow: 0 8px 25px -4px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.royal-gold-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px rgba(212, 175, 55, 0.6);
+  filter: brightness(1.08);
+}
+
+.royal-emblem-card {
+  position: relative;
+  background: radial-gradient(circle at center, rgba(140, 92, 43, 0.15) 0%, rgba(9, 10, 11, 0.95) 75%);
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.9), 0 0 40px -10px rgba(212, 175, 55, 0.25);
+}
+
+.royal-aura-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0) 65%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glowing Pulsing Status Indicator */
+.status-pulse {
+  position: relative;
+  display: inline-flex;
+}
+
+.status-pulse::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background-color: #10b981;
+  opacity: 0.75;
+  animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Modal Animations */
+.modal-enter {
+  animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-exit {
+  animation: modalOut 0.2s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+}
+
+/* Hero Glow Background Blurs */
+.hero-glow-1 {
+  position: absolute;
+  top: -10%;
+  left: 15%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-glow-2 {
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0) 70%);
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Active Filter Pill */
+.filter-btn.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 4px 15px -2px rgba(37, 99, 235, 0.5);
+}
+
+/* Interactive Calculator Checkboxes */
+.calc-checkbox:checked + label {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.calc-radio:checked + label {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Floating Action Button for Quick Leads */
+.floating-whatsapp {
+  box-shadow: 0 8px 25px -4px rgba(37, 211, 102, 0.5);
+  animation: float-pulse 3s ease-in-out infinite;
+}
+
+@keyframes float-pulse {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Admin Quick Bar Floating */
+.admin-bar-btn {
+  box-shadow: 0 8px 20px -2px rgba(99, 102, 241, 0.4);
+}
+/* Accessibility and mobile corrections */
+html {scroll-padding-top:100px} section[id] {scroll-margin-top:100px}
+a:focus-visible,button:focus-visible,[role=button]:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible {outline:3px solid #60a5fa;outline-offset:4px}
+label:has(> .calc-radio:checked),label:has(> .calc-checkbox:checked){border-color:#3b82f6;background:rgba(59,130,246,.12)}
+label:has(> .calc-radio:focus-visible){outline:3px solid #60a5fa;outline-offset:2px}
+.mz-honeypot{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+button:disabled{opacity:.65;cursor:wait}
+#lead-status{overflow-wrap:anywhere}
+.mobile-menu{padding:10px 20px;border-top:1px solid var(--border-color)}
+.mobile-menu summary{cursor:pointer;font-weight:700}
+.mobile-menu nav{display:flex;flex-wrap:wrap;gap:18px;padding:15px 0}
+@media(min-width:1280px){.mobile-menu{display:none}}
+@media(max-width:420px){body>nav>div{padding-inline:12px;gap:8px}body>nav>div>a{gap:6px}body>nav>div>a>div:last-child>span{font-size:8px}body>nav>div>.flex{gap:6px}body>nav a[href="#contact"]{padding:10px}#theme-toggle-btn{width:32px;height:36px}body>nav>div>a>div:first-child{width:36px;height:36px}.hero-glow-1,.hero-glow-2{max-width:90vw}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* A hidden spam field must not expand RTL page width. */
+.mz-honeypot{display:none}

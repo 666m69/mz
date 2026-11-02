@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="edu-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1035"/>
+      <stop offset="100%" stop-color="#090514"/>
+    </linearGradient>
+    <linearGradient id="tabby-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="tamara-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" rx="16" fill="url(#edu-bg)"/>
+  <rect x="30" y="30" width="740" height="440" rx="12" fill="#2e1065" fill-opacity="0.25" stroke="#7e22ce" stroke-width="1.8"/>
+
+  <!-- Browser Dots -->
+  <circle cx="60" cy="55" r="6" fill="#ef4444"/>
+  <circle cx="80" cy="55" r="6" fill="#f59e0b"/>
+  <circle cx="100" cy="55" r="6" fill="#10b981"/>
+  <rect x="130" y="44" width="450" height="22" rx="6" fill="#090514"/>
+  <text x="145" y="59" fill="#c084fc" font-family="sans-serif" font-size="11">https://leadership-academy.sa/masterclass • DRM Protected Streaming</text>
+
+  <!-- Academy Header -->
+  <rect x="50" y="85" width="700" height="42" rx="8" fill="#1e1035"/>
+  <text x="75" y="111" fill="#e9d5ff" font-family="sans-serif" font-weight="bold" font-size="14">LEADERSHIP MASTERCLASS</text>
+  <rect x="440" y="93" width="75" height="26" rx="4" fill="#090514"/>
+  <text x="450" y="110" fill="#c084fc" font-family="sans-serif" font-size="10">المحتوى الخاص</text>
+  <rect x="525" y="93" width="90" height="26" rx="4" fill="#090514"/>
+  <text x="535" y="110" fill="#a855f7" font-family="sans-serif" font-size="10">جلسات 1-on-1</text>
+  <rect x="625" y="93" width="110" height="26" rx="6" fill="url(#tabby-gradient)"/>
+  <text x="635" y="110" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="10">انضم للمشتركين VIP</text>
+
+  <!-- Video Player Mockup with DRM Watermark -->
+  <rect x="50" y="140" width="440" height="200" rx="10" fill="#090514" stroke="#581c87"/>
+  <circle cx="270" cy="230" r="32" fill="#7c3aed" opacity="0.8"/>
+  <polygon points="262,216 286,230 262,244" fill="#ffffff"/>
+
+  <!-- Dynamic Anti-Piracy Watermark -->
+  <rect x="70" y="155" width="170" height="22" rx="4" fill="#1e1035" opacity="0.7"/>
+  <text x="80" y="170" fill="#a855f7" font-family="monospace" font-size="10">USER_ID: #VIP-9402 [LIVE DRM]</text>
+
+  <!-- Video Progress Bar -->
+  <rect x="70" y="315" width="400" height="8" rx="4" fill="#2e1065"/>
+  <rect x="70" y="315" width="260" height="8" rx="4" fill="#a855f7"/>
+
+  <!-- Right: High-Ticket Checkout & Tabby/Tamara Split Pay -->
+  <rect x="505" y="140" width="245" height="200" rx="10" fill="#1e1035" stroke="#ec4899" stroke-width="1.2"/>
+  <text x="525" y="166" fill="#f472b6" font-family="sans-serif" font-weight="bold" font-size="12">عضوية التوجيه التنفيذي السنوية</text>
+  <text x="525" y="190" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="18">4,800 ر.س <tspan font-size="11" fill="#94a3b8">/ سنوياً</tspan></text>
+
+  <!-- Tabby / Tamara payment option cards -->
+  <rect x="525" y="205" width="205" height="40" rx="6" fill="#090514" stroke="#3b82f6"/>
+  <text x="535" y="222" fill="#60a5fa" font-family="sans-serif" font-weight="bold" font-size="10">قسّمها على 4 دفعات مع تابي (Tabby)</text>
+  <text x="535" y="238" fill="#e2e8f0" font-family="sans-serif" font-size="10">1,200 ر.س / شهرياً • بدون فوائد</text>
+
+  <rect x="525" y="252" width="205" height="40" rx="6" fill="#090514" stroke="#ec4899"/>
+  <text x="535" y="269" fill="#f43f5e" font-family="sans-serif" font-weight="bold" font-size="10">أو قسّمها مع تمارا (Tamara)</text>
+  <text x="535" y="285" fill="#e2e8f0" font-family="sans-serif" font-size="10">1,200 ر.س / شهرياً • بدون رسوم</text>
+
+  <rect x="525" y="300" width="205" height="30" rx="6" fill="url(#tabby-gradient)"/>
+  <text x="560" y="320" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="11">اشترك الآن بضغطة زر</text>
+
+  <!-- Bottom Metric Cards -->
+  <rect x="50" y="355" width="700" height="90" rx="10" fill="#1e1035"/>
+  <rect x="70" y="370" width="205" height="60" rx="8" fill="#090514"/>
+  <text x="85" y="395" fill="#a855f7" font-family="sans-serif" font-weight="bold" font-size="20">+$750K</text>
+  <text x="85" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">إيرادات الاشتراكات (6 أشهر)</text>
+
+  <rect x="295" y="370" width="205" height="60" rx="8" fill="#090514"/>
+  <text x="310" y="395" fill="#f43f5e" font-family="sans-serif" font-weight="bold" font-size="20">+340%</text>
+  <text x="310" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">إتمام الشراء عبر التقسيط (تابي/تمارا)</text>
+
+  <rect x="520" y="370" width="210" height="60" rx="8" fill="#090514"/>
+  <text x="535" y="395" fill="#10b981" font-family="sans-serif" font-weight="bold" font-size="20">0% تسريب</text>
+  <text x="535" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">حماية محتوى الفيديو بالعلامة المائية</text>
+</svg>

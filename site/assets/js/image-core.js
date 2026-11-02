@@ -1,0 +1,2 @@
+export function imageLayout(iw,ih,w,h,mode){if(![iw,ih,w,h].every(n=>Number.isFinite(n)&&n>0)||w>2048||h>2048)throw Error('أبعاد غير صالحة.');const scale=mode==='cover'?Math.max(w/iw,h/ih):Math.min(w/iw,h/ih);return {x:(w-iw*scale)/2,y:(h-ih*scale)/2,width:iw*scale,height:ih*scale}}
+export function outputName(name,index,ext){return String(index+1).padStart(2,'0')+'-'+name.replace(/\.[^.]+$/,'').replace(/[^\p{L}\p{N}_-]/gu,'-').slice(0,60)+'.'+ext}

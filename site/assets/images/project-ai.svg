@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ai-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#180033"/>
+      <stop offset="100%" stop-color="#090514"/>
+    </linearGradient>
+    <linearGradient id="purple-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" rx="16" fill="url(#ai-bg)"/>
+  <rect x="30" y="30" width="740" height="440" rx="12" fill="#2e1065" fill-opacity="0.3" stroke="#9333ea" stroke-width="1.5"/>
+
+  <circle cx="60" cy="55" r="6" fill="#ef4444"/>
+  <circle cx="80" cy="55" r="6" fill="#f59e0b"/>
+  <circle cx="100" cy="55" r="6" fill="#10b981"/>
+  <rect x="130" y="44" width="450" height="22" rx="6" fill="#090514"/>
+  <text x="145" y="59" fill="#c084fc" font-family="sans-serif" font-size="11">https://qalam-ai.app • Gemini Powered Arab NLP</text>
+
+  <!-- Prompt Box -->
+  <rect x="60" y="95" width="680" height="130" rx="10" fill="#1e1035" stroke="#7e22ce"/>
+  <text x="85" y="125" fill="#e9d5ff" font-family="sans-serif" font-weight="bold" font-size="13">أدخل فكرة إعلانك أو منتجك (باللهجة الخليجية أو الفصحى):</text>
+  <rect x="85" y="140" width="630" height="40" rx="6" fill="#090514" stroke="#4c1d95"/>
+  <text x="100" y="165" fill="#a855f7" font-family="sans-serif" font-size="12">عطر شرقي فاخر بلمسات العود والمسك للرجال للمناسبات الخاصة...</text>
+  
+  <rect x="580" y="188" width="135" height="30" rx="6" fill="url(#purple-glow)"/>
+  <text x="605" y="208" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="12">توليد الإعلان ✨</text>
+
+  <!-- Results Cards -->
+  <rect x="60" y="245" width="325" height="200" rx="10" fill="#1e1035" stroke="#581c87"/>
+  <text x="80" y="275" fill="#a855f7" font-family="sans-serif" font-weight="bold" font-size="12">نص إعلان TikTok جذاب 📱</text>
+  <rect x="80" y="290" width="285" height="135" rx="6" fill="#090514"/>
+  <text x="95" y="315" fill="#cbd5e1" font-family="sans-serif" font-size="11">"تبغى حضور يثبت وجودك من أول ثانية؟</text>
+  <text x="95" y="335" fill="#cbd5e1" font-family="sans-serif" font-size="11">عطر الأصالة الملكي.. ريحة تفوح فخامة</text>
+  <text x="95" y="355" fill="#cbd5e1" font-family="sans-serif" font-size="11">وتدوم معك طول اليوم! اطلبه الحين بخصم 30%"</text>
+  <rect x="95" y="380" width="85" height="24" rx="4" fill="#7e22ce"/>
+  <text x="110" y="396" fill="#ffffff" font-family="sans-serif" font-size="10">نسخ النص</text>
+
+  <rect x="415" y="245" width="325" height="200" rx="10" fill="#1e1035" stroke="#581c87"/>
+  <text x="435" y="275" fill="#a855f7" font-family="sans-serif" font-weight="bold" font-size="12">وصف منتج SEO لمتجر سلة/زد 🛍️</text>
+  <rect x="435" y="290" width="285" height="135" rx="6" fill="#090514"/>
+  <text x="450" y="315" fill="#cbd5e1" font-family="sans-serif" font-size="11">مقدمة العطر: نفحات دهن العود الكمبودي المعتق.</text>
+  <text x="450" y="335" fill="#cbd5e1" font-family="sans-serif" font-size="11">قلب العطر: ورد طائفي مع قطرات العنبر النقي.</text>
+  <text x="450" y="355" fill="#cbd5e1" font-family="sans-serif" font-size="11">الفوحان: ثبات عالي يدوم أكثر من 24 ساعة.</text>
+  <rect x="450" y="380" width="85" height="24" rx="4" fill="#7e22ce"/>
+  <text x="465" y="396" fill="#ffffff" font-family="sans-serif" font-size="10">نسخ النص</text>
+</svg>
