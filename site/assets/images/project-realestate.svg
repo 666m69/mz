@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="real-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#021a1a"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <linearGradient id="emerald-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="luxury-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" rx="16" fill="url(#real-bg)"/>
+  <rect x="30" y="30" width="740" height="440" rx="12" fill="#042f2e" fill-opacity="0.25" stroke="#0f766e" stroke-width="1.8"/>
+
+  <!-- Browser Header -->
+  <circle cx="60" cy="55" r="6" fill="#ef4444"/>
+  <circle cx="80" cy="55" r="6" fill="#f59e0b"/>
+  <circle cx="100" cy="55" r="6" fill="#10b981"/>
+  <rect x="130" y="44" width="450" height="22" rx="6" fill="#021a1a"/>
+  <text x="145" y="59" fill="#2dd4bf" font-family="sans-serif" font-size="11">https://elitedar.luxury/villas/al-nakheel • VIP Asset Portal</text>
+
+  <!-- Navbar inside mockup -->
+  <rect x="50" y="85" width="700" height="42" rx="8" fill="#021a1a"/>
+  <text x="75" y="111" fill="#fbbf24" font-family="sans-serif" font-weight="bold" font-size="14">DAR ELITE LUXURY</text>
+  <rect x="490" y="94" width="65" height="24" rx="4" fill="#064e3b"/>
+  <text x="502" y="110" fill="#a7f3d0" font-family="sans-serif" font-size="10">جولة 3D</text>
+  <rect x="570" y="94" width="80" height="24" rx="4" fill="#064e3b"/>
+  <text x="580" y="110" fill="#a7f3d0" font-family="sans-serif" font-size="10">حاسبة العائد</text>
+  <rect x="660" y="92" width="75" height="28" rx="6" fill="url(#luxury-gold)"/>
+  <text x="672" y="110" fill="#021a1a" font-family="sans-serif" font-weight="bold" font-size="10">حجز VIP</text>
+
+  <!-- Left Main Showcase Villa -->
+  <rect x="50" y="140" width="430" height="200" rx="12" fill="#092a27" stroke="#115e59"/>
+  <!-- Villa Mockup visual elements -->
+  <rect x="70" y="155" width="390" height="110" rx="8" fill="#021a1a"/>
+  <!-- Architectural silhouette -->
+  <polygon points="120,240 180,180 250,240" fill="#134e4a"/>
+  <rect x="230" y="195" width="180" height="45" rx="4" fill="#0f766e" opacity="0.6"/>
+  <rect x="250" y="205" width="35" height="25" rx="2" fill="#fef08a" opacity="0.8"/>
+  <rect x="300" y="205" width="35" height="25" rx="2" fill="#fef08a" opacity="0.8"/>
+  
+  <rect x="70" y="275" width="180" height="18" rx="4" fill="#f8fafc"/>
+  <text x="75" y="289" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12">قصر النخيل الملكي - الرياض</text>
+  <text x="70" y="312" fill="#2dd4bf" font-family="sans-serif" font-weight="bold" font-size="15">14,500,000 ر.س</text>
+  <text x="210" y="312" fill="#94a3b8" font-family="sans-serif" font-size="11">العائد المتوقع: 9.4% سنوياً</text>
+  <rect x="360" y="295" width="100" height="30" rx="6" fill="url(#emerald-gold)"/>
+  <text x="375" y="314" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="11">طلب معاينة VIP</text>
+
+  <!-- Right: Mortgage & Yield Calculator Widget -->
+  <rect x="495" y="140" width="255" height="200" rx="12" fill="#021a1a" stroke="#fbbf24" stroke-width="1.2"/>
+  <text x="515" y="168" fill="#fbbf24" font-family="sans-serif" font-weight="bold" font-size="12">حاسبة العائد والتمويل العقاري</text>
+  
+  <rect x="515" y="185" width="215" height="32" rx="6" fill="#0f2926"/>
+  <text x="525" y="205" fill="#a7f3d0" font-family="sans-serif" font-size="11">الدفعة الأولى: 20% (2.9M)</text>
+
+  <rect x="515" y="225" width="215" height="32" rx="6" fill="#0f2926"/>
+  <text x="525" y="245" fill="#a7f3d0" font-family="sans-serif" font-size="11">القسط الشهري: 48,200 ر.س</text>
+
+  <rect x="515" y="268" width="215" height="60" rx="8" fill="#064e3b" stroke="#059669"/>
+  <text x="525" y="290" fill="#fef08a" font-family="sans-serif" font-weight="bold" font-size="13">صافي التدفق الإيجاري:</text>
+  <text x="525" y="315" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="16">+1,360,000 ر.س / سنوياً</text>
+
+  <!-- Metrics Bar Bottom -->
+  <rect x="50" y="355" width="700" height="90" rx="10" fill="#021a1a" stroke="#115e59"/>
+  
+  <rect x="70" y="370" width="205" height="60" rx="8" fill="#092a27"/>
+  <text x="85" y="395" fill="#34d399" font-family="sans-serif" font-weight="bold" font-size="20">+$3.8M</text>
+  <text x="85" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">صفقات استثمارية محققة</text>
+
+  <rect x="295" y="370" width="205" height="60" rx="8" fill="#092a27"/>
+  <text x="310" y="395" fill="#fbbf24" font-family="sans-serif" font-weight="bold" font-size="20">+210%</text>
+  <text x="310" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">زيادة استفسارات المشترين VIP</text>
+
+  <rect x="520" y="370" width="210" height="60" rx="8" fill="#092a27"/>
+  <text x="535" y="395" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="20">15 دقيقة</text>
+  <text x="535" y="418" fill="#94a3b8" font-family="sans-serif" font-size="11">سرعة تأهيل العميل المهتم</text>
+</svg>

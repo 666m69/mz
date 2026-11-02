@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {safeURL,qrMatrix} from '../site/assets/js/art-core.js';
+test('ad QR only permits explicit web URLs',()=>{for(const s of ['javascript:alert(1)','data:text/html,hi','https://a:b@example.com','not a URL'])assert.throws(()=>safeURL(s));assert.equal(safeURL('https://example.com/listing/123'),'https://example.com/listing/123');assert.equal(safeURL(''),'')});
+test('QR supports Arabic and retains square matrix',()=>{const qr=qrMatrix('https://example.com/عقار');assert.ok(qr.getModuleCount()>=21);assert.equal(typeof qr.isDark(0,0),'boolean')});

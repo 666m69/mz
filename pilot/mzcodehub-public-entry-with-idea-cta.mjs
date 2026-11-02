@@ -1,5 +1,5 @@
-const SITE_TITLE = 'MZcode | مواقع وتطبيقات وحلول تقنية';
-const SITE_DESCRIPTION = 'MZcode — خدمات تطوير المواقع والتطبيقات وحلول الأتمتة والذكاء الاصطناعي. استكشف مشاريعنا واطلب مشروعك عبر mzcodehub.com';
+const SITE_TITLE = 'MZcode | مختبر الأفكار وأدوات العمل';
+const SITE_DESCRIPTION = 'جرّب فكرتك قبل طلب تنفيذها. اختبر مسار المستخدم وحالات التعطّل، ونزّل مواصفات مشروعك أو أرسلها إلى MZcode.';
 const CANONICAL_URL = 'https://mzcodehub.com/';
 const OG_IMAGE_URL = 'https://mzcodehub.com/og-image.png';
 
@@ -50,14 +50,15 @@ function updateCanonical(html, href) {
 function projectCta() {
   return `<section id="mzcode-project-cta" lang="ar" dir="rtl" aria-labelledby="mzcode-project-cta-title" style="box-sizing:border-box;max-width:1000px;margin:36px auto 28px;padding:28px 24px;border:1px solid #246d75;border-radius:14px;background:linear-gradient(135deg,#111 0%,#19150f 100%);color:#f5f1e9;text-align:right">
   <p style="margin:0 0 8px;color:#8cead5;font-size:15px;font-weight:700">MZcode · حلول تقنية</p>
-  <h2 id="mzcode-project-cta-title" style="margin:0 0 10px;color:#fff;font-size:clamp(23px,4vw,32px);line-height:1.5">أي فكرة عندك؟ خلّنا نبنيها</h2>
-  <p style="margin:0 0 20px;color:#e1ddd5;font-size:17px;line-height:1.9">اكتب فكرتك بحرّية مهما كان مجالها. نراجع احتياجك ونجهّز لك تصورًا أوليًا ونطاق عمل وتكلفة تقديرية قبل أي اتفاق.</p>
-  <a href="/idea" style="display:inline-flex;min-height:48px;align-items:center;justify-content:center;padding:11px 22px;border-radius:8px;background:#2bd2a1;color:#17120a;font-weight:700;text-decoration:none">ابدأ مشروعك الآن</a>
+  <h2 id="mzcode-project-cta-title" style="margin:0 0 10px;color:#fff;font-size:clamp(23px,4vw,32px);line-height:1.5">جرّب فكرتك قبل أن تطلب تنفيذها</h2>
+  <p style="margin:0 0 20px;color:#e1ddd5;font-size:17px;line-height:1.9">اكتب ما تريد أن يفعله المستخدم، وحدّد الوظائف وجرّب مسار النجاح والتعطّل. نزّل موجز التنفيذ أو أرسله لفريقنا عندما تكون مستعدًا.</p>
+  <a href="/idea" style="display:inline-flex;min-height:48px;align-items:center;justify-content:center;padding:11px 22px;border-radius:8px;background:#2bd2a1;color:#17120a;font-weight:700;text-decoration:none">افتح مختبر الفكرة</a>
 </section>`;
 }
 
 function rewriteHomepage(html) {
-  let output = html;
+  let output = html.replace(/(<section\b[^>]*class=["']intro["'][^>]*>[\s\S]*?<h1>)[\s\S]*?<\/h1>\s*<p>[\s\S]*?<\/p>/i,
+    '$1من الفكرة إلى تجربة.<br><span>اختبرها بنفسك.</span></h1><p>جرّب ما سيحدث للمستخدم قبل أن تطلب التطوير. أو اختر إحدى أدوات العمل الجاهزة أدناه.</p><a class="primary" href="/idea">ابدأ تجربة فكرتك ←</a>');
   const titleTag = `<title>${SITE_TITLE}</title>`;
   if (/<title\b[^>]*>[\s\S]*?<\/title>/i.test(output)) {
     output = output.replace(/<title\b[^>]*>[\s\S]*?<\/title>/i, titleTag);

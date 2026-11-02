@@ -46,9 +46,11 @@ export default {async fetch(request,env){
    const before=await env.DB.prepare("SELECT status FROM idea_requests WHERE id=?").bind(id).first();
    if(!before)return j({error:"Not found"},404);
    if(before.status===next)return j({ok:true,status:next});
-   const changed=await env.DB.prepare("UPDATE idea_requests SET status=? WHERE id=? AND status=?").bind(next,id,before.status).run();
+   const [,changed]=await env.DB.batch([
+     env.DB.prepare("INSERT INTO idea_status_events(id,request_id,actor,from_status,to_status,created_ms) SELECT ?,id,?,status,?,? FROM idea_requests WHERE id=? AND status=?").bind(crypto.randomUUID(),who.email,next,Date.now(),id,before.status),
+     env.DB.prepare("UPDATE idea_requests SET status=? WHERE id=? AND status=?").bind(next,id,before.status)
+   ]);
    if(changed.meta?.changes!==1)return j({error:"Conflict, reload"},409);
-   await env.DB.prepare("INSERT INTO idea_status_events(id,request_id,actor,from_status,to_status,created_ms) VALUES(?,?,?,?,?,?)").bind(crypto.randomUUID(),id,who.email,before.status,next,Date.now()).run();
    return j({ok:true,status:next});
   }catch(e){console.error("Admin status update failed");return j({error:"Unavailable"},503)}
  }
