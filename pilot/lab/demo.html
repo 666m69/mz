@@ -6,20 +6,21 @@
   <meta name="theme-color" content="#0a1822">
   <meta name="description" content="جرّب حجز آخر موعد في نموذج MZcode وشاهد كيف يتعامل مع طلبين لنفس الموعد.">
   <title>احجز آخر موعد | مختبر MZcode</title>
+  <link rel="icon" href="/assets/images/mz-mark.svg">
   <link rel="canonical" href="https://mzcodehub.com/idea/demo">
   <link rel="stylesheet" href="/idea/lab.css">
-  <script type="application/json" id="spec">{"title":"احجز آخر موعد","idea":"بقي موعد واحد لجولة في المدينة. احجزه باسم تجريبي، ثم حاول حجزه مرة ثانية وشاهد النتيجة.","features":[{"label":"حجز جولة في المدينة","resource":"المواعيد المتاحة","action":"تأكيد حجز الجولة","failure":"لم يعد هناك موعد متاح، لم يُسجَّل حجز آخر"}]}</script>
+  <script type="application/json" id="spec">{"title":"احجز آخر موعد","idea":"موعد واحد متاح. احجزه، ثم جرّب مرة ثانية.","features":[{"label":"حجز جولة في المدينة","resource":"المواعيد المتاحة","action":"تأكيد حجز الجولة","failure":"لم يعد هناك موعد متاح، لم يُسجَّل حجز آخر"}]}</script>
   <script defer src="/idea/prototype.js"></script>
 </head>
 <body class="public-demo" id="demo-booking">
-  <header><a href="/" class="brand" aria-label="MZcode الرئيسية"><b dir="ltr">MZ<span>code</span></b></a><a href="/idea">مختبر الفكرة</a></header>
+  <header><a href="/" class="brand" aria-label="MZcode الرئيسية"><img src="/assets/images/mz-mark.svg" alt="" width="32" height="32"><b dir="ltr">MZ<span>code</span></b></a><a href="/idea">مختبر الفكرة</a></header>
   <main>
     <p class="eyebrow">مثال تفاعلي من المختبر</p>
     <h1 id="title">احجز آخر موعد</h1>
-    <p class="lead" id="idea">بقي موعد واحد لجولة في المدينة. احجزه باسم تجريبي، ثم حاول حجزه مرة ثانية وشاهد النتيجة.</p>
+    <p class="lead" id="idea">موعد واحد متاح. احجزه، ثم جرّب مرة ثانية.</p>
     <div id="cards" data-run-label="احجز الموعد" data-restore-label="أتح موعدًا من جديد"></div>
     <section><h2>سجل التجربة</h2><ol id="events"></ol><small>هذه تجربة محلية ببيانات افتراضية. ينتهي السجل عند مغادرة الصفحة.</small></section>
-    <section><h2>ماذا تريد أن يجرّب عميلك؟</h2><p>اكتب فكرتك في أي مجال. يمكنك تعديل وظائفها واختبارها وتنزيل نموذجك قبل طلب التطوير.</p>
+    <section><h2>ماذا تريد أن يجرّب عميلك؟</h2><p>اكتب فكرتك ونزّل نموذجها.</p>
       <div class="actions"><a class="demo-primary" href="/idea">ابدأ بفكرتك الخاصة</a><a href="/idea#request">اطلب مراجعة مشروعك</a></div></section>
     <noscript>فعّل JavaScript لتجربة الحجز.</noscript>
   </main>

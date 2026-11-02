@@ -1,7 +1,7 @@
 const SITE_TITLE = 'MZcode | مختبر الأفكار وأدوات العمل';
 const SITE_DESCRIPTION = 'جرّب فكرتك قبل طلب تنفيذها. اختبر مسار المستخدم وحالات التعطّل، ونزّل مواصفات مشروعك أو أرسلها إلى MZcode.';
 const CANONICAL_URL = 'https://mzcodehub.com/';
-const OG_IMAGE_URL = 'https://mzcodehub.com/og-image.png';
+const OG_IMAGE_URL = 'https://mzcodehub.com/assets/images/mz-share.png';
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -79,7 +79,7 @@ function rewriteHomepage(html) {
   output = updateMeta(output, 'twitter:image', OG_IMAGE_URL, 'name');
   output = updateCanonical(output, CANONICAL_URL);
 
-  if (!/id=["']mzcode-project-cta["']/i.test(output)) {
+  if (!/id=["'](?:mzcode-project-cta|playground)["']/i.test(output)) {
     const cta = projectCta();
     if (/<\/main\s*>/i.test(output)) {
       output = output.replace(/<\/main\s*>/i, `${cta}\n</main>`);
@@ -138,9 +138,9 @@ async function signVisitor(request, headers, privateKey) {
 }
 
 async function serveOgImage(request, env) {
-  if (!env.MZ_OG_IMAGE_URL) return new Response('Image unavailable', {status:503});
+
   try {
-    const upstream = await fetch(env.MZ_OG_IMAGE_URL, {method:request.method === 'HEAD' ? 'HEAD' : 'GET'});
+    const upstream = await fetch(origin + '/assets/images/mz-share.png', {method:request.method === 'HEAD' ? 'HEAD' : 'GET'});
     if (!upstream.ok) return new Response('Image unavailable', {status:502});
     const headers = new Headers(upstream.headers);
     headers.set('Content-Type', 'image/png');

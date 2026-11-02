@@ -5,3 +5,5 @@
 .public-demo #cards [role=status]{color:var(--mint);min-height:1.7em;margin:8px 0 0}
 .public-demo #events:empty{padding:0;margin:0}
 .demo-primary{display:inline-block;border-radius:8px;background:var(--mint);color:#08221f;padding:10px 16px;font-weight:700;text-decoration:none}
+
+.brand{display:inline-flex;align-items:center;gap:8px;direction:ltr}.brand img{flex:none}.lead{max-width:36em}h1{letter-spacing:-.035em}
