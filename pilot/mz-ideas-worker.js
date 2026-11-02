@@ -35,7 +35,7 @@ export default {async fetch(request,env){
     await env.NOTIFY.send({from:"info@mzcodehub.com",to:null,subject:"[MZ Code Hub] New project idea — "+id.slice(0,8),
      text:"New idea received\nRequest: "+id+"\nName: "+name+"\nReply: "+email+"\n\n"+idea.slice(0,5000)});
     await env.DB.prepare("UPDATE idea_requests SET notification_status='sent' WHERE id=?").bind(id).run();
-   }catch(e){console.error("idea email notification failed",String(e).slice(0,300))}
+   }catch(e){console.error("idea email notification failed");try{await env.DB.prepare("UPDATE idea_requests SET notification_status='failed',notification_error=? WHERE id=?").bind(String(e?.message||e).slice(0,250),id).run()}catch{}}
   }
   return json({ok:true,id},201)
  }catch(e){console.error("idea intake storage failure");return json({error:"تعذر حفظ الطلب الآن"},503)}
