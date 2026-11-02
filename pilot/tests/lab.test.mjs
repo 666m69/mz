@@ -74,3 +74,24 @@ test('signed admin can update a case; a failed audit insert leaves the prior sta
     assert.equal(sql.prepare("SELECT status FROM idea_requests").get().status,'reviewing');
   }finally{globalThis.fetch=nativeFetch;}
 });
+test('offline file preserves hostile text as data, pins its script and simulates real state without a network',async()=>{
+  const ctx={crypto,btoa,TextEncoder};
+  vm.runInNewContext(readFileSync(new URL('../lab/prototype.js',import.meta.url),'utf8'),ctx);
+  const title='</script><script>alert(1)</script>',feature='<svg onload=alert(2)>';
+  const file=await ctx.MZPrototype.documentFor({title,idea:'تجربة',features:[feature]},() => ['المتاح','حجز','نفد']);
+  assert.ok(!file.includes(title));assert.match(file,/connect-src 'none'/);
+  const data=file.match(/<script type="application\/json" id="spec">([^<]+)<\/script>/)[1];
+  assert.equal(JSON.parse(data).title,title);
+  const code=file.match(/<script>([\s\S]*?)<\/script>/)[1],hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(code)))));
+  assert.ok(file.includes("script-src 'sha256-"+hash+"'"));
+  class El{
+    constructor(){this.children=[];this.textContent='';}append(...x){this.children.push(...x)}replaceChildren(...x){this.children=x}prepend(x){this.children.unshift(x)}setAttribute(){}focus(){}
+  }
+  const byId=Object.fromEntries(['spec','title','idea','cards','events'].map(k=>[k,new El()]));byId.spec.textContent=data;
+  const document={getElementById:id=>byId[id],createElement:()=>new El()};
+  vm.runInNewContext(code,{document});assert.equal(byId.title.textContent,title);
+  const [card]=byId.cards.children;const [,stock,,,run,restore,status]=card.children;
+  run.onclick();assert.match(status.textContent,/تم التنفيذ/);assert.match(stock.textContent,/0$/);
+  run.onclick();assert.match(status.textContent,/توقف التنفيذ/);restore.onclick();run.onclick();
+  assert.equal(byId.events.children.length,3);assert.match(status.textContent,/تم التنفيذ/);
+});

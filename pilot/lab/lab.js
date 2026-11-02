@@ -57,10 +57,19 @@ field("idea").oninput=()=>{field("idea").setCustomValidity("");field("workspace"
 for (const id of ["project-title","features"]) field(id).oninput=()=>{field("trial").hidden=true;field("scope-state").textContent="اعتمد التعديلات لتحديث التجربة.";};
 field("apply").onclick=updateSpec;field("case").onchange=()=>{field("outcome").textContent="";renderRule();};
 field("pass").onclick=()=>run("available");field("fail").onclick=()=>run("empty");field("again").onclick=()=>run("current");
+function downloadFile(body,type,name) {
+  const url=URL.createObjectURL(new Blob([body],{type}));
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
 field("download").onclick=()=>{
-  const body=E.briefMarkdown(spec)+"\n\n## نتائج محاكاة النطاق\n"+results()+"\n";
-  const url=URL.createObjectURL(new Blob([body],{type:"text/markdown;charset=utf-8"}));
-  const a=document.createElement("a");a.href=url;a.download="MZcode-project-brief.md";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  downloadFile(E.briefMarkdown(spec)+"\n\n## نتائج محاكاة النطاق\n"+results()+"\n","text/markdown;charset=utf-8","MZcode-project-brief.md");
+};
+field("prototype").onclick=async()=>{
+  try {
+    const html=await window.MZPrototype.documentFor(spec,scenario);
+    downloadFile(html,"text/html;charset=utf-8","MZcode-prototype.html");
+    field("export-state").textContent="افتح ملف MZcode-prototype.html في متصفحك لتجربة النموذج دون إنترنت.";
+  } catch {field("export-state").textContent="تعذر إنشاء النموذج. أعد المحاولة أو نزّل الموجز.";}
 };
 field("handoff").onclick=()=>{
   const base=spec.title+"\n"+spec.idea+"\n\nالوظائف المعتمدة\n"+spec.features.join("\n");
