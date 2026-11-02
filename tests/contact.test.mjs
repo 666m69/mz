@@ -7,6 +7,7 @@ const origin='https://mz702.pages.dev';
 function setup(){
  const db=new DatabaseSync(':memory:');
  if(existsSync(new URL('../migration.sql',import.meta.url)))db.exec(readFileSync(new URL('../migration.sql',import.meta.url),'utf8'));
+ db.exec(readFileSync(new URL('../interest-migration.sql',import.meta.url),'utf8'));
  const env={MZ_CONTACT_SECRET:'unit-test-secret-long-enough-12345',DB:{prepare(sql){return {bind(...args){return {first:async()=>db.prepare(sql).get(...args),run:async()=>({success:true,meta:db.prepare(sql).run(...args)})}}}}},ASSETS:{fetch:async()=>new Response('asset')}};
  const call=(path,method='GET',body,headers={})=>worker.fetch(new Request(origin+path,{method,headers:{origin,'content-type':'application/json','CF-Connecting-IP':'192.0.2.1',...headers},...(body===undefined?{}:{body:typeof body==='string'?body:JSON.stringify(body)})}),env);
  return {db,env,call};
@@ -70,7 +71,7 @@ test('edge signatures isolate visitor quotas and reject forged forwarding header
 
 test('legacy pages lead to existing visitor sections', async () => {
  const s = setup();
- for(const [path,target] of [['/about.html','/'],['/projects','/projects/'],['/services.html','/#tools'],['/contact','/#contact']]) {
+ for(const [path,target] of [['/about.html','/about/'],['/projects','/projects/'],['/services.html','/#pricing'],['/contact','/#contact']]) {
   assert.equal((await s.call(path)).headers.get('Location'),origin+target);
  }
 });
@@ -81,4 +82,37 @@ test('contact cleanup preserves the active hourly menu quota', async t => {
  s.db.prepare('INSERT INTO mz_contact_rate VALUES(?,?,?)').run('menu-limit',start,3);
  assert.equal((await s.call('/api/contact','POST',await quick(s))).status,201);
  assert.equal(s.db.prepare('SELECT count FROM mz_contact_rate WHERE ip_hash=?').get('menu-limit').count,3);
+});
+
+test('CoreResto confirms durable consent and deduplicates normalized phones',async()=>{
+ const s=setup(), {token}=await valid(s), body={mode:'coreresto',token,name:'اسم تجريبي',phone:'٠٥٠١٢٣٤٥٦٧',activity:'كافيه',branches:'٢',consent:true};
+ for(const phone of [body.phone,'+966501234567']){
+  const response=await s.call('/api/contact','POST',{...body,phone});
+  assert.equal(response.status,200);assert.equal((await response.json()).ok,true);
+ }
+ const rows=s.db.prepare('SELECT * FROM mz_coreresto_waitlist').all();
+ assert.equal(rows.length,1);assert.equal(rows[0].phone,'+966501234567');assert.equal(rows[0].branches,2);
+ assert.equal(rows[0].consent_version,'2026-11-02');
+ for(const patch of [{activity:'آخر'},{branches:0},{branches:'1.5'},{phone:'05xx'},{name:' '},{consent:false},{website:'bot'}]){
+  assert.equal((await s.call('/api/contact','POST',{...body,...patch})).status,400);
+ }
+ assert.equal((await s.call('/api/contact','POST',body,{origin:'https://example.org'})).status,403);
+ assert.equal((await s.call('/api/contact','POST',{...body,token:'no'})).status,403);
+});
+test('interest list uses one row per address and tool, separately from CoreResto',async()=>{
+ const s=setup(), {token}=await valid(s), body={mode:'tools',token,email:'Sample@Example.org',tool:'quote',consent:true};
+ for(const tool of ['quote','quote','menu'])assert.equal((await s.call('/api/contact','POST',{...body,tool})).status,200);
+ assert.equal(s.db.prepare('SELECT COUNT(*) AS n FROM mz_tool_interest WHERE email=?').get('sample@example.org').n,2);
+ assert.equal(s.db.prepare('SELECT COUNT(*) AS n FROM mz_coreresto_waitlist').get().n,0);
+ for(const patch of [{email:'bad'},{tool:'games'},{consent:false}])assert.equal((await s.call('/api/contact','POST',{...body,...patch})).status,400);
+ s.db.exec('DROP TABLE mz_tool_interest');
+ assert.equal((await s.call('/api/contact','POST',body)).status,503);
+});
+test('the interest form is rate limited without creating excess rows',async()=>{
+ const s=setup(),{token}=await valid(s);
+ for(let i=0;i<6;i++){
+  const r=await s.call('/api/contact','POST',{mode:'tools',token,tool:'quote',email:'test'+i+'@example.org',consent:true});
+  assert.equal(r.status,i===5?429:200);
+ }
+ assert.equal(s.db.prepare('SELECT COUNT(*) AS n FROM mz_tool_interest').get().n,5);
 });

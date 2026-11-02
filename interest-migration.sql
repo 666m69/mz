@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS mz_coreresto_waitlist (
+ phone TEXT PRIMARY KEY, name TEXT NOT NULL, activity TEXT NOT NULL,
+ branches INTEGER NOT NULL CHECK(branches BETWEEN 1 AND 9999),
+ consent_version TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS mz_tool_interest (
+ email TEXT NOT NULL, tool TEXT NOT NULL, consent_version TEXT NOT NULL,
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(email, tool)
+);

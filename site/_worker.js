@@ -23,6 +23,35 @@ async function rateAddress(req, env) {
  return await crypto.subtle.verify({name:'ECDSA', hash:'SHA-256'}, key, decode(proof), enc.encode(message)) ? ip : null;
 }
 function normalizePhone(s){let p=s.replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632)).replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776)).replace(/[\s()-]/g,'');if(/^05\d{8}$/.test(p))p='+966'+p.slice(1);if(/^9665\d{8}$/.test(p))p='+'+p;return p}
+async function checkRate(req,env) {
+ const ip=await rateAddress(req,env);
+ if(!ip)return error('تعذر التحقق من الاتصال.',403);
+ const windowStart=Math.floor(Date.now()/900000)*900000;
+ const ipHash=await sign(env.MZ_CONTACT_SECRET,ip+'.'+windowStart);
+ const rate=await env.DB.prepare('INSERT INTO mz_contact_rate(ip_hash,window_start,count) VALUES(?,?,1) ON CONFLICT(ip_hash,window_start) DO UPDATE SET count=count+1 RETURNING count').bind(ipHash,windowStart).first();
+ if(rate.count>5)return error('وصلت للحد المؤقت. حاول بعد 15 دقيقة أو راسلنا بالبريد.',429);
+ await env.DB.prepare('DELETE FROM mz_contact_rate WHERE window_start < ?').bind(windowStart-3600000).run();
+}
+async function saveInterest(req,env,b) {
+ if(b.consent!==true || b.website) return error('راجع الموافقة على حفظ بيانات الطلب.',400);
+ let statement;
+ if(b.mode==='coreresto'){
+  const name=typeof b.name==='string'?b.name.trim():'';
+  const phone=typeof b.phone==='string' && b.phone.length<=25?normalizePhone(b.phone):'';
+  const digits=String(b.branches??'').replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776);
+  if(name.length<2 || name.length>100 || !/^\+9665\d{8}$/.test(phone) || !['كافيه','مطعم','فود ترك','بوفيه'].includes(b.activity) || !/^[1-9]\d{0,3}$/.test(digits))return error('راجع الاسم والجوال السعودي ونوع النشاط وعدد الفروع (١ إلى ٩٩٩٩).',400);
+  statement=env.DB.prepare('INSERT INTO mz_coreresto_waitlist(phone,name,activity,branches,consent_version) VALUES(?,?,?,?,?) ON CONFLICT(phone) DO NOTHING').bind(phone,name,b.activity,Number(digits),'2026-11-02');
+ } else {
+  const email=typeof b.email==='string'?b.email.trim().toLowerCase():'';
+  if(email.length>254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !['quote','menu','property'].includes(b.tool))return error('اختر الأداة وأدخل بريدًا صحيحًا.',400);
+  statement=env.DB.prepare('INSERT INTO mz_tool_interest(email,tool,consent_version) VALUES(?,?,?) ON CONFLICT(email,tool) DO NOTHING').bind(email,b.tool,'2026-11-02');
+ }
+ const limited=await checkRate(req,env);
+ if(limited)return limited;
+ const saved=await statement.run();
+ if(!saved.success)throw Error('Interest insert failed');
+ return json({ok:true});
+}
 async function handle(req,env){
  const url=new URL(req.url),path=url.pathname;
  if(url.hostname.endsWith('.mz702.pages.dev')||url.hostname==='mz702.pages.dev'){
@@ -50,6 +79,7 @@ async function handle(req,env){
   let b;try{b=await readBody(req)}catch(code){return error('تعذر قراءة الطلب أو تجاوز الحجم المسموح.',code===413?413:400)}
   if(!b||typeof b!=='object'||Array.isArray(b))return error('بيانات غير صالحة.',400);
   if(!await verified(env.MZ_CONTACT_SECRET,b.token,url.origin))return error('انتهت صلاحية النموذج. أعد المحاولة لتجديده.',403);
+  if(b.mode==='coreresto'||b.mode==='tools')return saveInterest(req,env,b);
   const quick=b.mode==='quick';
   if(b.mode!==undefined&&!quick)return error('صيغة نموذج غير مدعومة.',400);
   if(quick){
@@ -63,22 +93,17 @@ async function handle(req,env){
   const payloadHash=await sign(env.MZ_CONTACT_SECRET,JSON.stringify({name,phone,email,service,message}));
   const prior=await env.DB.prepare('SELECT reference,payload_hash FROM mz_contact_requests WHERE request_id=?').bind(b.requestId).first();
   if(prior)return prior.payload_hash===payloadHash?json({ok:true,reference:prior.reference}):error('تغير الطلب أثناء إعادة الإرسال. أرسل طلباً جديداً.',409);
-  const ip=await rateAddress(req,env);if(!ip)return error('تعذر التحقق من الاتصال.',403);
-  const windowStart=Math.floor(Date.now()/900000)*900000;
-  const ipHash=await sign(env.MZ_CONTACT_SECRET,ip+'.'+windowStart);
-  const rate=await env.DB.prepare('INSERT INTO mz_contact_rate(ip_hash,window_start,count) VALUES(?,?,1) ON CONFLICT(ip_hash,window_start) DO UPDATE SET count=count+1 RETURNING count').bind(ipHash,windowStart).first();
-  if(rate.count>5)return error('وصلت للحد المؤقت. حاول بعد 15 دقيقة أو راسلنا بالبريد.',429);
+  const limited=await checkRate(req,env);if(limited)return limited;
   const reference='MZ-'+crypto.randomUUID().replaceAll('-','').slice(0,16).toUpperCase();
   await env.DB.prepare('INSERT INTO mz_contact_requests(request_id,reference,name,phone,email,service,message,payload_hash,consent_version) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(request_id) DO NOTHING').bind(b.requestId,reference,name,phone,email,service,message,payloadHash,quick?'2026-10-31-quick':'2026-10-29').run();
   const saved=await env.DB.prepare('SELECT reference,payload_hash FROM mz_contact_requests WHERE request_id=?').bind(b.requestId).first();
   if(!saved)throw Error('Storage did not confirm');
   if(saved.payload_hash!==payloadHash)return error('تغير الطلب أثناء الإرسال.',409);
-  await env.DB.prepare('DELETE FROM mz_contact_rate WHERE window_start < ?').bind(windowStart-3600000).run();
   return json({ok:true,reference:saved.reference},saved.reference===reference?201:200);
  }
  if(path.startsWith('/api/'))return error('المسار غير موجود.',404);
  if(!['GET','HEAD'].includes(req.method))return error('طريقة غير مسموحة.',405);
- const redirects={'/about':'/','/about.html':'/','/services':'/#tools','/services.html':'/#tools','/projects':'/projects/','/projects.html':'/projects/','/contact':'/#contact','/contact.html':'/#contact'};
+ const redirects={'/about':'/about/','/about.html':'/about/','/services':'/#pricing','/services.html':'/#pricing','/projects':'/projects/','/projects.html':'/projects/','/contact':'/#contact','/contact.html':'/#contact'};
  if(redirects[path])return Response.redirect(url.origin+redirects[path],302);
  if(/\.(md|sql|json)$/i.test(path))return error('المسار غير موجود.',404);
  if(['/privacy/','/terms/'].includes(path))return Response.redirect(url.origin+path.slice(0,-1),302);
