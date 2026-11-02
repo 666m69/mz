@@ -58,7 +58,7 @@ function projectCta() {
 
 function rewriteHomepage(html) {
   let output = html.replace(/(<section\b[^>]*class=["']intro["'][^>]*>[\s\S]*?<h1>)[\s\S]*?<\/h1>\s*<p>[\s\S]*?<\/p>/i,
-    '$1من الفكرة إلى تجربة.<br><span>اختبرها بنفسك.</span></h1><p>جرّب ما سيحدث للمستخدم قبل أن تطلب التطوير. أو اختر إحدى أدوات العمل الجاهزة أدناه.</p><a class="primary" href="/idea">ابدأ تجربة فكرتك ←</a>');
+    '$1من الفكرة إلى تجربة.<br><span>اختبرها بنفسك.</span></h1><p>اختبر ما سيحدث لعميلك، ثم خذ نموذجك معك في ملف يعمل دون إنترنت.</p><div style="display:flex;align-items:center;flex-wrap:wrap;gap:16px"><a class="primary" href="/idea">ابدأ تجربة فكرتك ←</a><a href="/idea/demo" style="color:#8cead5;text-underline-offset:4px">جرّب مثال حجز آخر موعد</a></div>');
   const titleTag = `<title>${SITE_TITLE}</title>`;
   if (/<title\b[^>]*>[\s\S]*?<\/title>/i.test(output)) {
     output = output.replace(/<title\b[^>]*>[\s\S]*?<\/title>/i, titleTag);
