@@ -78,7 +78,7 @@ async function handle(req,env){
  }
  if(path.startsWith('/api/'))return error('المسار غير موجود.',404);
  if(!['GET','HEAD'].includes(req.method))return error('طريقة غير مسموحة.',405);
- const redirects={'/about':'/','/about.html':'/','/services':'/#tools','/services.html':'/#tools','/projects':'/tools/','/projects.html':'/tools/','/contact':'/#contact','/contact.html':'/#contact'};
+ const redirects={'/about':'/','/about.html':'/','/services':'/#tools','/services.html':'/#tools','/projects':'/projects/','/projects.html':'/projects/','/contact':'/#contact','/contact.html':'/#contact'};
  if(redirects[path])return Response.redirect(url.origin+redirects[path],302);
  if(/\.(md|sql|json)$/i.test(path))return error('المسار غير موجود.',404);
  if(['/privacy/','/terms/'].includes(path))return Response.redirect(url.origin+path.slice(0,-1),302);
