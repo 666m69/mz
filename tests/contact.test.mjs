@@ -70,7 +70,7 @@ test('edge signatures isolate visitor quotas and reject forged forwarding header
 
 test('legacy pages lead to existing visitor sections', async () => {
  const s = setup();
- for(const [path,target] of [['/about.html','/'],['/projects','/tools/'],['/services.html','/#tools'],['/contact','/#contact']]) {
+ for(const [path,target] of [['/about.html','/'],['/projects','/projects/'],['/services.html','/#tools'],['/contact','/#contact']]) {
   assert.equal((await s.call(path)).headers.get('Location'),origin+target);
  }
 });
