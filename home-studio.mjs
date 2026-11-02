@@ -25,7 +25,7 @@ const social = `<div class="demo-stage social-trial" data-panel="social" hidden>
   <div id="content-result" hidden><label for="content-output">مسودة قابلة للتعديل</label><textarea id="content-output" rows="5" maxlength="3000"></textarea>
   <button type="button" class="plain-button" id="content-copy">انسخ الخطة</button></div>
   <p role="status" id="content-status" class="result">تُجهّز المسودة على جهازك.</p></div>`;
-export const mobileNav=`<nav class="mobile-dock" aria-label="روابط الجوال"><a href="/#playground"><span aria-hidden="true">▷</span>جرّب</a><a href="#tools"><span aria-hidden="true">⊞</span>الأدوات</a><a href="/idea"><span aria-hidden="true">✧</span>فكرتك</a><a href="/#contact"><span aria-hidden="true">✉</span>تواصل</a></nav>`;
+export const mobileNav=`<nav class="mobile-dock" aria-label="روابط الجوال"><a href="/#playground"><span aria-hidden="true">▷</span>جرّب</a><a href="/projects/"><span aria-hidden="true">▤</span>المشاريع</a><a href="/idea"><span aria-hidden="true">✧</span>فكرتك</a><a href="/#contact"><span aria-hidden="true">✉</span>تواصل</a></nav>`;
 export const studio = `<section id="playground" class="studio-hero" aria-labelledby="studio-title">
   <div class="studio-pitch"><span class="studio-label"><i aria-hidden="true"></i> MZcode · استوديو المنتجات الرقمية <span class="label-line" aria-hidden="true"></span></span>
    <h1 id="studio-title">من مجرد فكرة<br><em>إلى شيء ينبض بالحياة.</em></h1>
