@@ -27,13 +27,13 @@ const social = `<div class="demo-stage social-trial" data-panel="social" hidden>
   <p role="status" id="content-status" class="result">تُجهّز المسودة على جهازك.</p></div>`;
 export const mobileNav=`<nav class="mobile-dock" aria-label="روابط الجوال"><a href="/#playground"><span aria-hidden="true">▷</span>جرّب</a><a href="#tools"><span aria-hidden="true">⊞</span>الأدوات</a><a href="/idea"><span aria-hidden="true">✧</span>فكرتك</a><a href="/#contact"><span aria-hidden="true">✉</span>تواصل</a></nav>`;
 export const studio = `<section id="playground" class="studio-hero" aria-labelledby="studio-title">
-  <div class="studio-pitch"><span class="studio-label"><i aria-hidden="true"></i> استوديو MZcode</span>
-   <h1 id="studio-title">جرّبها.<br><em>ثم ابنِها.</em></h1>
-   <p>فكرتك في نموذج تفاعلي، من أول نقرة.</p>
-   <div class="pitch-actions"><a class="primary" href="/idea">ابدأ بفكرتك <span aria-hidden="true">←</span></a><a href="#tools">استكشف الأدوات</a></div></div>
+  <div class="studio-pitch"><span class="studio-label"><i aria-hidden="true"></i> MZcode · استوديو المنتجات الرقمية <span class="label-line" aria-hidden="true"></span></span>
+   <h1 id="studio-title">من مجرد فكرة<br><em>إلى شيء ينبض بالحياة.</em></h1>
+   <p>لا نكتفي بالحديث عن التقنية. جرّب منتجاتنا بنفسك، أو أخبرنا بما تتخيله وسنبدأ من الفكرة.</p>
+   <div class="pitch-actions"><a class="primary" href="/idea">حوّل فكرتك إلى تجربة <span aria-hidden="true">←</span></a><a class="outline-link" href="#tools">تصفّح الأعمال <span aria-hidden="true">↙</span></a></div><div class="hero-footnote"><span class="hero-live-dot" aria-hidden="true"></span> جرّب الآن من المتصفح <span class="hero-separator" aria-hidden="true">/</span> بدون تسجيل</div></div>
   <div class="live-console" aria-label="تجارب فورية">
-    <div class="console-line"><span class="console-flag">ساحة التجربة</span><span class="terminal-id" dir="ltr">MZ / LAB</span></div>
+    <div class="console-line"><span class="console-flag">تجربة حيّة · اضغط وجرّب</span><span class="terminal-id" dir="ltr">INTERACTIVE / 01</span></div>
     <div class="mode-switch" data-controls role="group" aria-label="اختر تجربة"><button type="button" data-mode="book" aria-pressed="true">احجز</button><button type="button" data-mode="quote" aria-pressed="false">سعّر</button><button type="button" data-mode="game" aria-pressed="false">العب</button><button type="button" data-mode="social" aria-pressed="false">خطّط</button></div>
     ${booking}${quoting}${gaming}${social}
     <noscript><p>تحتاج التجارب المضمّنة إلى JavaScript. يمكنك فتح <a href="/tools/">دليل الأدوات</a>.</p></noscript>
-  </div></section>`;
+  </div></section><div class="capability-strip" aria-label="ما يقدمه MZcode"><div><strong>فكرة غير تقليدية؟</strong><span>نحوّلها لمسار واضح قابل للتجربة</span></div><div><strong>منتجات جاهزة للاستخدام</strong><span>أدوات عربية تعمل من المتصفح</span></div><div><strong>من التجربة إلى التنفيذ</strong><span>نبدأ بما يحتاجه العميل فعلًا</span></div></div>`;
