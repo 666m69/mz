@@ -25,6 +25,10 @@ async function rateAddress(req, env) {
 function normalizePhone(s){let p=s.replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632)).replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776)).replace(/[\s()-]/g,'');if(/^05\d{8}$/.test(p))p='+966'+p.slice(1);if(/^9665\d{8}$/.test(p))p='+'+p;return p}
 async function handle(req,env){
  const url=new URL(req.url),path=url.pathname;
+ if(url.hostname.endsWith('.mz702.pages.dev')||url.hostname==='mz702.pages.dev'){
+  if(['GET','HEAD'].includes(req.method)&&['/idea','/idea/','/idea/demo','/idea/demo/'].includes(path))
+   return Response.redirect('https://mzcodehub.com'+path+url.search,302);
+ }
  if(url.hostname==='www.mzcodehub.com'){
   url.hostname='mzcodehub.com';
   url.protocol='https:';
