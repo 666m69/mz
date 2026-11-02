@@ -29,6 +29,14 @@ export default {async fetch(request,env){
   const n=await env.DB.prepare("SELECT count(*) AS n FROM idea_requests WHERE ip_hash=? AND created_ms>?").bind(ipHash,now-3600000).first();
   if((n?.n||0)>=3)return json({error:"تجاوزت حد الطلبات لهذه الساعة"},429);
   await env.DB.prepare("INSERT INTO idea_requests(id,idea,email,name,ip_hash,created_ms,status) VALUES(?,?,?,?,?,?,?)").bind(id,idea,email,name,ipHash,now,"new").run();
+  // Email failure must never discard a saved lead. Status remains pending for later retry.
+  if(env.NOTIFY){
+   try{
+    await env.NOTIFY.send({from:"info@mzcodehub.com",to:null,subject:"[MZ Code Hub] New project idea — "+id.slice(0,8),
+     text:"New idea received\nRequest: "+id+"\nName: "+name+"\nReply: "+email+"\n\n"+idea.slice(0,5000)});
+    await env.DB.prepare("UPDATE idea_requests SET notification_status='sent' WHERE id=?").bind(id).run();
+   }catch(e){console.error("idea email notification failed",String(e).slice(0,300))}
+  }
   return json({ok:true,id},201)
  }catch(e){console.error("idea intake storage failure");return json({error:"تعذر حفظ الطلب الآن"},503)}
 }};
