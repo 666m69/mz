@@ -8,7 +8,7 @@ export function advance(state, action) {
     return { ...state, turn: state.turn + 1, water: state.water - 2, food: state.food - 2, scouts: state.scouts + 1 };
   return state;
 }
-const root = document.querySelector('.game');
+const root = typeof document === 'undefined' ? null : document.querySelector('.game');
 if (root) {
   const $ = (selector) => root.querySelector(selector);
   const arabic = (number) => number.toLocaleString('ar-SA');
