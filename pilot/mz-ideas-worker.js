@@ -7,16 +7,23 @@ export default {async fetch(request,env){
  if(request.method==="GET"&&(path==="/idea"||path==="/idea/"))return new Response(html,{headers});
  if(path!=="/api/ideas")return json({error:"Not found"},404);
  if(request.method!=="POST")return json({error:"Method not allowed"},405);
- if(!env.DB)return json({error:"Service temporarily unavailable"},503);
+ if(!env.DB||!env.HASH_SALT)return json({error:"Service temporarily unavailable"},503);
  const origin=request.headers.get("origin"); if(origin&&origin!==url.origin)return json({error:"Invalid origin"},403);
  const type=request.headers.get("content-type")||"";if(!type.toLowerCase().startsWith("application/json"))return json({error:"JSON required"},415);
  const length=Number(request.headers.get("content-length")||0);if(length>10000)return json({error:"Too large"},413);
- let data;try{data=await request.json()}catch{return json({error:"Invalid JSON"},400)}
+ let data;try{
+  if(!request.body)return json({error:"Empty body"},400);
+  const reader=request.body.getReader();let total=0;const chunks=[];
+  while(true){const {done,value}=await reader.read();if(done)break;total+=value.byteLength;if(total>10000){await reader.cancel();return json({error:"Too large"},413)}chunks.push(value)}
+  const bytes=new Uint8Array(total);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
+  data=JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(bytes));
+  if(!data||typeof data!=="object"||Array.isArray(data))return json({error:"Invalid JSON"},400);
+ }catch{return json({error:"Invalid JSON"},400)}
  const idea=typeof data.idea==="string"?data.idea.trim():"",email=typeof data.email==="string"?data.email.trim().toLowerCase():"",name=typeof data.name==="string"?data.name.trim():"";
  if(data.website)return json({ok:true,id:"received"});
- if(idea.length<20||idea.length>5000||email.length>254||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||name.length>100)return json({error:"تحقق من الفكرة والبريد"},400);
+ if(idea.length<20||idea.length>5000||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||name.length>100)return json({error:"تحقق من الفكرة والبريد"},400);
  const id=crypto.randomUUID(),ip=request.headers.get("CF-Connecting-IP")||"unknown",now=Date.now();
- const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ip+":"+(env.HASH_SALT||"mz-ideas")));const ipHash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
+ const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ip+":"+env.HASH_SALT));const ipHash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
  try{
   const n=await env.DB.prepare("SELECT count(*) AS n FROM idea_requests WHERE ip_hash=? AND created_ms>?").bind(ipHash,now-3600000).first();
   if((n?.n||0)>=3)return json({error:"تجاوزت حد الطلبات لهذه الساعة"},429);
