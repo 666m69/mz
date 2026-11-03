@@ -113,24 +113,62 @@ function makeChecklist() {
   });
   render();
 }
-function submit(text) {
-  const value=text.trim();if(!value)return;
+
+const aiHistory=[];
+let sending=false;
+const errors={
+  ai_disabled:'النموذج غير مفعّل حتى الآن على بيئة العرض.',
+  binding_unavailable:'ربط النموذج أو قاعدة الحماية غير متاح حاليًا.',
+  sensitive_input:'يبدو أن النص يحتوي معلومات شخصية أو صحية حساسة. احذفها ثم أعد المحاولة.',
+  daily_user_limit:'وصلت إلى الحد المجاني اليومي لهذا الجهاز.',
+  daily_global_limit:'اكتمل الحد التجريبي اليومي للمنصة. جرّب غدًا.',
+  invalid_request:'الطلب غير صالح أو طويل؛ اختصره ثم أعد الإرسال.',
+  ai_unavailable:'تعذّر الوصول إلى النموذج حاليًا.',
+  ai_invalid_response:'النموذج لم يعد برد صالح.'
+};
+async function submit(text) {
+  const value=text.trim();if(!value || sending)return;
+  if(!$('#ai-consent').checked){
+    message('assistant','قبل إرسال النص إلى نموذج Cloudflare، ضع علامة الموافقة أسفل المحادثة. لا تُدخل أسماء طلاب أو مرضى أو بيانات شخصية.');
+    return;
+  }
+  const plan=interpret(value);
   message('user',value);input.value='';
-  try {
-    const out=interpret(value);message('assistant',out.reply);
-    if(out.action==='teacher_draft')makeTeacher();
-    else if(out.action==='property_draft')makeProperty();
-    else if(out.action==='checklist')makeChecklist();
+  if(['health_review','safety_review'].includes(plan.intent)){
+    message('assistant',plan.reply);workspace.replaceChildren();return;
+  }
+  sending=true;$('#send').disabled=true;$('#send').textContent='جارٍ التفكير...';
+  try{
+    const resp=await fetch('/api/assistant',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'same-origin',
+      cache:'no-store',
+      body:JSON.stringify({message:value,history:aiHistory.slice(-4),consent:true})
+    });
+    const data=await resp.json().catch(()=>null);
+    if(!resp.ok||data?.ok!==true||typeof data.reply!=='string'){
+      message('assistant',errors[data?.error]||'المساعد غير متاح الآن؛ لم يتم تنفيذ طلبك.');
+      return;
+    }
+    message('assistant',data.reply);
+    aiHistory.push({role:'user',content:value.slice(0,700)},{role:'assistant',content:data.reply.slice(0,700)});
+    if(aiHistory.length>4)aiHistory.splice(0,aiHistory.length-4);
+    if(plan.action==='teacher_draft')makeTeacher();
+    else if(plan.action==='property_draft')makeProperty();
+    else if(plan.action==='checklist')makeChecklist();
     else workspace.replaceChildren();
-  } catch(error) {
-    message('assistant',error instanceof AssistantInputError?'اكتب طلبًا مختصرًا وواضحًا لا يتجاوز 1200 حرف.':'حدث خطأ غير متوقع. حاول مرة أخرى.');
+  }catch{
+    message('assistant','تعذّر الاتصال بالنموذج. تحقق من الشبكة أو أن البيئة التجريبية مفعّلة.');
+  }finally{
+    sending=false;$('#send').disabled=false;$('#send').textContent='إرسال الطلب ←';
   }
 }
 $('#chat-form').addEventListener('submit',e=>{e.preventDefault();submit(input.value);});
 for(const suggestion of document.querySelectorAll('[data-prompt]')){
   suggestion.addEventListener('click',()=>submit(suggestion.dataset.prompt));
 }
-$('#reset-chat').addEventListener('click',()=>{messages.replaceChildren();workspace.replaceChildren();input.value='';input.focus();});
+$('#reset-chat').addEventListener('click',()=>{aiHistory.length=0;messages.replaceChildren();workspace.replaceChildren();input.value='';input.focus();});
 $('#delete-local').addEventListener('click',()=>{
   try {localStorage.removeItem(checklistKey);message('assistant','تم مسح قائمة المهام المحفوظة على هذا الجهاز.');}
   catch {message('assistant','تعذر مسح البيانات من إعدادات المتصفح.');}
