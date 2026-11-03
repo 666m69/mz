@@ -13,7 +13,7 @@ function walk(dir) {
   const file=path.join(dir,entry.name);
   if(entry.isDirectory()){walk(file);continue}
   const relative=path.relative(root.pathname,file);
-  if(relative.startsWith('_')||relative==='menu-server.js')continue;
+  if(relative.startsWith('_')||['menu-server.js','assistant-api.js'].includes(relative))continue;
   let content=fs.readFileSync(file);
   if(relative.endsWith('.html')){
    content=Buffer.from(content.toString('utf8').replace(styleLinks,`<link rel="stylesheet" href="${bundlePath}">`));
