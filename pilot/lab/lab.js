@@ -28,7 +28,7 @@ function updateSpec() {
   const options=spec.features.map((f,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=f;return o;});
   field("case").replaceChildren(...options);field("trial").hidden=false;
   field("scope-state").textContent="النطاق المعتمد يشمل "+spec.features.length+" وظائف.";
-  field("estimate").textContent="نطاق استرشادي أولي "+spec.quote.low.toLocaleString("ar-SA")+"–"+spec.quote.high.toLocaleString("ar-SA")+" ر.س. يحدد الفريق السعر والمدة بعد مراجعة المتطلبات.";
+  field("estimate").textContent="تقدير آلي غير ملزم: "+spec.quote.low.toLocaleString("ar-SA")+"–"+spec.quote.high.toLocaleString("ar-SA")+" ر.س. · مدة استرشادية "+spec.quote.weeks+". هذه محاكاة لقواعد عامة وليست عرض سعر معتمدًا؛ يراجع الفريق الوظائف والتكلفة والمدة قبل الاتفاق.";
   field("outcome").textContent="";renderHistory();renderRule();return true;
 }
 function renderRule() {
