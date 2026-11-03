@@ -43,3 +43,15 @@ test("studio games, quotes, content plans and booking run locally and remain ind
  const edited="خطة اختارها الزائر";get("#content-output").value=edited;await get("#content-copy").onclick();assert.ok(get("#content-output").selected);
  modes[0].events.click();assert.equal(get("#slot-count").textContent,"00");get("#slot-reset").onclick();assert.equal(get("#slot-count").textContent,"01");
 });
+
+test("visitors without ideas can freely browse from the community invitation",()=>{
+ const html=read("index.html");
+ assert.match(html,/id="mz-community-invite"/);
+ assert.match(html,/ما عندك فكرة؟ ولا ودّك تشارك؟/);
+ assert.match(html,/خذ لك فَرّة بالموقع/);
+ assert.match(html,/class="community-browse"[^>]*>/);
+ assert.match(html,/href="\/projects\/"/);
+ assert.match(html,/href="\/community\/"/);
+ const css=read("assets/css/refined.css");
+ assert.match(css,/\.community-invite \.community-browse/);
+});
