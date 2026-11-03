@@ -59,3 +59,29 @@ test('intake requires consent and confirms a persisted request', () => {
   assert.match(worker, /ON CONFLICT\(id\) DO NOTHING/);
   assert.match(worker, /origin!==url\.origin/);
 });
+
+
+test('customer tracking accepts an unguessable ID and returns only the status', async () => {
+  const code=worker.replace('export default', 'const exported =')+'\nexport {exported};';
+  const mod=await import('data:text/javascript;charset=utf-8,'+encodeURIComponent(code));
+  const id='12345678-1234-4234-8234-123456789abc';
+  let queried=null;
+  const env={DB:{prepare(sql){queried=sql;return {bind(value){assert.equal(value,id);return {async first(){return {status:'reviewing',email:'private@example.invalid',idea:'private'};}}}}}}};
+  const ok=await mod.exported.fetch(new Request('https://mzcodehub.com/api/ideas/'+id),env);
+  assert.equal(ok.status,200);
+  assert.deepEqual(await ok.json(),{ok:true,id,status:'reviewing'});
+  assert.equal(queried,'SELECT status FROM idea_requests WHERE id=?');
+  const invalid=await mod.exported.fetch(new Request('https://mzcodehub.com/api/ideas/not-a-uuid'),env);
+  assert.equal(invalid.status,400);
+  const missing=await mod.exported.fetch(new Request('https://mzcodehub.com/api/ideas/'+id),{DB:{prepare(){return {bind(){return {async first(){return null;}}}}}}});
+  assert.equal(missing.status,404);
+  const forbidden=await mod.exported.fetch(new Request('https://mzcodehub.com/api/ideas/'+id,{method:'POST'}),env);
+  assert.equal(forbidden.status,405);
+});
+test('tracking UX has an accessible, private status form and no user content HTML injection', () => {
+  for (const id of ['track','track-form','tracking-id','tracking-result','track-submit']) assert.match(html,new RegExp('id="'+id+'"'));
+  assert.match(script,/fetch\("\/api\/ideas\/"\+encodeURIComponent\(id\)/);
+  assert.match(script,/trackingLabels/);
+  assert.match(html,/id="tracking-result"[^>]*role="status"/);
+  assert.doesNotMatch(script,/\.innerHTML\s*=/);
+});
