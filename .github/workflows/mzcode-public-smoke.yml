@@ -1,0 +1,24 @@
+name: Public MZcode smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - pilot/public-smoke.mjs
+      - .github/workflows/mzcode-public-smoke.yml
+
+permissions:
+  contents: read
+
+jobs:
+  public-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check public pages, idea workflow and access guard
+        run: node pilot/public-smoke.mjs
