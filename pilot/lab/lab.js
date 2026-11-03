@@ -84,6 +84,7 @@ field("direct-request").onclick=event=>{
 field("idea").oninput=()=>{field("idea").setCustomValidity("");field("workspace").hidden=true;field("live-preview").hidden=true;};
 for (const id of ["project-title","features"]) field(id).oninput=()=>{field("trial").hidden=true;field("live-preview").hidden=true;field("scope-state").textContent="اعتمد التعديلات لتحديث التجربة.";};
 field("apply").onclick=updateSpec;field("case").onchange=()=>{field("outcome").textContent="";renderRule();};
+field("preview-request").onclick=()=>field("handoff").click();
 field("preview-reset").onclick=()=>{
   if(!spec)return;
   quantities=new Map();history=new Map();
