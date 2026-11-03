@@ -10,7 +10,7 @@ const styles = read('pilot/lab/lab.css');
 const worker = read('pilot/mz-ideas-worker.js');
 
 test('the idea → interactive preview → request journey is complete', () => {
-  const ids = new Set([...html.matchAll(/\\bid="([^"]+)"/g)].map(match => match[1]));
+  const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
   for (const id of ['design', 'idea', 'apply', 'live-preview', 'preview-heading',
     'preview-subtitle', 'preview-actions', 'preview-status', 'preview-reset',
     'preview-request', 'trial', 'estimate', 'handoff', 'request', 'intake',
@@ -18,24 +18,24 @@ test('the idea → interactive preview → request journey is complete', () => {
     assert.ok(ids.has(id), 'Missing element: ' + id);
   }
   assert.equal([...html.matchAll(/id="estimate"/g)].length, 1);
-  assert.match(script, /function renderPreview\\(\\)/);
-  assert.match(script, /renderHistory\\(\\);renderRule\\(\\);renderPreview\\(\\)/);
-  assert.match(script, /field\\("preview-request"\\)\\.onclick=\\(\\)=>field\\("handoff"\\)\\.click\\(\\)/);
-  assert.match(script, /field\\("request"\\)\\.scrollIntoView/);
+  assert.match(script, /function renderPreview\(\)/);
+  assert.match(script, /renderHistory\(\);renderRule\(\);renderPreview\(\)/);
+  assert.match(script, /field\("preview-request"\)\.onclick=\(\)=>field\("handoff"\)\.click\(\)/);
+  assert.match(script, /field\("request"\)\.scrollIntoView/);
 });
 
 test('preview treats customer ideas as text and supports mobile screens', () => {
-  assert.match(script, /field\\("preview-heading"\\)\\.textContent=spec\\.title/);
-  assert.match(script, /field\\("preview-subtitle"\\)\\.textContent=spec\\.idea/);
-  assert.match(script, /heading\\.textContent=feature/);
-  assert.doesNotMatch(script, /\\.innerHTML\\s*=/);
-  assert.match(styles, /\\.preview-actions\\{display:grid/);
-  assert.match(styles, /@media\\(max-width:590px\\)/);
+  assert.match(script, /field\("preview-heading"\)\.textContent=spec\.title/);
+  assert.match(script, /field\("preview-subtitle"\)\.textContent=spec\.idea/);
+  assert.match(script, /heading\.textContent=feature/);
+  assert.doesNotMatch(script, /\.innerHTML\s*=/);
+  assert.match(styles, /\.preview-actions\{display:grid/);
+  assert.match(styles, /@media\(max-width:590px\)/);
 });
 
 test('estimations are nonbinding and have a duration', () => {
   assert.match(script, /تقدير آلي غير ملزم/);
-  assert.match(script, /spec\\.quote\\.weeks/);
+  assert.match(script, /spec\.quote\.weeks/);
   assert.match(script, /ليست عرض سعر معتمدًا/);
   const sandbox = {};
   runInNewContext(read('pilot/lab/engine.js'), sandbox, {timeout: 1000});
@@ -51,11 +51,11 @@ test('estimations are nonbinding and have a duration', () => {
 
 test('intake requires consent and confirms a persisted request', () => {
   assert.match(html, /type="checkbox" id="consent" required/);
-  assert.match(script, /fetch\\("\/api\/ideas",\\{method:"POST"/);
-  assert.match(script, /data\\.ok!==true/);
+  assert.match(script, /fetch\("\/api\/ideas",\{method:"POST"/);
+  assert.match(script, /data\.ok!==true/);
   assert.match(script, /رقم المتابعة/);
-  assert.match(worker, /if\\(data\\.consent!=="yes"\\)/);
+  assert.match(worker, /if\(data\.consent!=="yes"\)/);
   assert.match(worker, /INSERT INTO idea_requests/);
-  assert.match(worker, /ON CONFLICT\\(id\\) DO NOTHING/);
-  assert.match(worker, /origin!==url\\.origin/);
+  assert.match(worker, /ON CONFLICT\(id\) DO NOTHING/);
+  assert.match(worker, /origin!==url\.origin/);
 });
