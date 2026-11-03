@@ -62,8 +62,10 @@ async function init(){
   await send('Emulation.setTouchEmulationEnabled',{enabled:true});
 }
 const expression = `(() => {
-  const viewport=innerWidth;
+  const viewport=document.documentElement.clientWidth;
   const root=document.documentElement;
+  const styles=[...document.querySelectorAll('link[rel="stylesheet"]')];
+  const stylesEffect=styles.map(link=>{const original=link.disabled;link.disabled=true;const value={name:link.getAttribute('href'),width:root.scrollWidth,inner:innerWidth};link.disabled=original;return value;});
   const all=[...document.body.querySelectorAll('*')];
   const over=all.map((node)=>{
     const r=node.getBoundingClientRect(), c=getComputedStyle(node);
@@ -71,8 +73,8 @@ const expression = `(() => {
       left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),
       minWidth:c.minWidth,position:c.position,display:c.display,overflowX:c.overflowX};
   }).filter(x=>x.width&&x.display!=='none'&&(x.right>viewport+2||x.left< -2)).sort((a,b)=>b.right-a.right);
-  return {title:document.title,viewportWidth:viewport,htmlScrollWidth:root.scrollWidth,bodyScrollWidth:document.body.scrollWidth,
-    scrollLeft:scrollX,appWidth:root.clientWidth,over:over.slice(0,22),
+  return {title:document.title,viewportWidth:innerWidth,stylesEffect,htmlScrollWidth:root.scrollWidth,bodyScrollWidth:document.body.scrollWidth,
+    scrollLeft:scrollX,appWidth:root.clientWidth,rootMin:getComputedStyle(root).minWidth,bodyMin:getComputedStyle(document.body).minWidth,bodyRect:{width:document.body.getBoundingClientRect().width,left:document.body.getBoundingClientRect().left,right:document.body.getBoundingClientRect().right},over:over.slice(0,22),
     controls:[...document.querySelectorAll('.site-header nav,.studio-hero,.studio-pitch,.live-console,.hero-graphic,.hero,.experience')].map(x=>({el:x.className,r:{left:Math.round(x.getBoundingClientRect().left),right:Math.round(x.getBoundingClientRect().right),width:Math.round(x.getBoundingClientRect().width)},css:getComputedStyle(x).gridTemplateColumns})).slice(0,10)}
 })();`;
 try{
