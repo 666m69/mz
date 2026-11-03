@@ -3,6 +3,7 @@
 const HTML = __MZ_HTML__;
 const CSS = __MZ_CSS__;
 const APP_JS = __MZ_JS__;
+const MARK_SVG = __MZ_MARK__;
 const TEXT = new TextEncoder();
 const PROJECTS = new Set(['kafu','formah','marib']);
 const REVIEW_PROJECTS = new Set(['kafu','formah','marib','code']);
@@ -94,6 +95,7 @@ async function handle(req,env){
   if(p==='/community')return Response.redirect(url.origin+'/community/'+url.search,308);
   if((p==='/community/'||p==='/community/index.html')&&['GET','HEAD'].includes(req.method))return showAsset(HTML,'text/html; charset=utf-8',req);
   if(p==='/community/style.css'&&['GET','HEAD'].includes(req.method))return showAsset(CSS,'text/css; charset=utf-8',req);
+  if(p==='/community/mark.svg'&&['GET','HEAD'].includes(req.method))return showAsset(MARK_SVG,'image/svg+xml; charset=utf-8',req);
   if(p==='/community/app.js'&&['GET','HEAD'].includes(req.method))return showAsset(APP_JS,'text/javascript; charset=utf-8',req);
   if(!['/api/community','/api/community/vote','/api/community/ideas','/api/community/reviews'].includes(p))return fail('المسار غير موجود.',404);
   if(!env.DB||!env.MZ_LAB_SECRET)return fail('المختبر لا يستقبل مشاركات حاليًا.',503);
