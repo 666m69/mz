@@ -1,6 +1,27 @@
 import {spawn} from 'node:child_process';
+import {createServer} from 'node:http';
+import {readFile} from 'node:fs/promises';
 import {setTimeout as delay} from 'node:timers/promises';
 
+const local=process.argv.includes('--local');
+const strict=process.argv.includes('--assert');
+let httpServer;
+if(local){
+  httpServer=createServer(async (req,res)=>{
+    const pathname=new URL(req.url,'http://localhost').pathname;
+    let root=new URL('../site/',import.meta.url);
+    let name=pathname;
+    if(pathname.startsWith('/community/')){root=new URL('./community/',import.meta.url);name=pathname.slice('/community'.length);}
+    if(name==='/')name='/index.html';
+    if(name.endsWith('/'))name+='index.html';
+    if(!/^\/[a-zA-Z0-9_\-./]+$/.test(name)||name.includes('..')){res.writeHead(400).end();return;}
+    const file=new URL('.'+name,root);
+    const ext=name.split('.').pop();
+    try{const buf=await readFile(file);res.writeHead(200,{'Content-Type':{html:'text/html',css:'text/css',js:'text/javascript',svg:'image/svg+xml',png:'image/png',webp:'image/webp'}[ext]||'application/octet-stream'}).end(buf);}
+    catch{res.writeHead(404).end('Not found');}
+  });
+  await new Promise(resolve=>httpServer.listen(0,'127.0.0.1',resolve));
+}
 const chrome = spawn(process.env.CHROME_PATH || 'google-chrome',[
   '--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
   '--remote-debugging-port=9223','--remote-allow-origins=*',
@@ -56,12 +77,16 @@ const expression = `(() => {
 })();`;
 try{
   await init();
-  for(const url of (process.argv.slice(2).length?process.argv.slice(2):['https://mzcodehub.com/','https://mzcodehub.com/community/'])){
+  const base=local?'http://127.0.0.1:'+httpServer.address().port:'https://mzcodehub.com';
+  const pages=['/','/community/'];
+  for(const url of pages.map(p=>base+p)){
     await send('Page.navigate',{url});await delay(2300);
     const response=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
     if(response.exceptionDetails)throw Error(JSON.stringify(response.exceptionDetails));
     console.log('MOBILE_LAYOUT '+JSON.stringify({url,...response.result.value}));
+    const metrics=response.result.value;
+    if(strict && (metrics.htmlScrollWidth>metrics.appWidth+2 || metrics.viewportWidth>metrics.appWidth+2))throw Error('Horizontal overflow remains on '+url+' ('+metrics.htmlScrollWidth+' > '+metrics.appWidth+')');
   }
 }finally{
-  ws?.close();chrome.kill('SIGKILL');
+  ws?.close();chrome.kill('SIGKILL');httpServer?.close();
 }
