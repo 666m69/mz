@@ -22,11 +22,13 @@ if(local){
   });
   await new Promise(resolve=>httpServer.listen(0,'127.0.0.1',resolve));
 }
+const port=9300+(process.pid%1200);
 const chrome = spawn(process.env.CHROME_PATH || 'google-chrome',[
   '--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
-  '--remote-debugging-port=9223','--remote-allow-origins=*',
+  '--remote-debugging-port='+port,'--remote-allow-origins=*',
   '--user-data-dir=/tmp/mz-mobile-audit-'+process.pid,'about:blank'
-],{stdio:'ignore'});
+],{stdio:['ignore','ignore','pipe']});
+let chromeErrors='';chrome.stderr?.on('data',chunk=>{chromeErrors=(chromeErrors+chunk.toString()).slice(-2000);});
 const pending = new Map();
 let ws,seq=0;
 async function send(method,params={}){
@@ -40,14 +42,14 @@ async function send(method,params={}){
 }
 async function init(){
   let data;
-  for(let attempt=0;attempt<50;attempt++){
+  for(let attempt=0;attempt<95;attempt++){
     try{
-      const res=await fetch('http://127.0.0.1:9223/json/new?about:blank',{method:'PUT'});
+      const res=await fetch('http://127.0.0.1:'+port+'/json/new?about:blank',{method:'PUT'});
       if(res.ok){data=await res.json();break;}
     }catch{}
     await delay(160);
   }
-  if(!data)throw Error('Unable to connect to Chrome DevTools');
+  if(!data)throw Error('Unable to connect to Chrome DevTools: '+chromeErrors);
   ws=new WebSocket(data.webSocketDebuggerUrl);
   await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
   ws.addEventListener('message',ev=>{
