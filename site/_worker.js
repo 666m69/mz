@@ -1,4 +1,5 @@
 import {menuHandle} from './menu-server.js';
+import {assistantHandle} from './assistant-api.js';
 const SERVICES=['متجر إلكتروني','صفحة هبوط تسويقية','موقع شركة أو مؤسسة','تطبيق ويب / لوحة تحكم','تحسين سرعة وسيو','استشارة أخرى'];
 const enc=new TextEncoder();
 const security={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'strict-origin-when-cross-origin','Permissions-Policy':'camera=(), microphone=(), geolocation=()'};
@@ -63,6 +64,7 @@ async function handle(req,env){
   url.protocol='https:';
   return Response.redirect(url.href,308);
  }
+ if(path==='/api/assistant')return assistantHandle(req,env,{rateAddress,sign});
  if(path==='/api/menus'||path.startsWith('/api/menus/'))return menuHandle(req,env,{json,error,sign,verified,readBody,rateAddress});
  if(/^\/(admin(?:\.html)?(?:\/|$)|assets\/js\/admin\.js$|api\/admin(?:\/|$))/i.test(path))return error('الإدارة متاحة للمالك عبر حساب الاستضافة فقط.',403);
  if(path==='/api/contact-token'){
