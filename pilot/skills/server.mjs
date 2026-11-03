@@ -1,4 +1,4 @@
-import {randomUUID, timingSafeEqual} from 'node:crypto';
+import {randomUUID, timingSafeEqual, createHash} from 'node:crypto';
 import {buildWebApp} from '../builder/engine.mjs';
 
 const INITIAL = [
@@ -64,12 +64,17 @@ export function createSkillsService({ownerToken,outputRoot,now=()=>Date.now()}={
      if(input.title!==undefined&&typeof input.title!=='string')throw error('invalid_title');
      if(typeof idempotencyKey!=='string'||!(/^[a-zA-Z0-9_-]{8,80}$/).test(idempotencyKey))throw error('idempotency_required');
      const key=id+':'+idempotencyKey;
-     if(runs.has(key))return clone(runs.get(key));
+     const digest=createHash('sha256').update(JSON.stringify({id,input})).digest('hex');
+     if(runs.has(key)){
+       const prior=runs.get(key);
+       if(prior.inputDigest!==digest)throw error('idempotency_conflict',409);
+       return clone(prior);
+     }
      // Only vetted template generators. No visitor code, no shell execution.
      const hint=d.handler==='shopping'?'قائمة مشتريات':'قائمة مهام';
      if(!new RegExp(d.handler==='shopping'?'مشتريات|shopping':'مهام|tasks?|to.do','i').test(input.idea))throw error('skill_input_mismatch');
      const result=await buildWebApp(input,{outputRoot});
-     const response={id:key,skillId:id,skillVersion:d.version,status:'built_unpublished',directory:result.directory,appId:result.appId,files:result.files};
+     const response={id:key,skillId:id,skillVersion:d.version,status:'built_unpublished',inputDigest:digest,directory:result.directory,appId:result.appId,files:result.files};
      runs.set(key,response);log('skill_run',{skillId:id,version:d.version,runId:key,status:'built_unpublished'});
      return clone(response);
    }
