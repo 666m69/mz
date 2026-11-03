@@ -128,3 +128,37 @@ field("intake").addEventListener("submit",async event=>{
   } catch (e) {receipt.textContent=e.name==="TypeError"||e.name==="TimeoutError"?"لم يصلنا تأكيد. أعد الإرسال بنفس البيانات لاسترجاع رقم الطلب.":e.message;}
   finally{button.disabled=false;}
 });
+
+
+// Request tracking displays only a status. The tracking key must be treated as private.
+const trackingLabels={
+ "new":"تم استلام طلبك، وهو في قائمة المراجعة.",
+ "reviewing":"الطلب قيد المراجعة.",
+ "in_review":"الطلب قيد المراجعة.",
+ "contacted":"تواصل الفريق بخصوص طلبك.",
+ "quoted":"تم إعداد عرض السعر؛ راجع بريدك للتفاصيل.",
+ "approved":"تم اعتماد تنفيذ المشروع.",
+ "in_progress":"التنفيذ جارٍ.",
+ "delivered":"تم تسليم المشروع.",
+ "closed":"أُغلق الطلب.",
+ "cancelled":"أُغلق الطلب دون تنفيذ."
+};
+field("track-form").addEventListener("submit",async event=>{
+ event.preventDefault();
+ const id=field("tracking-id").value.trim();
+ const result=field("tracking-result"),button=field("track-submit");
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
+  result.textContent="رقم المتابعة غير صحيح. انسخه كاملاً من إيصال الطلب.";return;
+ }
+ if(button.disabled)return;
+ button.disabled=true;result.textContent="جارٍ التحقق من حالة الطلب…";
+ try{
+  const response=await fetch("/api/ideas/"+encodeURIComponent(id),{method:"GET",cache:"no-store",signal:AbortSignal.timeout(12000)});
+  if(response.status===404){result.textContent="لم نجد طلباً بهذا الرقم. تأكد من نسخه بصورة صحيحة.";return;}
+  if(!response.ok)throw Error("تعذر الاستعلام حالياً. أعد المحاولة لاحقاً.");
+  const data=await response.json();
+  if(data.ok!==true||data.id.toLowerCase()!==id.toLowerCase()||typeof data.status!=="string")throw Error("تعذر قراءة حالة الطلب حالياً.");
+  result.textContent=trackingLabels[data.status]||"تم العثور على الطلب. للحصول على آخر التفاصيل تواصل مع info@mzcodehub.com.";
+ }catch(e){result.textContent=e.name==="TimeoutError"?"انتهت مهلة الاستعلام. حاول مجدداً.":e.message||"تعذر الاستعلام حالياً."}
+ finally{button.disabled=false;}
+});
