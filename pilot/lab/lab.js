@@ -21,15 +21,15 @@ const signature = () => JSON.stringify([field("idea").value.trim(),field("projec
 function updateSpec() {
   const title=field("project-title").value.trim(), features=nonblankLines(field("features").value);
   if(!title || !features.length || features.length>8 || features.some(s=>s.length>125) || new Set(features).size!==features.length){
-    field("scope-state").textContent="اكتب اسمًا ووظيفة واحدة إلى ثمانٍ، دون تكرار أو تجاوز ١٢٥ حرفًا للوظيفة.";return false;
+    field("live-preview").hidden=true;field("scope-state").textContent="اكتب اسمًا ووظيفة واحدة إلى ثمانٍ، دون تكرار أو تجاوز ١٢٥ حرفًا للوظيفة.";return false;
   }
   spec=E.buildSpec(field("idea").value,{title,features});
   if(signature()!==activeSignature) {history=new Map();quantities=new Map();activeSignature=signature();}
   const options=spec.features.map((f,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=f;return o;});
   field("case").replaceChildren(...options);field("trial").hidden=false;
   field("scope-state").textContent="النطاق المعتمد يشمل "+spec.features.length+" وظائف.";
-  field("estimate").textContent="نطاق استرشادي أولي "+spec.quote.low.toLocaleString("ar-SA")+"–"+spec.quote.high.toLocaleString("ar-SA")+" ر.س. يحدد الفريق السعر والمدة بعد مراجعة المتطلبات.";
-  field("outcome").textContent="";renderHistory();renderRule();return true;
+  field("estimate").textContent="تقدير آلي غير ملزم: "+spec.quote.low.toLocaleString("ar-SA")+"–"+spec.quote.high.toLocaleString("ar-SA")+" ر.س. · مدة استرشادية "+spec.quote.weeks+". هذه محاكاة لقواعد عامة وليست عرض سعر معتمدًا؛ يراجع الفريق الوظائف والتكلفة والمدة قبل الاتفاق.";
+  field("outcome").textContent="";renderHistory();renderRule();renderPreview();return true;
 }
 function renderRule() {
   const i=Number(field("case").value), [resource,action]=scenario(spec.features[i]);
@@ -38,12 +38,30 @@ function renderRule() {
 function renderHistory() {
   field("history").replaceChildren(...Array.from(history.values(),v=>{const li=document.createElement("li");li.textContent=v;return li;}));
 }
+function renderPreview() {
+  // Render customer input with textContent only; no user-controlled HTML is executed.
+  field("preview-heading").textContent=spec.title;
+  field("preview-subtitle").textContent=spec.idea;
+  const cards=spec.features.map((feature,i)=>{
+    const card=document.createElement("article");card.className="preview-card";
+    const number=document.createElement("span");number.className="preview-number";number.textContent=String(i+1).padStart(2,"0");
+    const heading=document.createElement("strong");heading.textContent=feature;
+    const button=document.createElement("button");button.type="button";button.className="preview-action";
+    button.textContent="جرّب الوظيفة";
+    button.addEventListener("click",()=>{field("case").value=String(i);run("current");});
+    card.append(number,heading,button);
+    return card;
+  });
+  field("preview-actions").replaceChildren(...cards);
+  field("preview-status").textContent="اختر وظيفة؛ المحاولة الأولى تنجح، والثانية تختبر نفاد الشرط.";
+  field("live-preview").hidden=false;
+}
 function run(mode) {
   const i=Number(field("case").value), f=spec.features[i], [resource,action,failure]=scenario(f);
   const before=mode==="available"?1:mode==="empty"?0:(quantities.get(i)??1);
   const result=simulate(before,action,failure);quantities.set(i,result.left);
   const line=f+" — "+(result.ok?"نُفّذ: ":"مُنع: ")+result.detail+" ("+resource+" "+before+" ← "+result.left+").";
-  history.set(i+":"+result.ok,line);field("outcome").textContent=line;renderRule();renderHistory();
+  history.set(i+":"+result.ok,line);field("outcome").textContent=line;field("preview-status").textContent=line;renderRule();renderHistory();
 }
 function results() {return [...history.values()].join("\n")||"لم تُجرَ اختبارات بعد.";}
 field("design").addEventListener("submit",event=>{
@@ -63,9 +81,16 @@ field("direct-request").onclick=event=>{
   }
   brief.focus();
 };
-field("idea").oninput=()=>{field("idea").setCustomValidity("");field("workspace").hidden=true;};
-for (const id of ["project-title","features"]) field(id).oninput=()=>{field("trial").hidden=true;field("scope-state").textContent="اعتمد التعديلات لتحديث التجربة.";};
+field("idea").oninput=()=>{field("idea").setCustomValidity("");field("workspace").hidden=true;field("live-preview").hidden=true;};
+for (const id of ["project-title","features"]) field(id).oninput=()=>{field("trial").hidden=true;field("live-preview").hidden=true;field("scope-state").textContent="اعتمد التعديلات لتحديث التجربة.";};
 field("apply").onclick=updateSpec;field("case").onchange=()=>{field("outcome").textContent="";renderRule();};
+field("preview-request").onclick=()=>field("handoff").click();
+field("preview-reset").onclick=()=>{
+  if(!spec)return;
+  quantities=new Map();history=new Map();
+  field("preview-status").textContent="أُعيدت التجربة؛ يمكنك البدء من جديد.";
+  field("outcome").textContent="";renderRule();renderHistory();
+};
 field("pass").onclick=()=>run("available");field("fail").onclick=()=>run("empty");field("again").onclick=()=>run("current");
 function downloadFile(body,type,name) {
   const url=URL.createObjectURL(new Blob([body],{type}));
@@ -87,7 +112,7 @@ field("handoff").onclick=()=>{
   const full=base+counts+"\n"+results();
   field("brief").value=full.length<=5000?full:base+counts;
   field("receipt").textContent=full.length<=5000?"راجع النص قبل إرساله.":"يتضمن الطلب ملخص الاختبارات. تتوفر التفاصيل في ملف الموجز.";
-  field("brief").focus();
+  field("request").scrollIntoView({block:"start"});field("brief").focus();
 };
 field("intake").addEventListener("submit",async event=>{
   event.preventDefault();const button=field("send"),receipt=field("receipt");if(button.disabled)return;
