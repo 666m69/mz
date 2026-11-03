@@ -1,0 +1,25 @@
+name: MZ mobile viewport & sharing audit
+on:
+  pull_request:
+    paths:
+      - "pilot/mobile-audit.mjs"
+      - "pilot/community/**"
+      - "pilot/mzcodehub-public-entry-with-idea-cta.mjs"
+      - "site/assets/css/**"
+      - "site/assets/js/mz-share.js"
+      - "home-studio.mjs"
+      - ".github/workflows/mobile-audit.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Diagnose 390px mobile pages on live domain
+        run: node pilot/mobile-audit.mjs
