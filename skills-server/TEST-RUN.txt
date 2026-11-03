@@ -1,0 +1,209 @@
+npm test
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> test
+> npm run build && node --test tests/*.test.mjs pilot/tests/*.test.mjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> build
+> node catalog.mjs && node build.mjs && node pilot/build-lab.mjs
+
+Built 87 assets; worker 1855520 bytes
+✔ verified Cloudflare Access JWT protects admin read and status updates (223.65999ms)
+✔ generated application runtime executes add/edit/complete/filter/reload/delete (31.799168ms)
+✔ generated runtime renders visitor text as text nodes, never HTML (21.32535ms)
+✔ creates a complete runnable web app, not a simulation response (27.071431ms)
+✔ supports shopping list idea as a real checklist (1.445127ms)
+✔ rejects unsupported ideas instead of pretending to build them (1.953663ms)
+✔ requires review for payment, login, WhatsApp and other external requirements (0.443508ms)
+✔ never executes or writes visitor text into scripts or paths (20.950808ms)
+✔ validates malformed and overlong inputs (1.297465ms)
+✔ each generated app has independent browser storage identity (23.189165ms)
+✔ simple idea is only a local prototype, not a shipped app (1.64543ms)
+✔ external integration needs review (0.426993ms)
+✔ visitor instructions cannot authorize execution (0.23913ms)
+✔ reject malformed input (0.436027ms)
+✔ RTL page, scripts and CSP are served independently (10.382189ms)
+✔ API has no access when DB/secret unavailable (0.648388ms)
+✔ one browser votes once; total reflects saved database rows (71.532638ms)
+✔ POST rejects wrong origin and unsigned cookie (2.010552ms)
+✔ anonymous ideas remain pending and exact repeats are deduplicated (10.414297ms)
+✔ review is written and can be updated but not duplicated (11.840755ms)
+✔ too large body is rejected (3.913002ms)
+✔ the idea → interactive preview → request journey is complete (1.421332ms)
+✔ preview treats customer ideas as text and supports mobile screens (0.209035ms)
+✔ estimations are nonbinding and have a duration (5.231062ms)
+✔ intake requires consent and confirms a persisted request (0.35791ms)
+✔ customer tracking accepts an unguessable ID and returns only the status (13.197195ms)
+✔ tracking UX has an accessible, private status form and no user content HTML injection (0.563389ms)
+✔ customer receives friendly reference; provider-accepted Arabic receipt is not duplicated on replay (77.714116ms)
+✔ missing customer-mail provider fails open for lead saving but never misrepresents email delivery (1.525031ms)
+✔ provider refusal records failure independently from admin notifications and still saves the lead (2.183964ms)
+customer receipt email not accepted by provider
+✔ lab and each first-party asset support GET and HEAD with a restrictive policy (25.012401ms)
+✔ consent, content type, origin and maximum payload are enforced (5.202316ms)
+Access token validation error
+✔ retry and concurrent cap never create a fourth row or duplicate a request (26.021924ms)
+✔ database failure gives no receipt and anonymous visitors cannot list customer data (2.423245ms)
+✔ literal HTML input is data and does not appear in the served shell (1.83635ms)
+Admin status update failed
+✔ signed admin can update a case; a failed audit insert leaves the prior state intact (89.112398ms)
+✔ offline file preserves hostile text as data, pins its script and simulates real state without a network (7.742307ms)
+✔ public demo opens with a fixed example, two clear exits and no network form (13.036182ms)
+✔ opening the example preserves the lab tab and its draft (0.938726ms)
+✔ direct intake carries the current idea locally and preserves an edited brief (2.79795ms)
+✔ the public homepage links directly to a demo and still offers a blank idea (14.185566ms)
+✔ ad QR only permits explicit web URLs (1.692243ms)
+✔ QR supports Arabic and retains square matrix (18.512252ms)
+✔ approved SVG monogram is the orange, silver and violet code symbol (2.041739ms)
+✔ PNG app icons and social card use the generated brand sizes (1.552642ms)
+✔ every deployed asset matches the tested source bytes (423.680709ms)
+✔ tools require own scripts and refuse framing (2.715526ms)
+✔ unknown routes and private paths never return a success page (1.685212ms)
+✔ tool trailing slash canonicalized and HEAD body empty (0.904764ms)
+✔ home, catalog and gallery load the full studio theme in one stylesheet (40.351182ms)
+✔ buy and sell use quantities, spread and preserve nonnegative balances (2.784489ms)
+✔ no overbuy, oversell, invalid quantities or underfunded actions (6.595208ms)
+✔ travel consumes food and advances days, and refuses zero provisions (0.413423ms)
+✔ finish automatically liquidates cargo and disables actions (0.303117ms)
+✔ save validation rejects corrupted state (0.392392ms)
+✔ profitable route can reach the win target (0.792615ms)
+✔ generated homepage exposes community without replacing business flow (1.546713ms)
+✔ gateway short invitation link redirects to live community (2.853143ms)
+✔ gateway injects discoverable invitation and no stale email in deployed old home (10.591486ms)
+✔ gateway adds navigation on tools without rewriting its title (1.957112ms)
+✔ public administration is denied (16.112563ms)
+✔ unknown API is not a successful homepage (1.522125ms)
+✔ missing server configuration fails closed (0.817633ms)
+✔ successful response corresponds to a durable stored request (29.333498ms)
+✔ repeat submission stores only one row and same receipt (6.280353ms)
+✔ reusing request ID with changed content is rejected (4.038736ms)
+✔ rejects missing consent (2.519746ms)
+✔ rejects invalid phone (7.134811ms)
+✔ rejects blank name (4.116449ms)
+✔ rejects oversized message (3.554391ms)
+✔ rejects invalid email (2.127288ms)
+✔ rejects honeypot (2.673372ms)
+✔ rejects unknown service (3.165294ms)
+✔ cross-origin requests are blocked (5.504883ms)
+✔ forged form token cannot submit (2.575585ms)
+✔ malformed JSON and oversized bodies fail cleanly (1.96182ms)
+✔ GET cannot expose submissions (0.686606ms)
+✔ rate limit prevents a sixth distinct request (38.328115ms)
+✔ database failure is not reported as success (5.679847ms)
+✔ Arabic phone digits are normalized (6.284549ms)
+✔ extensionless policy URL does not loop through asset canonical redirect (2.904391ms)
+✔ two-field contact persists email without requiring name or phone (18.700597ms)
+✔ two-field contact accepts Arabic Saudi mobile without email (21.923368ms)
+✔ two-field contact rejects unusable replies and malicious shapes (41.146061ms)
+✔ two-field contact retains duplicate protection and changed-content conflict (7.647104ms)
+✔ two-field contact keeps consent spam origin and token checks (15.393418ms)
+✔ two-field contact rate limit still stops sixth message (22.616282ms)
+✔ edge signatures isolate visitor quotas and reject forged forwarding headers (39.038562ms)
+✔ legacy pages lead to existing visitor sections (6.698944ms)
+✔ contact cleanup preserves the active hourly menu quota (7.367212ms)
+✔ CoreResto confirms durable consent and deduplicates normalized phones (6.957244ms)
+✔ interest list uses one row per address and tool, separately from CoreResto (8.796227ms)
+✔ the interest form is rate limited without creating excess rows (6.100582ms)
+✔ CRM outstanding excludes quotes and archived projects (3.3679ms)
+✔ CRM rejects overpayment and false completion (0.752265ms)
+✔ CSV escapes quotes, newlines and spreadsheet formulas (0.305721ms)
+✔ modern theme is loaded on both visitor pages (2.070974ms)
+✔ home keeps four live trials, three curated cards and a link to the full catalog (0.482468ms)
+✔ the complete catalog retains all interactive product and game links (0.28478ms)
+✔ catalog preview visual markup does not block accessible links (0.227493ms)
+✔ the shipped homepage offers four usable activities and full-product links (1.990622ms)
+✔ the gateway preserves the new playground and does not add the old sales block (20.160959ms)
+✔ the small MZ mark is vector geometry with no glyph or external asset dependency (0.453484ms)
+✔ studio games, quotes, content plans and booking run locally and remain independent when switching (23.883603ms)
+✔ contain keeps whole landscape photo centered (2.429615ms)
+✔ cover fills square with centered crop (0.627277ms)
+✔ output names cannot create traversal in ZIP (1.4122ms)
+✔ published menu persisted and public read excludes editing secret (34.09786ms)
+✔ anonymous, wrong key and another menu owner cannot edit (16.794932ms)
+✔ authorized update retains URL and changes public values (11.123007ms)
+✔ cross-origin publication and forged tokens fail (5.600527ms)
+✔ menu public listing and invalid ID unavailable (1.631401ms)
+✔ menu invalid images, prices and item counts rejected (0.931896ms)
+✔ publication rate limited after three creates (30.644852ms)
+✔ all eight levels have a solution within the command budget (5.566827ms)
+✔ first puzzle completes with expected route (0.283657ms)
+✔ invalid moves fail and cannot resume until reset (0.482788ms)
+✔ goal cannot win before collecting required batteries (0.19921ms)
+✔ unit conversion, portions and target margin (1.433031ms)
+✔ waste accounts for usable yield (0.403438ms)
+✔ volume conversion and zero sale (0.243558ms)
+✔ incompatible units and invalid divisors refused (0.500224ms)
+✔ homepage and projects gallery feature three distinct real project names and truthful states (1.824692ms)
+✔ public gallery and preview respond with cacheable HTML, privacy controls retained (8.651144ms)
+✔ After Marib teaser is deterministic, discloses limits and uses no backend (0.995551ms)
+✔ social previews point to the approved MZcode image with cache-busting version (1.579993ms)
+✔ quote discount then percentage and line rounding (1.58475ms)
+✔ decimal rounding without floating point residue (0.262946ms)
+✔ Arabic and Persian numeric input supported (0.340544ms)
+✔ invalid and extreme input refused (0.387514ms)
+✔ zero priced item and full discount supported (0.236687ms)
+ℹ tests 131
+ℹ suites 0
+ℹ pass 131
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1055.009007
+
+node --test skills-server/test/*.test.mjs
+✔ private control plane exists and rejects a request without credentials (15.438222ms)
+✔ migration is additive in a dedicated skills namespace (10.676958ms)
+✔ unknown adapters, executable manifests and self-asserted test status are rejected (28.456959ms)
+✔ review, activation, stale administrator decisions, disable and tested rollback (49.135707ms)
+✔ cross-request reads and writes are concealed, actor cannot administer, secret input encrypted (17.902185ms)
+✔ idempotent intake and concurrent build retries preserve one operation; payload substitution rejected (29.681994ms)
+✔ transport rejects foreign origins, oversized JSON and unsupported operations (6.735378ms)
+✔ rate ceiling enforced without a new row per rejected unauthenticated caller (4.766252ms)
+✔ withdrawal revokes queued and running work, stale completion cannot create an artifact (25.166681ms)
+✔ one lease at once, expired lease fenced, bounded retries and failure visible to owner (7.602195ms)
+✔ hard caps limit per-request, per-skill, global daily queue and total retained work (101.512018ms)
+✔ untrusted output paths, anomalous artifacts and missing encryption keys fail closed (16.575396ms)
+✔ expired lease rejected even before any subsequent runner claims; monitor exposes the stall (5.943085ms)
+✔ each adapter owns its input schema; a bounded initial count belongs only to the counter (11.597911ms)
+✔ restart preserves registry, approval, scoped capability, encrypted idea and idempotent queued run (83.777184ms)
+✔ runner boundary actively denies external file access, network and child processes with limits in force (195.559822ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 437.166272
+
+python3 -B skills-server/test/isolation.py
+test_cpu_ceiling_terminates_busy_fixture (__main__.IsolationTests.test_cpu_ceiling_terminates_busy_fixture) ... ok
+test_digest_mismatch_never_enters_child (__main__.IsolationTests.test_digest_mismatch_never_enters_child) ... ok
+test_pinned_sources (__main__.IsolationTests.test_pinned_sources) ... ok
+test_seccomp_failure_is_closed (__main__.IsolationTests.test_seccomp_failure_is_closed) ... ok
+test_wall_timeout_kills_sleeping_fixture (__main__.IsolationTests.test_wall_timeout_kills_sleeping_fixture) ... ok
+test_wrong_idea_not_promoted_to_a_project (__main__.IsolationTests.test_wrong_idea_not_promoted_to_a_project) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 8.457s
+
+OK
+
+node --test skills-server/test/e2e.mjs
+local-checklist archive SHA-256 7ac14bc910035e813ea75f64c75586a0e221af3cb56d42d8246fae481afa7ab4 bytes 10537
+✔ private intake → runner → ZIP → functional Chromium app: local-checklist (1509.284092ms)
+local-counter archive SHA-256 38c481be099fdf8b4853aff9671f0f13d55e8906961446131bf38c9567f9be46 bytes 3040
+✔ private intake → runner → ZIP → functional Chromium app: local-counter (752.139058ms)
+✔ mobile owner UI submits a reviewed release, shows tests, activates and disables, forgets token on reload (682.995048ms)
+✔ an unsupported private idea finishes with a visible reason and no downloadable artifact (345.958635ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3790.772027
