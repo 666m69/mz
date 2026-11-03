@@ -64,6 +64,7 @@ async function init(){
   await send('Emulation.setTouchEmulationEnabled',{enabled:true});
 }
 const expression = `(() => {
+  window.scrollTo(0,0);
   const viewport=document.documentElement.clientWidth;
   const root=document.documentElement;
   const all=[...document.body.querySelectorAll('*')];
