@@ -2,6 +2,10 @@ name: Public MZcode smoke
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - pilot/public-smoke.mjs
+      - .github/workflows/mzcode-public-smoke.yml
   push:
     branches: [main]
     paths:
