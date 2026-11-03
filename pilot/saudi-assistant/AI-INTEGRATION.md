@@ -17,7 +17,7 @@
 ## Deployment prerequisites — not yet executed
 1. Verify Cloudflare account's billing plan and active free quota. The connected OAuth lacks billing-read scope; subscription lookup returned 403, so costlessness cannot be proven. Workers AI Free includes 10,000 Neurons/day, but Workers Paid bills above this allocation.
 2. Check with the owner before any live inference, ensure current usage is inside the free allocation, and enforce budget stop on the account.
-3. Create/apply the D1 quota table in a dedicated preview database (no customer data), and run a preview Worker smoke test.
+3. **Completed:** D1 quota table and index were applied to the existing `mz702-qa-preview` D1 only; verified via sqlite_master. No customer rows were queried or modified. Next, test the preview Worker with AI disabled.
 4. Enable `MZ_ASSISTANT_AI_ENABLED=true` in **preview only**, verify Arabic response, rate limits, privacy warnings, CSP and mobile display. Inspect spend/usage afterward.
 5. Only after owner approval, review release to production with audited quota, monitoring, rollback path, and privacy notice.
 
@@ -30,4 +30,4 @@
 - https://developers.cloudflare.com/workers-ai/platform/pricing/
 - https://developers.cloudflare.com/pages/functions/bindings/
 
-This branch does not change the production site, modify live databases, enable AI billing, or send client data to any model.
+This branch does not change the production site or production database and does not enable AI billing or send client data to any model. It created one quota table and index in the *preview-only* database, without touching existing tables.
