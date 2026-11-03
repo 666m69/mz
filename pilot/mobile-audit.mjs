@@ -72,7 +72,7 @@ const expression = `(() => {
       minWidth:c.minWidth,position:c.position,display:c.display,overflowX:c.overflowX};
   }).filter(x=>x.width&&x.display!=='none'&&(x.right>viewport+2||x.left< -2)).sort((a,b)=>b.right-a.right);
   return {title:document.title,viewportWidth:innerWidth,htmlScrollWidth:root.scrollWidth,bodyScrollWidth:document.body.scrollWidth,
-    scrollLeft:scrollX,appWidth:root.clientWidth,rootMin:getComputedStyle(root).minWidth,bodyMin:getComputedStyle(document.body).minWidth,bodyRect:{width:document.body.getBoundingClientRect().width,left:document.body.getBoundingClientRect().left,right:document.body.getBoundingClientRect().right},over:over.slice(0,22),
+    scrollLeft:scrollX,appWidth:root.clientWidth,rootMin:getComputedStyle(root).minWidth,bodyMin:getComputedStyle(document.body).minWidth,bodyRect:{width:document.body.getBoundingClientRect().width,left:document.body.getBoundingClientRect().left,right:document.body.getBoundingClientRect().right},over:over.slice(0,12),leftOver:all.map(e=>({e,r:e.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.left< -2).sort((a,b)=>a.r.left-b.r.left).slice(0,18).map(x=>({tag:x.e.tagName,cls:String(x.e.className||'').slice(0,50),id:x.e.id,left:Math.round(x.r.left),right:Math.round(x.r.right),width:Math.round(x.r.width)})),
     controls:[...document.querySelectorAll('.site-header nav,.studio-hero,.studio-pitch,.live-console,.hero-graphic,.hero,.experience')].map(x=>({el:x.className,r:{left:Math.round(x.getBoundingClientRect().left),right:Math.round(x.getBoundingClientRect().right),width:Math.round(x.getBoundingClientRect().width)},css:getComputedStyle(x).gridTemplateColumns})).slice(0,10)}
 })();`;
 try{
