@@ -28,6 +28,8 @@
 .marib-orb{position:absolute;left:27%;top:14%;width:75px;height:75px;background:#ffe3a3;border-radius:100px;box-shadow:0 0 65px #ffdf9fa9}
 .marib-ridge{position:absolute;width:160%;height:175px;bottom:-108px;left:-32%;border-radius:50%;background:#ad8757;transform:rotate(-9deg)}
 .marib-ridge.back{bottom:-78px;background:#ddc295;transform:rotate(13deg)}
+/* Keep decorative terrain inside its card on narrow phones. */
+@media(max-width:640px){.marib-ridge,.marib-ridge.back{left:0;width:100%;transform:none}}
 .marib-emblem{position:absolute;bottom:30px;right:25px;font-size:37px;line-height:1.2;font-weight:900;color:#fff5df;text-shadow:0 4px 20px #472c1b}
 .projects-only{margin-block:30px 90px}.projects-only .featured-all{display:none}.projects-hero{padding:72px 0 24px}.projects-hero .kicker{font-weight:800}.projects-hero h1{font-size:clamp(44px,6vw,78px);line-height:1.15;font-weight:850;margin:14px 0}.projects-hero p{max-width:690px;color:#afc0d2;font-size:17px;line-height:1.9}.projects-more{border-top:1px solid #ffffff25;padding:28px 0;margin-bottom:70px}.projects-more h2{font-size:25px;margin:0 0 10px}.projects-more p{color:#aec0d3}
 @media(max-width:1000px){.featured-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.featured-card:last-child{grid-column:1/-1}.featured-card:last-child{display:grid;grid-template-columns:1fr 1fr}.featured-card:last-child .featured-visual{height:100%;min-height:250px}.featured-card:last-child .featured-body{min-height:250px}}
