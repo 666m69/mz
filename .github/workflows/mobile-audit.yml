@@ -21,5 +21,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Diagnose 390px mobile pages on live domain
+      - name: Build local site and test mobile viewport without off-screen content
+        run: |
+          npm run build
+          node pilot/mobile-audit.mjs --local --assert
+      - name: Inspect live baseline (informational until deployed)
         run: node pilot/mobile-audit.mjs
