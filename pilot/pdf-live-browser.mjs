@@ -56,10 +56,10 @@ try{
  return {text:document.getElementById('paper').innerText,dir:document.documentElement.dir,width:innerWidth,scroll:document.documentElement.scrollWidth};})()`);
  assert.ok(filled.text.includes('العميل التجريبي'));assert.ok(filled.text.includes('تصميم وتطوير'));assert.ok(filled.scroll<=filled.width+3,'Quote horizontal overflow after inputs');
  await capture('quote-mobile.png');
- await evalJS("document.querySelector('#quote-form').requestSubmit(); 'submitted'");
+ await evalJS("document.querySelector('#quote-form button[type=submit]').click(); 'clicked'");
  const pdfPath=join(evidence,'MZ-Quote.pdf');
  for(let i=0;i<100&&(!existsSync(pdfPath)||statSync(pdfPath).size<1500);i++)await sleep(250);
- assert.ok(existsSync(pdfPath),'PDF did not download in browser');
+ assert.ok(existsSync(pdfPath),'PDF did not download in browser; state: '+JSON.stringify(await evalJS(`({status:document.getElementById('status')?.textContent,valid:document.getElementById('quote-form')?.checkValidity(),files:document.querySelectorAll('#lines .line').length})`)));
  const pdf=readFileSync(pdfPath);
  assert.ok(pdf.length>5000,'Generated PDF unexpectedly small');
  assert.equal(pdf.subarray(0,5).toString(),'%PDF-');
