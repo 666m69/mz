@@ -17,4 +17,8 @@ jobs:
         with:
           node-version: '22'
       - name: Exercise live QA route without paid dependencies
-        run: node pilot/community/qa-smoke.mjs --write
+        run: node pilot/community/qa-smoke.mjs
+      - name: Verify real browser executes the community client
+        run: |
+          google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --virtual-time-budget=6000 --dump-dom https://mzcodehub.com/community/ > /tmp/mz-community.html 2>/tmp/mz-browser-stderr.log
+          node --input-type=module -e "import fs from 'node:fs'; const s=fs.readFileSync('/tmp/mz-community.html','utf8'); if(!s.includes('vote-count') || (!s.includes('كن أول من يصوّت') && !s.includes('مجموع المشاركات:'))) { console.error(s.slice(-500)); process.exit(1) } console.log('PASS browser-rendered vote summary')"
