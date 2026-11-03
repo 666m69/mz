@@ -29,7 +29,7 @@ test('universal share message preserves section path but removes tracking parame
   assert.doesNotMatch(win.MZShare.buildMessage(),/utm_source|access_token|secret/);
   win.location.href=origin+'/community/?utm_campaign=test';
   assert.equal(win.MZShare.urlForPage(),origin+'/join');
-  assert.match(win.MZShare.buildMessage(),/جرّب/);
+  assert.match(win.MZShare.buildMessage(),/تجارب تفاعلية تقدر تجربها/);
 });
 test('public pages receive one shared script tag and preserve their own content',async t=>{
   const html='<html lang="ar"><head><title>MZ</title></head><body><main><h1>صفحة الأداة</h1></main></body></html>';
