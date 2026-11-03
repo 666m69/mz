@@ -12,7 +12,7 @@ class D1 {
   constructor(){this.votes=new Map();this.ideas=[];this.reviews=new Map();this.limits=new Map();}
   prepare(sql){
     const db=this;
-    return {bind(...params){
+    const bind=(...params)=>{
       return {
         async all(){
           if(sql.startsWith('SELECT project,COUNT(*)')){
@@ -44,7 +44,8 @@ class D1 {
           throw Error('Unexpected run: '+sql);
         }
       };
-    }};
+    };
+    return {bind,all:()=>bind().all(),first:()=>bind().first(),run:()=>bind().run()};
   }
 }
 function request(path,{method='GET',cookie='',origin=HOST,payload,ip='203.0.113.20'}={}){
