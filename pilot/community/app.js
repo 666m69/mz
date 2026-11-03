@@ -4,7 +4,7 @@
   const tabButtons = [...document.querySelectorAll('[data-tab]')];
   const panels = ['idea', 'vote', 'try'];
   const projectIds = ['kafu', 'formah', 'marib'];
-  const invitation = 'ادخل مختبر MZ وخلّنا نشوف أفكارك. ما فيه تسجيل ولا بيع؛ جرّب، صوّت، وقل رأيك بصراحة!\nhttps://mzcodehub.com/community/';
+  const invitation = 'ادخل مختبر MZ وخلّنا نشوف أفكارك. ما فيه تسجيل ولا بيع؛ جرّب، صوّت، وقل رأيك بصراحة!\nhttps://mzcodehub.com/join';
   let snapshot = null;
   let busy = false;
 
@@ -146,13 +146,13 @@
   });
   async function invite() {
     if (navigator.share) {
-      try { await navigator.share({title:'مختبر MZ',text:'جرّب وشاركنا رأيك دون تسجيل أو شراء.',url:'https://mzcodehub.com/community/'}); return; }
+      try { await navigator.share({title:'مختبر MZ',text:'جرّب وشاركنا رأيك دون تسجيل أو شراء.',url:'https://mzcodehub.com/join'}); return; }
       catch (error) { if (error.name === 'AbortError') return; }
     }
     const copied = await copy(invitation);
     const button = $('share-bottom');
     const old = button.textContent;
-    button.textContent = copied ? 'نسخت الدعوة — أرسلها لمن تحب' : 'الرابط: mzcodehub.com/community/';
+    button.textContent = copied ? 'نسخت الدعوة — أرسلها لمن تحب' : 'الرابط: mzcodehub.com/join';
     setTimeout(() => { button.textContent = old; },4000);
   }
   $('share-top').addEventListener('click',invite);

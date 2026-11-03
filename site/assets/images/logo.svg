@@ -1,17 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="100%" height="100%">
-  <defs>
-    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="50%" stop-color="#8b5cf6"/>
-      <stop offset="100%" stop-color="#06b6d4"/>
-    </linearGradient>
-  </defs>
-  <!-- Modern Monogram Icon -->
-  <rect x="5" y="10" width="40" height="40" rx="10" fill="url(#logo-grad)"/>
-  <text x="13" y="38" fill="#ffffff" font-family="'Readex Pro', sans-serif" font-weight="900" font-size="22">M</text>
-  <path d="M 33 18 L 39 30 L 33 42" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-  
-  <!-- Text Brand -->
-  <text x="58" y="37" fill="currentColor" font-family="'Readex Pro', sans-serif" font-weight="800" font-size="24" letter-spacing="1">MZ<tspan fill="#3b82f6">702</tspan></text>
-  <circle cx="160" cy="24" r="4" fill="#10b981"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 590 144" role="img" aria-label="MZcode"><defs><linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F9A825"/><stop offset="1" stop-color="#8A2BE2"/></linearGradient></defs><rect x="2" y="2" width="139" height="139" rx="30" fill="#0B0F1A" stroke="url(#edge)" stroke-width="4"/><g transform="scale(.54)" fill="none" stroke-linejoin="round"><path d="M55 72 L26 128 L55 183" stroke="#F9A825" stroke-width="18"/><path d="M76 180 L76 79 L104 117 L131 79 L131 180" stroke="#F9A825" stroke-width="18"/><path d="M147 80 H190 L146 180 H190" stroke="#F5F7FA" stroke-width="17"/><path d="M201 72 L231 128 L201 183" stroke="#F5F7FA" stroke-width="18"/></g><text x="163" y="101" font-family="Arial,DejaVu Sans,sans-serif" font-size="84" font-weight="bold" letter-spacing="-5"><tspan fill="#F9A825">MZ</tspan><tspan fill="#F5F7FA">code</tspan></text></svg>

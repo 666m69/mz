@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import {mobileNav} from './home-studio.mjs';
 
-export const navigation = `<nav aria-label="التنقل الرئيسي"><a href="/projects/">المشاريع</a><a href="/tools/">الأدوات</a><a href="/#pricing">الأسعار</a><a href="/about/">من نحن</a><a href="/#contact" class="nav-contact">تواصل</a></nav>`;
+export const navigation = `<nav aria-label="التنقل الرئيسي"><a href="/projects/">المشاريع</a><a href="/tools/">الأدوات</a><a href="/#pricing">الأسعار</a><a href="/community/" class="nav-community">مختبر MZ</a><a href="/#contact" class="nav-contact">تواصل</a></nav>`;
 const brand = '<a class="brand" href="/" aria-label="MZcode الرئيسية"><img src="/assets/images/mz-mark.svg" alt="" width="38" height="38"><span dir="ltr">MZ<span>code</span></span></a>';
 export const organization = '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Organization',name:'MZcode',url:'https://mzcodehub.com/',logo:'https://mzcodehub.com/assets/images/mz-mark.svg',email:'info@mzcodehub.com',founder:{'@type':'Person',name:'مروان الزهراني'}})+'</script>';
 const steps = [
