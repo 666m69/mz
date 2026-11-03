@@ -24,6 +24,8 @@ jobs:
         run: command -v google-chrome
       - name: Generate and inspect real PDF from production with mobile Chrome
         run: node pilot/pdf-live-browser.mjs
+      - name: Read-only live site links and project URL audit
+        run: node pilot/links-live-readonly.mjs
       - name: Preserve QA-only screenshot and PDF evidence
         if: always()
         uses: actions/upload-artifact@v4
