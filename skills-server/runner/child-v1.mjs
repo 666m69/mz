@@ -25,6 +25,6 @@ try{
   verifyRuntime(skill,files);
   process.stdout.write(JSON.stringify(job.kind==='test'?{ok:true,checks}:{ok:true,files}));
 }catch(e){
-  const codes={REVIEW_REQUIRED:'technical_review',UNSUPPORTED_IDEA:'unsupported_idea',INVALID_TITLE:'invalid_input',INVALID_IDEA:'invalid_input'};
+  const codes={REVIEW_REQUIRED:'technical_review',UNSUPPORTED_IDEA:'unsupported_idea',INVALID_TITLE:'invalid_input',INVALID_IDEA:'invalid_input',INVALID_INPUT:'invalid_input'};
   process.stdout.write(JSON.stringify({ok:false,error:codes[e.code]??'contract_failed'}));
 }

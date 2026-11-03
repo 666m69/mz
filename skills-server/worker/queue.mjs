@@ -1,4 +1,4 @@
-import {knownDigest,checks,artifactNames,matches,manifest} from './catalog.mjs';
+import {knownDigest,checks,artifactNames,matches} from './catalog.mjs';
 import {requireThat,fields,id,seal,unseal,size,hash,canonical} from './security.mjs';
 import {first,stmt,mutation} from './store.mjs';
 export async function claim(env) {
@@ -24,7 +24,7 @@ export async function complete(env,req,jobId,body) {
   fields(body,['lease','ok','error','checks','files'],['lease','ok']);
   requireThat(typeof body.ok==='boolean' && /^[0-9a-f-]{36}$/.test(body.lease),422,'invalid_result');
   return mutation(db,req,'finish/'+jobId+'/'+body.lease,body,env,async()=>{
-    const job=await first(db,'SELECT * FROM ss_jobs WHERE id=?',jobId);
+    const job=await first(db,'SELECT j.*,r.manifest FROM ss_jobs j JOIN ss_releases r ON r.skill_id=j.skill_id AND r.version=j.version WHERE j.id=?',jobId);
     requireThat(job && job.status==='running' && job.lease===body.lease,409,'stale_lease');
     const statements=[];let error=null,result=null;
     if(!body.ok){fields(body,['lease','ok','error']);requireThat(failureCodes.includes(body.error),422,'invalid_result');error=body.error;}
@@ -40,7 +40,7 @@ export async function complete(env,req,jobId,body) {
         requireThat(artifactNames.every(name=>typeof body.files[name]==='string' && size(body.files[name])>0),422,'invalid_artifact');
         const bytes=artifactNames.reduce((n,k)=>n+size(body.files[k]),0);
         result={files:artifactNames.length,bytes,sha256:await hash(canonical(body.files))};
-        requireThat(matches(manifest(job.skill_id,job.version,'').output_schema,result),422,'invalid_artifact');
+        requireThat(matches(JSON.parse(job.manifest).output_schema,result),422,'invalid_artifact');
         statements.push(stmt(db,'INSERT INTO ss_artifacts(job_id,cipher) VALUES(?,?)',jobId,await seal(env,'artifact/'+jobId,body.files)));
       }
     }

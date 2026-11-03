@@ -4,19 +4,20 @@ import {join} from 'node:path';
 import {assessCapability} from '../../pilot/capability-gate.mjs';
 export const fixture={idea:'أريد عداد محاولات محلي مع زيادة ونقصان وحفظ العدد'};
 const fail=code=>{throw Object.assign(new Error(code),{code});};
-export async function build({idea,title='عدادي المحلي'},root) {
+export async function build({idea,title='عدادي المحلي',initial_count=0},root) {
   if(typeof idea!=='string'||idea.trim().length<20||idea.length>2000)fail('INVALID_IDEA');
   if(assessCapability(idea).decision!=='prototype_only')fail('REVIEW_REQUIRED');
   if(!/عد[ّ]?اد|counter|tally/i.test(idea))fail('UNSUPPORTED_IDEA');
   if(typeof title!=='string'||!/^[\p{L}\p{N}][\p{L}\p{N} \u060C.,()،\-]{1,58}$/u.test(title))fail('INVALID_TITLE');
+  if(!Number.isSafeInteger(initial_count)||initial_count<0||initial_count>9999)fail('INVALID_INPUT');
   const path=await mkdtemp(join(root,'counter-')), appId=randomUUID();
   const blueprint={kind:'local-counter',schemaVersion:1,title,features:['increment','decrement','reset','local-persistence'],
-    storage:'browser-local',minimum:0,maximum:9999,automatedRelease:false,externalCostsSar:0};
+    storage:'browser-local',minimum:0,maximum:9999,initial_count,automatedRelease:false,externalCostsSar:0};
   const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer"><title>${title}</title><link rel="stylesheet" href="./styles.css"></head>
 <body><main><p>استوديو MZcode</p><h1>${title}</h1><p>لكل ضغطة عدد. يُحفظ على هذا الجهاز فقط.</p>
-<output id="count" aria-live="polite" data-key="${appId}">0</output>
+<output id="count" aria-live="polite" data-key="${appId}" data-initial="${initial_count}">${initial_count}</output>
 <div><button type="button" id="plus">زيادة +</button><button type="button" id="minus">إنقاص −</button>
 <button type="button" id="reset">تصفير</button></div><p id="notice" role="status"></p></main>
 <script src="./app.js" defer></script></body></html>`;

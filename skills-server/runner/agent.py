@@ -23,7 +23,11 @@ MAX_RESULT = 96 * 1024
 
 def source_bytes(adapter):
     files = {}
-    h = hashlib.sha256()
+    if any(adapter[k] not in adapter["sources"] for k in ("entry", "module")):
+        raise ValueError("unlisted entrypoint")
+    h = hashlib.sha256(b"mz-adapter-v1\0" + adapter["entry"].encode() + b"\0" + adapter["module"].encode() + b"\0")
+    contract = json.dumps([adapter["input_schema"], adapter["daily_builds"]], ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    h.update(contract.encode() + b"\0")
     for name in sorted(adapter["sources"]):
         path = (ROOT / name).resolve()
         if not path.is_relative_to(ROOT) or Path(name).is_absolute():

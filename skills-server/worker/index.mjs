@@ -23,6 +23,7 @@ export default {async fetch(req,env){
   }catch(e){
     const err=dbError(e);if(!(err instanceof ApiError))console.error('skills_internal_failure');
     const status=err instanceof ApiError?err.status:500,code=err instanceof ApiError?err.code:'internal_error';
-    return protect(Response.json({error:code},{status,headers:status===429?{'Retry-After':'60'}:{}}));
+    const retry=code==='rate_limit'?60:code==='queue_full'?30:code==='daily_limit'?86400-(Math.floor(Date.now()/1000)%86400):0;
+    return protect(Response.json({error:code},{status,headers:retry?{'Retry-After':String(retry)}:{}}));
   }
 }};

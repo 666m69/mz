@@ -54,10 +54,15 @@ export async function route(req,env,actor,path) {
   if(path.length===1 && method==='POST'){
     owner(actor);const b=await readJson(req);fields(b,['skill_id','input','private_prototype_consent']);
     requireThat(b.private_prototype_consent===true,422,'private_consent_required');
-    requireThat(reviewed(b.skill_id)&&matches(manifest(b.skill_id,'','').input_schema,b.input)
-      && b.input.idea.trim().length>=20,422,'invalid_input');
+    requireThat(reviewed(b.skill_id) && b.input && typeof b.input.idea==='string' && b.input.idea.trim().length>=20,422,'invalid_input');
     const result=await mutation(db,req,'owner/intake',b,env,async()=>{
-      const active=await first(db,'SELECT enabled FROM ss_skills WHERE id=?',b.skill_id);requireThat(active?.enabled,409,'inactive_release');
+      const active=await first(db,'SELECT r.manifest,r.digest FROM ss_skills s JOIN ss_releases r ON r.skill_id=s.id AND r.version=s.active_version WHERE s.id=? AND s.enabled=1',b.skill_id);
+      if(!active){
+        requireThat(matches(manifest(b.skill_id,'','').input_schema,b.input),422,'invalid_input');
+        throw new ApiError(409,'inactive_release');
+      }
+      requireThat(knownDigest(b.skill_id,active.digest),409,'inactive_release');
+      requireThat(matches(JSON.parse(active.manifest).input_schema,b.input),422,'invalid_input');
       const rid=id();
       return {statements:[stmt(db,'INSERT INTO ss_requests(id,skill_id,input_cipher,private_consent) VALUES(?,?,?,1)',rid,b.skill_id,
         await seal(env,'input/'+rid,b.input))],response:{request_id:rid}};

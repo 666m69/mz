@@ -3,3 +3,4 @@ __pycache__/
 .dev.vars*
 .env*
 node_modules/
+.local-state/

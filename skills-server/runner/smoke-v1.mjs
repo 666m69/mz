@@ -16,7 +16,10 @@ function mount(files,storage){
   const el=id=>{if(!nodes.has(id))nodes.set(id,new Element());return nodes.get(id);};
   const config=files['index.html'].match(/id="app-config">([^<]*)</)?.[1];
   if(config)el('app-config').textContent=config;
-  else el('count').dataset.key=files['index.html'].match(/data-key="([a-f0-9-]+)"/)[1];
+  else {
+    el('count').dataset.key=files['index.html'].match(/data-key="([a-f0-9-]+)"/)[1];
+    el('count').dataset.initial=files['index.html'].match(/data-initial="([0-9]+)"/)[1];
+  }
   const document={getElementById:el,createElement:()=>new Element(),querySelectorAll:()=>[]};
   runInNewContext(files['app.js'],{document,localStorage:storage,crypto:{randomUUID},window:{prompt:()=>null}},{timeout:300});
   return el;
@@ -31,9 +34,10 @@ export function verifyRuntime(kind,files){
     const again=mount(files,storage);assert.equal(again('items').children[0].children[1].textContent,'تجربة');
     assert.equal(again('items').children[0].children[0].checked,true);
   }else if(kind==='local-counter'){
-    assert.equal(el('count').textContent,'0');el('plus').fire('click');assert.equal(el('count').textContent,'1');
-    const again=mount(files,storage);assert.equal(again('count').textContent,'1');
-    again('minus').fire('click');assert.equal(again('count').textContent,'0');
-    again('plus').fire('click');again('reset').fire('click');assert.equal(again('count').textContent,'0');
+    const initial=Number(el('count').dataset.initial),next=initial===9999?9998:initial+1;
+    assert.equal(el('count').textContent,String(initial));el(initial===9999?'minus':'plus').fire('click');
+    assert.equal(el('count').textContent,String(next));
+    const again=mount(files,storage);assert.equal(again('count').textContent,String(next));
+    again('reset').fire('click');assert.equal(again('count').textContent,'0');
   }else throw new Error('unknown adapter');
 }

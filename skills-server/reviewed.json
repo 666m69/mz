@@ -15,7 +15,28 @@
           "skills-server/runner/child-v1.mjs",
           "skills-server/runner/smoke-v1.mjs"
         ],
-        "digest": "38603c20f949e9117d5a6e6900f5207914ac432d2962b95d8218cab68a98518d"
+        "digest": "28b489b8a2c38438ccac2d14407a351720c0077a7982b6204cdc6755feb7d091",
+        "input_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "idea"
+          ],
+          "properties": {
+            "idea": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 2000
+            },
+            "title": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 59,
+              "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N} \\u060C.,()،\\-]{1,58}$"
+            }
+          }
+        },
+        "daily_builds": 8
       }
     }
   },
@@ -33,7 +54,33 @@
           "skills-server/runner/counter-v1.mjs",
           "skills-server/runner/smoke-v1.mjs"
         ],
-        "digest": "26e518779bd0fca4f4f4cf25a83b676f3ac747a4c49c965e49148d72acde867f"
+        "digest": "1627e39b660e0f4d08e6e8d9c758c0a281fab66e407ed76594d7b78e0a9f210c",
+        "input_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "idea"
+          ],
+          "properties": {
+            "idea": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 2000
+            },
+            "title": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 59,
+              "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N} \\u060C.,()،\\-]{1,58}$"
+            },
+            "initial_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9999
+            }
+          }
+        },
+        "daily_builds": 8
       }
     }
   }

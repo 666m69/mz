@@ -157,3 +157,15 @@ test('expired lease rejected even before any subsequent runner claims; monitor e
   assert.equal((await call(runner,'runner/jobs/'+job.id+'/complete',{lease:job.lease,ok:true,checks})).s,409);
   assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_finishes').get().n,0);
 });
+test('each adapter owns its input schema; a bounded initial count belongs only to the counter',async t=>{
+  const {owner,runner,call,enable}=await setup(t);await enable();
+  const extra={initial_count:4};
+  assert.equal((await call(owner,'requests',{...input,input:{...input.input,...extra}})).s,422);
+  await call(owner,'releases',{id:'local-counter',version:'1.0.0',name_ar:'عداد'});
+  const {job}=(await call(runner,'runner/claim',{})).b;
+  await call(runner,'runner/jobs/'+job.id+'/complete',{lease:job.lease,ok:true,checks});
+  await call(owner,'skills/local-counter/activate',{version:'1.0.0',revision:0});
+  const counter={skill_id:'local-counter',private_prototype_consent:true,input:{idea:'أريد عداد محاولات محلي على هذا الجهاز',...extra}};
+  assert.equal((await call(owner,'requests',counter)).s,200);
+  assert.equal((await call(owner,'requests',{...counter,input:{...counter.input,initial_count:10000}})).s,422);
+});
