@@ -91,6 +91,29 @@ function rewriteHomepage(html) {
 }
 
 
+// Community is an optional visitor experience; commercial requests continue unchanged.
+function rewriteCommunityEntry(html, pathname) {
+  let output = html.replace(/vexa702@gmail\.com/gi, 'info@mzcodehub.com');
+  output = output.replace(/<a href="\/about\/">من نحن<\/a>/g,
+    '<a href="/community/" style="color:#e9c786;font-weight:700">مختبر MZ</a>');
+  output = output.replace(/(<a\b[^>]*class="brand"[^>]*>[\s\S]{0,180}?)\/assets\/images\/mz-mark\.svg/i,
+    '$1/community/mark.svg');
+  if (pathname === '/' && !output.includes('id="mz-community-invite"')) {
+    const invitation = `<section id="mz-community-invite" dir="rtl" aria-labelledby="mz-community-title" style="max-width:1150px;margin:18px auto 35px;padding:27px clamp(19px,4vw,36px);border:1px solid #8f7849;border-radius:19px;background:linear-gradient(115deg,#172b32,#171920);color:#eef4f8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+      <div style="max-width:670px">
+        <p style="color:#edc77f;font-size:13px;font-weight:700;margin:0 0 7px">جديد · للأهل والأصدقاء وكل زائر</p>
+        <h2 id="mz-community-title" style="font-size:clamp(23px,4vw,34px);line-height:1.5;margin:0 0 7px">جرّب، صوّت، وشاركنا أفكارك.</h2>
+        <p style="font-size:15px;color:#c6d4df;line-height:1.9;margin:0">تجارب ومشاريع مفتوحة لرأيك، من غير تسجيل ولا طلب شراء.</p>
+      </div>
+      <a href="/community/" style="display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 25px;border-radius:11px;background:linear-gradient(120deg,#ddad56,#f3d18a);font-size:15px;font-weight:700;text-decoration:none;color:#1b160e">ادخل مختبر MZ ←</a>
+    </section>`;
+    if (/<div\b[^>]*class="capability-strip"/.test(output))
+      output=output.replace(/<div\b[^>]*class="capability-strip"/,invitation+'<div class="capability-strip"');
+    else output=output.replace(/<\/main\s*>/i, invitation+'</main>');
+  }
+  return output;
+}
+
 const canonical = 'https://mzcodehub.com';
 const origin = 'https://mz702.pages.dev';
 const allowedHosts = new Set(['mzcodehub.com', 'www.mzcodehub.com']);
@@ -156,6 +179,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (!allowedHosts.has(url.hostname)) return new Response('Not found', {status:404});
+    if (url.pathname === '/join' && (request.method === 'GET' || request.method === 'HEAD')) return Response.redirect('https://mzcodehub.com/community/', 302);
     if (url.origin !== canonical) return Response.redirect(canonical + url.pathname + url.search, 308);
     if (!['GET','HEAD','POST','PUT'].includes(request.method)) return new Response('Method not allowed', {status:405});
     if (url.pathname === '/og-image.png' && ['GET','HEAD'].includes(request.method)) return serveOgImage(request, env);
@@ -174,7 +198,7 @@ export default {
     target.search = url.search;
     const upstream = await fetch(target, {method:request.method, headers, body:request.body, redirect:'manual'});
     let result;
-    if (url.pathname === '/' && request.method === 'GET' && upstream.ok && (upstream.headers.get('content-type') || '').toLowerCase().includes('text/html')) {
+    if (['/','/tools/','/projects/'].includes(url.pathname) && request.method === 'GET' && upstream.ok && (upstream.headers.get('content-type') || '').toLowerCase().includes('text/html')) {
       const contentLength = Number(upstream.headers.get('content-length') || 0);
       if (!contentLength || contentLength <= MAX_HTML_BYTES) {
         const html = await readTextLimited(upstream, MAX_HTML_BYTES);
@@ -182,8 +206,8 @@ export default {
           const responseHeaders = new Headers(upstream.headers);
           for (const name of ['content-length','content-encoding','etag','content-md5']) responseHeaders.delete(name);
           responseHeaders.set('Content-Type', responseHeaders.get('Content-Type').includes('charset=') ? responseHeaders.get('Content-Type') : 'text/html; charset=utf-8');
-          responseHeaders.set('Cache-Control', 'public, max-age=300');
-          result = new Response(rewriteHomepage(html), {status:upstream.status, statusText:upstream.statusText, headers:responseHeaders});
+          responseHeaders.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
+          result = new Response(rewriteCommunityEntry(url.pathname === '/' ? rewriteHomepage(html) : html, url.pathname), {status:upstream.status, statusText:upstream.statusText, headers:responseHeaders});
         }
       }
     }
