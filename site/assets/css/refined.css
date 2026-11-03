@@ -231,3 +231,9 @@ main,.site-footer { max-width:1280px; padding-inline:clamp(18px,4vw,56px); }
 
 /* Approved MZcode orange/silver identity; scoped to branding and invitation elements. */
 .site-header .brand>span{color:#F9A825!important}.site-header .brand>span>span{color:#F5F7FA!important}.site-header .brand img{border-radius:10px;box-shadow:0 0 15px #8a2be21c}.nav-community{color:#F9A825!important}.community-invite{border-color:#77599f;background:linear-gradient(115deg,#191925,#111a27)}.community-invite span{color:#F9A825}.community-invite>a{background:linear-gradient(120deg,#F9A825,#EDC779);color:#10131B}.site-header .brand:focus-visible{outline-color:#F9A825}
+
+/* A low-pressure way for visitors to browse without submitting an idea. */
+.community-invite .community-browse{margin-top:13px;padding-top:12px;border-top:1px solid #ffffff20;color:#d8e5eb;font-size:14px;line-height:1.85}
+.community-invite .community-browse a{color:#b4ffe5;text-decoration:underline;text-underline-offset:4px;font-weight:800}
+.community-invite .community-browse a:hover{color:#ffffff}
+.community-invite .community-browse a:focus-visible{outline:3px solid #a1f3d8;outline-offset:3px}
