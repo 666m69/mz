@@ -28,5 +28,5 @@ jobs:
         run: node pilot/public-smoke.mjs
 
       - name: Live business acceptance checks (one-off QA branch only)
-        if: github.event_name == 'pull_request' && github.head_ref == 'qa/commercial-acceptance-20261103'
+        if: github.event_name == 'pull_request' && github.head_ref == 'qa/commercial-acceptance-20261103' && github.event.pull_request.head.sha == '658498f094b7c5f50422f899c3116aff44e28d14'
         run: node pilot/acceptance-live.mjs
