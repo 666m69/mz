@@ -64,6 +64,7 @@ export async function route(req,env,actor,path) {
     });
     return {...result,request_token:await capability(env,result.request_id)};
   }
+  requireThat(typeof item==='string' && /^[0-9a-f-]{36}$/.test(item),404,'not_found');
   scope(actor,item);const r=await first(db,'SELECT id,skill_id,created_at FROM ss_requests WHERE id=?',item);
   requireThat(r,404,'not_found');
   if(path.length===2&&method==='GET')return {...r,runs:await all(db,'SELECT id,version,status,error_code FROM ss_jobs WHERE request_id=? ORDER BY created_at,rowid',item)};

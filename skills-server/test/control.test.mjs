@@ -110,3 +110,50 @@ test('one lease at once, expired lease fenced, bounded retries and failure visib
   const view=(await call(owner,'monitor')).b;assert.equal(view.faults[0].error_code,'lease_exhausted');
   assert.equal((await call(owner,'skills')).b.skills[0].versions[0].test_status,'failed');
 });
+test('hard caps limit per-request, per-skill, global daily queue and total retained work',async t=>{
+  const {owner,call,enable,sqlite}=await setup(t);await enable();
+  const a=(await call(owner,'requests',input)).b;
+  const path='requests/'+a.request_id+'/runs';
+  for(let i=0;i<3;i++)assert.equal((await call(owner,path,{})).s,200);
+  assert.equal((await call(owner,path,{})).b.error,'request_limit');
+  // Two more customer requests reach the eight-build cap for this skill today.
+  for(let n=0;n<2;n++){
+    const b=(await call(owner,'requests',input)).b;
+    for(let i=0;i<(n?2:3);i++)assert.equal((await call(owner,'requests/'+b.request_id+'/runs',{})).s,200);
+  }
+  const other=(await call(owner,'requests',input)).b;
+  assert.equal((await call(owner,'requests/'+other.request_id+'/runs',{})).b.error,'queue_full');
+  sqlite.exec("UPDATE ss_jobs SET status='failed',error_code='timeout' WHERE kind='build' AND status='queued'");
+  assert.equal((await call(owner,'requests/'+other.request_id+'/runs',{})).b.error,'daily_limit');
+  while(sqlite.prepare('SELECT count(*) AS n FROM ss_requests').get().n<24)
+    assert.equal((await call(owner,'requests',input)).s,200);
+  assert.equal((await call(owner,'requests',input)).b.error,'daily_limit');
+  // Simulate retained historical metadata without touching other databases.
+  sqlite.exec("UPDATE ss_requests SET created_at=0");
+  const fill=sqlite.prepare("INSERT INTO ss_requests(id,skill_id,input_cipher,private_consent,created_at) VALUES(?,'local-checklist','historical-fixture',1,0)");
+  for(let n=24;n<400;n++)fill.run('historical-'+n);
+  assert.equal((await call(owner,'requests',input)).b.error,'capacity_limit');
+});
+test('untrusted output paths, anomalous artifacts and missing encryption keys fail closed',async t=>{
+  const {owner,runner,env,call,enable,sqlite}=await setup(t);await enable();
+  const dataKey=env.DATA_KEY;env.DATA_KEY='invalid';assert.equal((await call(owner,'requests',input)).s,503);
+  assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_requests').get().n,0);
+  env.DATA_KEY=dataKey;const a=(await call(owner,'requests',input)).b;
+  await call(owner,'requests/'+a.request_id+'/runs',{});const {job}=(await call(runner,'runner/claim',{})).b;
+  const files={'app.js':'a','index.html':'b','styles.css':'c','blueprint.json':'{}'};
+  const finish=f=>call(runner,'runner/jobs/'+job.id+'/complete',{lease:job.lease,ok:true,files:f});
+  assert.equal((await finish({...files,'../extra':'bad'})).s,422);
+  assert.equal((await finish({...files,'app.js':'a'.repeat(49153)})).s,422);
+  assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_artifacts').get().n,0);
+  const k=key(),payload={lease:job.lease,ok:true,files};
+  const first=await call(runner,'runner/jobs/'+job.id+'/complete',payload,k);
+  assert.equal(first.s,200);assert.deepEqual(first.b,(await call(runner,'runner/jobs/'+job.id+'/complete',payload,k)).b);
+  assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_artifacts').get().n,1);
+});
+test('expired lease rejected even before any subsequent runner claims; monitor exposes the stall',async t=>{
+  const {owner,runner,sqlite,call,add}=await setup(t);await add();const {job}=(await call(runner,'runner/claim',{})).b;
+  sqlite.exec("UPDATE ss_jobs SET lease_until=unixepoch()-1");
+  assert.equal((await call(owner,'monitor')).b.expired_leases,1);
+  assert.equal((await call(runner,'runner/jobs/'+job.id+'/complete',{lease:job.lease,ok:true,checks})).s,409);
+  assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_finishes').get().n,0);
+});
