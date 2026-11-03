@@ -69,7 +69,7 @@ test('customer tracking accepts an unguessable ID and returns only the status', 
   const env={DB:{prepare(sql){queried=sql;return {bind(value){assert.equal(value,id);return {async first(){return {status:'reviewing',email:'private@example.invalid',idea:'private'};}}}}}}};
   const ok=await mod.exported.fetch(new Request('https://mzcodehub.com/api/ideas/'+id),env);
   assert.equal(ok.status,200);
-  assert.deepEqual(await ok.json(),{ok:true,id,status:'reviewing'});
+  assert.deepEqual(await ok.json(),{ok:true,id,reference:'MZ-123456782ABC',status:'reviewing'});
   assert.equal(queried,'SELECT status FROM idea_requests WHERE id=?');
   const invalid=await mod.exported.fetch(new Request('https://mzcodehub.com/api/ideas/not-a-uuid'),env);
   assert.equal(invalid.status,400);
@@ -83,5 +83,8 @@ test('tracking UX has an accessible, private status form and no user content HTM
   assert.match(script,/fetch\("\/api\/ideas\/"\+encodeURIComponent\(id\)/);
   assert.match(script,/trackingLabels/);
   assert.match(html,/id="tracking-result"[^>]*role="status"/);
+  assert.match(html,/id="receipt-card"/);
+  assert.match(html,/id="receipt-code"/);
+  assert.match(script,/pending_setup/);
   assert.doesNotMatch(script,/\.innerHTML\s*=/);
 });
