@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 const repo=new URL('../../',import.meta.url);
+execFileSync(process.execPath,['--check','pilot/community/app.js'],{cwd:repo.pathname,stdio:'pipe'});
 execFileSync(process.execPath,['pilot/community/build.mjs'],{cwd:repo.pathname,stdio:'pipe'});
 const source=readFileSync(new URL('../../build/mz-community.mjs',import.meta.url),'utf8');
 const worker=(await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).default;
