@@ -14,10 +14,15 @@
 .core-layout{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(28px,5vw,72px);align-items:start}.core-story h2{margin-top:1.3em;font-size:1.45rem}.feature-list{padding-inline-start:24px}.feature-list li{padding-block:4px}.signup h2{font-size:clamp(23px,2.3vw,32px)}
 .signup form{display:grid;gap:14px;max-width:550px}.signup label{display:grid;gap:4px;color:#e3edf7;font-weight:650}.signup input,.signup select{font:inherit;min-height:46px;width:100%;padding:8px 12px;border-radius:8px;border:1px solid #526879;background:#0b1824;color:#edf6fc}.signup .check{display:flex;gap:10px;align-items:start;font-size:.92rem}.check input{width:18px;min-height:18px;margin:6px 0}.signup button{border:0;cursor:pointer;font:inherit;font-weight:750}.signup button:disabled{opacity:.7}.signup .feedback:empty{display:none}.signup .feedback{margin:0;color:#abedd4}
 @media(max-width:800px){.core-layout{grid-template-columns:1fr}.work-steps,.plans{grid-template-columns:repeat(2,minmax(0,1fr))}.core-spot{align-items:start;flex-direction:column}}
-@media(max-width:720px){.work-steps,.plans{grid-template-columns:1fr}.founder{align-items:start;flex-direction:column}.header-inner{display:block}.header-inner nav{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}.header-inner nav a,.header-inner nav .nav-contact{margin:0;padding:4px 9px;font-size:13px;min-height:34px}.mobile-dock{display:none!important}.signup{scroll-margin-top:130px}.core-layout,.editorial{margin-block:30px}.trust-count{margin-bottom:32px}}
+@media(max-width:720px){.work-steps,.plans{grid-template-columns:1fr}.founder{align-items:start;flex-direction:column}.signup{scroll-margin-top:130px}.core-layout,.editorial{margin-block:30px}.trust-count{margin-bottom:32px}}
 
 @media(max-width:720px){html{scroll-padding-top:120px}.header-inner nav a{min-height:44px;display:inline-flex;align-items:center}}
 
 .mobile-dock{display:none}
 
 @media(max-width:720px),(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Shared mobile navigation: do not override studio/refined small-screen layout. */
+@media(max-width:720px){.header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap}.header-inner nav{display:none}.mobile-dock{display:grid;position:fixed;inset-inline:auto;left:0;right:auto;width:100vw;max-width:100%;box-sizing:border-box;min-width:0;bottom:0;z-index:11;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:5px 8px calc(5px + env(safe-area-inset-bottom));background:#0a1722f7;border-top:1px solid #34515c;backdrop-filter:blur(12px)}.mobile-dock a{min-height:48px;display:grid;place-items:center;align-content:center;gap:2px;color:#d8e7ef;text-decoration:none;font-size:11px;line-height:1.35}.mobile-dock span{color:#f9a825;font:20px/1 ui-sans-serif,sans-serif}.site-footer{padding-bottom:calc(82px + env(safe-area-inset-bottom))}}
+
+@media(max-width:720px){.studio-hero::before{inset-inline:0}}
