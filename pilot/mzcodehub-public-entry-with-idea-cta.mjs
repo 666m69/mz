@@ -5,7 +5,7 @@ const MZ_BRAND_STYLE = ".site-header .brand>span{color:#F9A825!important}.site-h
 const SITE_TITLE = 'MZcode | مختبر الأفكار وأدوات العمل';
 const SITE_DESCRIPTION = 'جرّب فكرتك قبل طلب تنفيذها. اختبر مسار المستخدم وحالات التعطّل، ونزّل مواصفات مشروعك أو أرسلها إلى MZcode.';
 const CANONICAL_URL = 'https://mzcodehub.com/';
-const OG_IMAGE_URL = 'https://mzcodehub.com/assets/images/mz-share.png';
+const OG_IMAGE_URL = 'https://mzcodehub.com/assets/images/mz-share.png?v=approved-mz-20261103';
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
