@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="مختبر MZ: شاركنا فكرة، صوّت للمشروع القادم، وجرّب تطبيقات وألعاب MZcode. مساحة للأصدقاء والأهل دون تسجيل أو شراء.">
+<meta property="og:title" content="مختبر MZ — جرّب وشاركنا رأيك">
+<meta property="og:description" content="ثلاث تجارب سريعة: اقترح فكرة، اختر مشروعك المفضل، واختبر ما بنيناه. لا تسجيل ولا بيع.">
+<meta property="og:image" content="https://mzcodehub.com/assets/images/mz-share.png">
+<link rel="canonical" href="https://mzcodehub.com/community/">
+<link rel="icon" href="/assets/images/mz-mark.svg">
+<title>مختبر MZ | أنت شريك التجربة</title>
+<link rel="stylesheet" href="/community/style.css">
+<script src="/community/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">تخطّ إلى المحتوى</a>
+<header class="topbar"><div class="top-inner">
+<a class="brand" href="/" aria-label="الرئيسية"><img src="/assets/images/mz-mark.svg" width="38" height="38" alt=""><span dir="ltr">MZ<b>code</b></span></a>
+<nav aria-label="روابط مختبر MZ"><a href="/projects/">المشاريع</a><a href="/games/code/">الألعاب</a><a href="/idea">مختبر التنفيذ</a></nav>
+</div></header>
+<main id="main">
+<section class="hero">
+<div class="hero-copy"><p class="eyebrow"><span class="live-dot"></span> مساحة التجارب · للأصدقاء والأهل وكل الفضوليين</p>
+<h1>أهلًا بك في<br><span>مختبر MZ.</span></h1>
+<p class="lead">ما جينا نبيعك شيء. نبيك تجرّب اللي بنيناه وتقول رأيك، ويمكن فكرتك تكون مشروعنا القادم.</p>
+<div class="hero-actions"><a href="#experiences" class="action primary">ابدأ التحدّي <span aria-hidden="true">←</span></a><button type="button" class="action secondary" id="share-top">ادعُ شخصًا يجرب <span aria-hidden="true">↗</span></button></div>
+<p class="tiny">بدون تسجيل · بدون دفع · الآراء تهمنا أكثر من المجاملات</p></div>
+<div class="hero-graphic" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="core">MZ<span>LAB</span></div><span class="float-tag a">فكرة؟</span><span class="float-tag b">جرّب</span><span class="float-tag c">صوّت</span></div>
+</section>
+<section id="experiences" class="experience" aria-labelledby="experiences-title">
+<div class="section-head"><div><p class="eyebrow">اختر مغامرتك</p><h2 id="experiences-title">ثلاث طرق للمشاركة</h2></div><span class="side-note">كل تجربة أقل من دقيقتين</span></div>
+<div class="tabs" role="tablist" aria-label="أنواع المشاركة">
+<button type="button" id="tab-idea" role="tab" aria-selected="true" aria-controls="panel-idea" tabindex="0" data-tab="idea"><span class="tab-num">01</span> عندي فكرة</button>
+<button type="button" id="tab-vote" role="tab" aria-selected="false" aria-controls="panel-vote" tabindex="-1" data-tab="vote"><span class="tab-num">02</span> أصوّت لمشروع</button>
+<button type="button" id="tab-try" role="tab" aria-selected="false" aria-controls="panel-try" tabindex="-1" data-tab="try"><span class="tab-num">03</span> أجرب وأقيّم</button>
+</div>
+<section class="panel" id="panel-idea" role="tabpanel" aria-labelledby="tab-idea">
+<div class="panel-heading"><span class="signal">تحدّي الخيال</span><h3>لو تقدر تصنع أي شيء تقني... وش بيكون؟</h3><p>تطبيق؟ لعبة؟ خدمة غريبة؟ ما عندنا قائمة تحدّ خيالك. اكتب فكرتك حتى لو كانت مجرد سطر.</p></div>
+<div class="split">
+<form id="idea-form" class="input-card">
+<label for="idea-text">فكرتك</label><textarea id="idea-text" name="idea" rows="5" minlength="12" maxlength="800" required placeholder="مثال: لعبة يتحدى فيها أفراد العائلة بعضهم في المعرفة عن المدينة..."></textarea>
+<div class="form-bottom"><span id="idea-length">0 / 800</span><label for="idea-name" class="optional">اسم مستعار (اختياري)</label></div>
+<input id="idea-name" name="nickname" maxlength="40" placeholder="مثلًا: مخترع من المدينة" autocomplete="off">
+<div class="honeypot" aria-hidden="true"><label for="idea-web">اترك هذا الحقل فارغًا</label><input id="idea-web" name="website" tabindex="-1" autocomplete="off"></div>
+<label class="check"><input type="checkbox" id="idea-consent" required> أوافق على حفظ الفكرة لمراجعتها داخليًا. لن تُنشر علنًا دون موافقة مستقلة.</label>
+<button type="submit" class="action primary" id="idea-send">أرسل الفكرة <span aria-hidden="true">←</span></button>
+<p class="status" role="status" aria-live="polite" id="idea-status"></p>
+</form>
+<aside class="aside-card"><span class="card-top">كيف نختار الأفكار؟</span><div class="info-step"><b>01</b><p>نقرأ الفكرة بدون الحكم على غرابتها.</p></div><div class="info-step"><b>02</b><p>نختار ما يفيد الناس ونقدر نبنيه.</p></div><div class="info-step"><b>03</b><p>لا مشاركة علنية ولا التزام بتنفيذ أي فكرة.</p></div><p class="subtle">لو كانت الفكرة لمشروعك الخاص وتحتاج سرية أو عرض سعر، استخدم <a href="/idea">طلب التنفيذ الخاص</a> بدلًا من هذه المساحة.</p></aside>
+</div>
+<div class="receipt" id="idea-receipt" hidden><span class="signal">وصلتنا الفكرة</span><h3>فكرتك صارت جزءًا من المختبر.</h3><p>احتفظ برقم المساهمة للرجوع إليه عند التواصل معنا.</p><strong id="idea-ref" dir="ltr"></strong><button type="button" class="action secondary" id="copy-ref">نسخ الرقم</button><button type="button" class="link-button" id="another-idea">عندي فكرة ثانية</button></div>
+</section>
+<section class="panel" id="panel-vote" role="tabpanel" aria-labelledby="tab-vote" hidden>
+<div class="panel-heading"><span class="signal">أنت لجنة التحكيم</span><h3>من يستحق اهتمامنا في المرحلة القادمة؟</h3><p>صوت واحد من هذا المتصفح. الأرقام حقيقية من المشاركات المسجلة، ولا يمكن تغيير اختيارك بعد تأكيده.</p></div>
+<div class="vote-grid" id="vote-grid">
+<article class="vote-card" data-project="kafu"><span class="card-symbol">◈</span><span class="card-top">العائلة</span><h4>كفو | KAFU AI</h4><p>عادات ومهام ومكافآت للعائلة.</p><div class="vote-meter"><i></i></div><div class="vote-bottom"><span class="vote-count">— صوت</span><button type="button" class="mini-action" data-vote="kafu">صوّت لكفو</button></div></article>
+<article class="vote-card" data-project="formah"><span class="card-symbol">◇</span><span class="card-top">اللياقة</span><h4>فورمة | Formah</h4><p>تدريب وتغذية ومتابعة المتدرب.</p><div class="vote-meter"><i></i></div><div class="vote-bottom"><span class="vote-count">— صوت</span><button type="button" class="mini-action" data-vote="formah">صوّت لفورمة</button></div></article>
+<article class="vote-card" data-project="marib"><span class="card-symbol">✧</span><span class="card-top">الألعاب</span><h4>بعد مأرب</h4><p>لعبة استراتيجية عربية تحكي بداية جديدة.</p><div class="vote-meter"><i></i></div><div class="vote-bottom"><span class="vote-count">— صوت</span><button type="button" class="mini-action" data-vote="marib">صوّت للعبة</button></div></article>
+</div><p class="status" role="status" aria-live="polite" id="vote-status"></p><p class="subtle">التصويت للمشاركة في ترتيب الأولويات وليس وعدًا بتطوير مشروع معين. تقلل الحماية التكرار ولكن لا تضمن شخصًا واحدًا لكل صوت.</p>
+</section>
+<section class="panel" id="panel-try" role="tabpanel" aria-labelledby="tab-try" hidden>
+<div class="panel-heading"><span class="signal">خذ لك جولة</span><h3>اختر تجربة، ثم قل لنا كيف كانت.</h3><p>جرّب لعبة أو مشروعًا متاحًا، وارجع هنا لتقييم تجربتك. ما نبي مجاملة.</p></div>
+<div class="try-grid">
+<a class="try-card" href="/games/code/" target="_blank" rel="noopener"><span class="try-ico">⌘</span><b>تحدّي المبرمج</b><span>لعبة ذكاء سريعة من المتصفح</span><em>افتح التجربة ↗</em></a>
+<a class="try-card" href="/games/baad-marib/" target="_blank" rel="noopener"><span class="try-ico">✦</span><b>بعد مأرب</b><span>تجربة لعب استراتيجية مصغّرة</span><em>افتح اللعبة ↗</em></a>
+<a class="try-card" href="https://kafu.mzcodehub.com/" target="_blank" rel="noopener noreferrer"><span class="try-ico">◇</span><b>كفو</b><span>تطبيق عائلي · تجربة خارجية</span><em>افتح كفو ↗</em></a>
+<a class="try-card" href="https://formah.mzcodehub.com/" target="_blank" rel="noopener noreferrer"><span class="try-ico">◈</span><b>فورمة</b><span>تجربة لياقة · قد تحتاج حسابًا</span><em>افتح فورمة ↗</em></a>
+</div>
+<form id="review-form" class="review-form">
+<h4>أرسل رأيك بعد التجربة</h4>
+<label for="review-project">ماذا جرّبت؟</label><select id="review-project" required><option value="">اختر تجربة</option><option value="code">تحدّي المبرمج</option><option value="marib">بعد مأرب</option><option value="kafu">كفو</option><option value="formah">فورمة</option></select>
+<fieldset><legend>كيف تقيّمها من ٥؟</legend><div class="rating"><label><input type="radio" name="score" value="1" required><span>1</span></label><label><input type="radio" name="score" value="2"><span>2</span></label><label><input type="radio" name="score" value="3"><span>3</span></label><label><input type="radio" name="score" value="4"><span>4</span></label><label><input type="radio" name="score" value="5"><span>5</span></label></div></fieldset>
+<label for="review-note">وش نصلّح أو نضيف؟ (اختياري)</label><textarea id="review-note" rows="3" maxlength="600" placeholder="أبغى الخط أوضح بالجوال، أو زر البداية أكبر..."></textarea>
+<p class="subtle">التقييم يُحفظ داخليًا لتحسين المشاريع ولا يُنشر باسمك.</p><button type="submit" class="action primary" id="review-send">أرسل التقييم ←</button><p class="status" role="status" aria-live="polite" id="review-status"></p>
+</form>
+</section>
+</section>
+<section class="invite"><div><span class="eyebrow">التحدّي ينتقل لغيرك</span><h2>مين عنده فكرة أغرب منك؟</h2><p>أرسل المختبر لشخص تحب تسمع رأيه. الدعوة للتجربة، مو للشراء.</p></div><button class="action primary" id="share-bottom" type="button">شارك التحدّي ↗</button></section>
+</main>
+<footer><span dir="ltr">© 2026 MZcode</span><div><a href="/privacy">الخصوصية</a><a href="/terms">الشروط</a><a href="mailto:info@mzcodehub.com">تواصل</a></div></footer>
+</body></html>
