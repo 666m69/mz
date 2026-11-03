@@ -11,7 +11,7 @@ for(const path of seeds){
   if(!r.ok){fails.push(path+' HTTP '+r.status);continue}
   const text=await r.text();
   if(!r.headers.get('content-type')?.includes('text/html'))continue;
-  if(path==='/'){homepageHasIdeaCTA=/href=[\"'][^\"']*\\/idea(?:[\\/?#]|[\"'])/.test(text);if(!homepageHasIdeaCTA)fails.push('Homepage missing /idea CTA');}
+  if(path==='/'){homepageHasIdeaCTA=text.includes('href="/idea"')||text.includes("href='/idea'")||text.includes('href="/idea/')||text.includes("href='/idea/");if(!homepageHasIdeaCTA)fails.push('Homepage missing /idea CTA');}
   const attrs=[...text.matchAll(/\b(?:href|src)=["']([^"']+)["']/g)].map(x=>x[1]);
   for(const raw of attrs){
    if(/^(?:mailto:|tel:|data:|#)/i.test(raw))continue;
