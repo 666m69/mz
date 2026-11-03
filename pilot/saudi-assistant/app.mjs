@@ -126,13 +126,25 @@ const errors={
   ai_unavailable:'تعذّر الوصول إلى النموذج حاليًا.',
   ai_invalid_response:'النموذج لم يعد برد صالح.'
 };
+function showLocalAction(plan) {
+  if(plan.action==='teacher_draft')makeTeacher();
+  else if(plan.action==='property_draft')makeProperty();
+  else if(plan.action==='checklist')makeChecklist();
+  else workspace.replaceChildren();
+}
 async function submit(text) {
   const value=text.trim();if(!value || sending)return;
+  const plan=interpret(value);
   if(!$('#ai-consent').checked){
-    message('assistant','قبل إرسال النص إلى نموذج Cloudflare، ضع علامة الموافقة أسفل المحادثة. لا تُدخل أسماء طلاب أو مرضى أو بيانات شخصية.');
+    if(plan.action) {
+      message('user',value);
+      message('assistant','سأفتح لك الأداة المحلية دون إرسال طلبك إلى أي نموذج ذكاء اصطناعي.');
+      showLocalAction(plan);
+    } else {
+      message('assistant','للحوار مع نموذج Cloudflare، وافق على إرسال نص الطلب. لا تُدخل بيانات شخصية أو حساسة.');
+    }
     return;
   }
-  const plan=interpret(value);
   message('user',value);input.value='';
   if(['health_review','safety_review'].includes(plan.intent)){
     message('assistant',plan.reply);workspace.replaceChildren();return;
@@ -149,17 +161,16 @@ async function submit(text) {
     const data=await resp.json().catch(()=>null);
     if(!resp.ok||data?.ok!==true||typeof data.reply!=='string'){
       message('assistant',errors[data?.error]||'المساعد غير متاح الآن؛ لم يتم تنفيذ طلبك.');
+      if(plan.action){message('assistant','الأداة المحلية متاحة دون اتصال بالنموذج.');showLocalAction(plan);}
       return;
     }
     message('assistant',data.reply);
     aiHistory.push({role:'user',content:value.slice(0,700)},{role:'assistant',content:data.reply.slice(0,700)});
     if(aiHistory.length>4)aiHistory.splice(0,aiHistory.length-4);
-    if(plan.action==='teacher_draft')makeTeacher();
-    else if(plan.action==='property_draft')makeProperty();
-    else if(plan.action==='checklist')makeChecklist();
-    else workspace.replaceChildren();
+    showLocalAction(plan);
   }catch{
     message('assistant','تعذّر الاتصال بالنموذج. تحقق من الشبكة أو أن البيئة التجريبية مفعّلة.');
+    if(plan.action){message('assistant','يمكنك استخدام الأداة المحلية دون اتصال بالنموذج.');showLocalAction(plan);}
   }finally{
     sending=false;$('#send').disabled=false;$('#send').textContent='إرسال الطلب ←';
   }
