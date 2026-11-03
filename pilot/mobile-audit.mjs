@@ -68,13 +68,14 @@ const expression = `(() => {
   const viewport=document.documentElement.clientWidth;
   const root=document.documentElement;
   const all=[...document.body.querySelectorAll('*')];
+  const hideProbe=['.mobile-dock','.marib-art','.featured-marib','.studio-hero','.community-invite','.site-header','.catalog-section','.featured-showcase'].map(sel=>{const e=document.querySelector(sel);if(!e)return null;const old=e.style.display;e.style.display='none';const width=root.scrollWidth;e.style.display=old;return {sel,width};}).filter(Boolean);
   const over=all.map((node)=>{
     const r=node.getBoundingClientRect(), c=getComputedStyle(node);
     return {tag:node.tagName,cls:typeof node.className==='string'?node.className.slice(0,58):'',id:node.id,
       left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),
       minWidth:c.minWidth,position:c.position,display:c.display,overflowX:c.overflowX};
   }).filter(x=>x.width&&x.display!=='none'&&(x.right>viewport+2||x.left< -2)).sort((a,b)=>b.right-a.right);
-  return {title:document.title,viewportWidth:innerWidth,htmlScrollWidth:root.scrollWidth,bodyScrollWidth:document.body.scrollWidth,
+  return {title:document.title,viewportWidth:innerWidth,hideProbe,htmlScrollWidth:root.scrollWidth,bodyScrollWidth:document.body.scrollWidth,
     scrollLeft:scrollX,appWidth:root.clientWidth,rootMin:getComputedStyle(root).minWidth,media640:matchMedia('(max-width:640px)').matches,screenWidth:screen.width,visualWidth:visualViewport?.width,cssSheets:[...document.styleSheets].map(x=>({href:x.href,disabled:x.disabled})).slice(0,15),bodyMin:getComputedStyle(document.body).minWidth,bodyRect:{width:document.body.getBoundingClientRect().width,left:document.body.getBoundingClientRect().left,right:document.body.getBoundingClientRect().right},over:over.slice(0,12),leftOver:all.map(e=>({e,r:e.getBoundingClientRect()})).filter(x=>x.r.width&&x.r.left< -2).sort((a,b)=>a.r.left-b.r.left).slice(0,18).map(x=>({tag:x.e.tagName,cls:String(x.e.className||'').slice(0,50),id:x.e.id,left:Math.round(x.r.left),right:Math.round(x.r.right),width:Math.round(x.r.width)})),
     controls:[...document.querySelectorAll('.site-header nav,.studio-hero,.studio-pitch,.live-console,.hero-graphic,.hero,.experience')].map(x=>({el:x.className,r:{left:Math.round(x.getBoundingClientRect().left),right:Math.round(x.getBoundingClientRect().right),width:Math.round(x.getBoundingClientRect().width)},css:getComputedStyle(x).gridTemplateColumns})).slice(0,10)}
 })();`;
