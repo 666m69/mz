@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 const base='https://mzcodehub.com';
 const seeds=['/','/projects/','/tools/','/idea','/tools/quote/','/tools/menu/','/tools/clients/','/tools/property/','/tools/images/','/tools/recipe/','/games/code/','/games/caravan/','/games/baad-marib/','/coreresto/','/privacy','/terms'];
 const internals=new Set(seeds), externals=new Set(), fails=[], stats=[];
+let homepageHasIdeaCTA=false;
 const fetchSafe=async u=>fetch(u,{method:'GET',redirect:'follow',signal:AbortSignal.timeout(15000),headers:{'User-Agent':'MZcode-acceptance-readonly/20261103'}});
 for(const path of seeds){
  try {
@@ -10,6 +11,7 @@ for(const path of seeds){
   if(!r.ok){fails.push(path+' HTTP '+r.status);continue}
   const text=await r.text();
   if(!r.headers.get('content-type')?.includes('text/html'))continue;
+  if(path==='/'){homepageHasIdeaCTA=/href=[\"'][^\"']*\\/idea(?:[\\/?#]|[\"'])/.test(text);if(!homepageHasIdeaCTA)fails.push('Homepage missing /idea CTA');}
   const attrs=[...text.matchAll(/\b(?:href|src)=["']([^"']+)["']/g)].map(x=>x[1]);
   for(const raw of attrs){
    if(/^(?:mailto:|tel:|data:|#)/i.test(raw))continue;
@@ -30,5 +32,5 @@ for(const url of [...externals].slice(0,12)){
  try{const r=await fetchSafe(url);console.log('EXTERNAL_LINK',r.status,url)}
  catch(e){console.log('EXTERNAL_LINK_UNVERIFIED',url,e.message)}
 }
-console.log('LINK_AUDIT_RESULTS',JSON.stringify({seedCount:seeds.length,totalChecked:stats.length,good:stats.filter(x=>x.status>=200&&x.status<300).length,failures:fails,paths:stats}));
+console.log('LINK_AUDIT_RESULTS',JSON.stringify({homepageHasIdeaCTA,seedCount:seeds.length,totalChecked:stats.length,good:stats.filter(x=>x.status>=200&&x.status<300).length,failures:fails,paths:stats}));
 if(fails.length)process.exitCode=1;
