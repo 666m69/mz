@@ -1,0 +1,21 @@
+name: MZcode brand homepage links production smoke
+on:
+  push:
+    branches: [qa/brand-home-prod-readonly-20261103]
+    paths:
+      - pilot/brand-home-live-readonly.mjs
+      - .github/workflows/brand-home-live-readonly.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify deployed navigation and sharing without modifying customer data
+        run: node pilot/brand-home-live-readonly.mjs
