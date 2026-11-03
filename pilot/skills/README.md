@@ -37,7 +37,7 @@ A registration cannot introduce a new executable handler; only audited `checklis
 
 - Owner token is checked with timing-safe comparison. This is **not** a full identity provider or production RBAC.
 - Rate limit: ten run attempts per minute per service process, **not** distributed/per-user.
-- Idempotency: in-memory; does not persist across restarts. The current key does not bind to a hash of input, so reusing a key with different input returns the original result. Must be fixed before multi-user use.
+- Idempotency: in-memory; does not persist across restarts. The key is bound to a SHA-256 request digest and conflicting payloads are rejected; storage is still in-memory and must be made durable before multi-user use.
 - Registry, logs, run state are all in memory; restart loses history and updates. No D1 migrations have been applied.
 - Generated app files live in `.mz-generated` and are excluded from git. No per-customer isolation, encryption, retention policy, quotas or secure deletion.
 - API is loopback-only. No external deployment, price, payment, customer data, or publication.
