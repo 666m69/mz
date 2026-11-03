@@ -79,14 +79,16 @@ try{
   await init();
   const base=local?'http://127.0.0.1:'+httpServer.address().port:'https://mzcodehub.com';
   const pages=['/','/community/'];
+  const failures=[];
   for(const url of pages.map(p=>base+p)){
     await send('Page.navigate',{url});await delay(2300);
     const response=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
     if(response.exceptionDetails)throw Error(JSON.stringify(response.exceptionDetails));
     console.log('MOBILE_LAYOUT '+JSON.stringify({url,...response.result.value}));
     const metrics=response.result.value;
-    if(strict && (metrics.htmlScrollWidth>metrics.appWidth+2 || metrics.viewportWidth>metrics.appWidth+2))throw Error('Horizontal overflow remains on '+url+' ('+metrics.htmlScrollWidth+' > '+metrics.appWidth+')');
+    if(strict && (metrics.htmlScrollWidth>metrics.appWidth+2 || metrics.viewportWidth>metrics.appWidth+2))failures.push(url+' ('+metrics.htmlScrollWidth+' > '+metrics.appWidth+')');
   }
+  if(failures.length)throw Error('Horizontal overflow remains on '+failures.join(', '));
 }finally{
   ws?.close();chrome.kill('SIGKILL');httpServer?.close();
 }
