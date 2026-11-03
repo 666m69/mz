@@ -13,6 +13,19 @@ export default {async fetch(request,env){
  }
 
 
+ // Tracking IDs are unguessable UUIDv4 values. Return status only, never customer PII.
+ if(path.startsWith("/api/ideas/")){
+  if(request.method!=="GET")return json({error:"Method not allowed"},405);
+  if(!env.DB)return json({error:"Service temporarily unavailable"},503);
+  const id=path.slice("/api/ideas/".length);
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
+   return json({error:"Invalid tracking ID"},400);
+  try {
+   const entry=await env.DB.prepare("SELECT status FROM idea_requests WHERE id=?").bind(id).first();
+   if(!entry)return json({error:"Request not found"},404);
+   return json({ok:true,id,status:entry.status});
+  }catch(e){console.error("idea tracking lookup failed");return json({error:"Service temporarily unavailable"},503)}
+ }
  if(path!=="/api/ideas")return json({error:"Not found"},404);
  if(request.method!=="POST")return json({error:"Method not allowed"},405);
  if(!env.DB||!env.HASH_SALT)return json({error:"Service temporarily unavailable"},503);
