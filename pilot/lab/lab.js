@@ -119,16 +119,36 @@ field("intake").addEventListener("submit",async event=>{
   const body={idea:field("brief").value.trim(),email:field("email").value.trim(),name:field("name").value.trim(),consent:field("consent").checked?"yes":"",website:field("website").value};
   const signature=JSON.stringify(body);
   if(signature!==lastPayload){requestKey=crypto.randomUUID();lastPayload=signature;}
-  button.disabled=true;receipt.textContent="جارٍ حفظ الطلب…";
+  button.disabled=true;receipt.textContent="جارٍ حفظ الطلب…";field("receipt-card").hidden=true;
   try {
     const res=await fetch("/api/ideas",{method:"POST",headers:{"Content-Type":"application/json","Idempotency-Key":requestKey},body:signature,signal:AbortSignal.timeout(25000)});
     const data=await res.json();
     if(!res.ok||data.ok!==true||!/^[a-f0-9-]{36}$/.test(data.id))throw Error(data.error||"لم نتلقَّ تأكيد حفظ. أعد المحاولة.");
-    receipt.textContent="تم حفظ طلبك. رقم المتابعة "+data.id+". احتفظ بالرقم للمراجعة.";event.target.reset();lastPayload=null;
+    const reference=data.reference||"MZ-"+data.id.slice(0,8).toUpperCase()+data.id.slice(-4).toUpperCase();
+    field("receipt-code").textContent=reference;
+    const date=Number.isFinite(data.created_ms)?new Intl.DateTimeFormat("ar-SA-u-ca-gregory",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(data.created_ms)):"وقت استلام الطلب";
+    field("receipt-date").textContent="تاريخ الاستلام: "+date+" (بتوقيت السعودية)";
+    const mail={
+     accepted:"قبلت خدمة البريد إرسال رسالة التأكيد إلى "+body.email+". راجع الوارد والبريد غير الهام.",
+     pending_setup:"لم تُرسل رسالة بريد للعميل بعد، لأن خدمة إرسال البريد الخارجي لم تُفعّل. طلبك محفوظ بأمان ويمكن متابعته بهذا الرقم.",
+     failed:"تم حفظ طلبك، لكن تعذر إرسال رسالة التأكيد إلى بريدك. احتفظ بالرقم وتواصل معنا عند الحاجة."
+    };
+    field("receipt-mail-status").textContent=mail[data.receipt_email_status]||"تم حفظ الطلب؛ احتفظ برقم المتابعة.";
+    field("tracking-id").value=reference;
+    field("receipt-card").hidden=false;
+    receipt.textContent="تم حفظ طلبك بنجاح. هذا رقمك المختصر وإيصال الاستلام:";
+    event.target.reset();lastPayload=null;
   } catch (e) {receipt.textContent=e.name==="TypeError"||e.name==="TimeoutError"?"لم يصلنا تأكيد. أعد الإرسال بنفس البيانات لاسترجاع رقم الطلب.":e.message;}
   finally{button.disabled=false;}
 });
 
+
+field("copy-reference").addEventListener("click",async()=>{
+ const code=field("receipt-code").textContent;
+ try{await navigator.clipboard.writeText(code);field("copy-reference").textContent="تم نسخ الرقم";}
+ catch{field("copy-reference").textContent="حدّد الرقم أعلاه لنسخه";}
+});
+field("receipt-track").addEventListener("click",()=>field("tracking-id").value=field("receipt-code").textContent);
 
 // Request tracking displays only a status. The tracking key must be treated as private.
 const trackingLabels={
@@ -150,7 +170,7 @@ field("track-form").addEventListener("submit",async event=>{
  event.preventDefault();
  const id=field("tracking-id").value.trim();
  const result=field("tracking-result"),button=field("track-submit");
- if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
+ if(!/^MZ-[0-9a-f]{12}$/i.test(id)&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
   result.textContent="رقم المتابعة غير صحيح. انسخه كاملاً من إيصال الطلب.";return;
  }
  if(button.disabled)return;
@@ -160,7 +180,7 @@ field("track-form").addEventListener("submit",async event=>{
   if(response.status===404){result.textContent="لم نجد طلباً بهذا الرقم. تأكد من نسخه بصورة صحيحة.";return;}
   if(!response.ok)throw Error("تعذر الاستعلام حالياً. أعد المحاولة لاحقاً.");
   const data=await response.json();
-  if(data.ok!==true||data.id.toLowerCase()!==id.toLowerCase()||typeof data.status!=="string")throw Error("تعذر قراءة حالة الطلب حالياً.");
+  if(data.ok!==true||typeof data.status!=="string"||(data.reference?.toLowerCase()!==id.toLowerCase()&&data.id?.toLowerCase()!==id.toLowerCase()))throw Error("تعذر قراءة حالة الطلب حالياً.");
   result.textContent=trackingLabels[data.status]||"تم العثور على الطلب. للحصول على آخر التفاصيل تواصل مع info@mzcodehub.com.";
  }catch(e){result.textContent=e.name==="TimeoutError"?"انتهت مهلة الاستعلام. حاول مجدداً.":e.message||"تعذر الاستعلام حالياً."}
  finally{button.disabled=false;}

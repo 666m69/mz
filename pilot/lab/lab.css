@@ -48,3 +48,12 @@ button:not(:disabled):hover{filter:brightness(1.07);transform:translateY(-1px)}
   .actions>button,.actions>a{max-width:100%}
 }
 @media(prefers-reduced-motion:reduce){button{transition:none}button:not(:disabled):hover{transform:none}body{background-attachment:scroll}}
+
+
+/* Clear confirmation receipt; short code remains readable on small Android screens. */
+.receipt-card{margin-top:20px;padding:20px;border:1px solid #65ccb7;border-radius:16px;background:linear-gradient(130deg,#0c2f35,#102736);box-shadow:0 14px 35px rgba(0,0,0,.16)}
+.receipt-card .eyebrow{margin:0 0 4px}
+.receipt-code{display:block;width:fit-content;max-width:100%;padding:9px 13px;border-radius:10px;background:#061821;border:1px solid #37677b;font-size:clamp(1.35rem,5vw,2rem);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.035em;direction:ltr;unicode-bidi:isolate;user-select:all;overflow-wrap:anywhere}
+.receipt-card>p{color:#d1e7ed;overflow-wrap:anywhere}
+.receipt-card .actions a{font-weight:700}
+#tracking-id{direction:ltr;text-align:left;font-family:ui-monospace,Consolas,monospace;letter-spacing:.025em}

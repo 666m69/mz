@@ -1,6 +1,50 @@
 const assets=/* LAB_ASSETS */ {};
 const publicHeaders={"cache-control":"no-store","x-content-type-options":"nosniff","x-frame-options":"DENY","referrer-policy":"no-referrer","permissions-policy":"camera=(), microphone=(), geolocation=()","content-security-policy":"default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"};
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
+
+const friendlyReference=id=>"MZ-"+id.slice(0,8).toUpperCase()+id.slice(-4).toUpperCase();
+const dateForCustomer=ms=>new Intl.DateTimeFormat("ar-SA-u-ca-gregory",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(ms));
+const receiptResult=(id,created_ms,receipt_email_status)=>({ok:true,id,reference:friendlyReference(id),created_ms,receipt_email_status});
+async function sendCustomerReceipt(env,{id,created_ms,idea,email,name}){
+ if(!env.RESEND_API_KEY)return {status:"pending_setup",providerId:null,error:null};
+ const reference=friendlyReference(id);
+ const message=[
+  "مرحباً "+(name||"بك")+"،",
+  "",
+  "تم استلام طلب تنفيذ فكرتك في MZcode Hub، وسنراجعه ثم نرد عليك.",
+  "رقم الطلب: "+reference,
+  "تاريخ الاستلام: "+dateForCustomer(created_ms)+" (توقيت السعودية)",
+  "الاسم: "+(name||"لم يُذكر"),
+  "بريد التواصل: "+email,
+  "الحالة: جديد — بانتظار المراجعة",
+  "",
+  "تفاصيل الطلب:",
+  idea,
+  "",
+  "لمتابعة حالة طلبك: https://mzcodehub.com/idea#track",
+  "أدخل رقم الطلب المختصر في خانة المتابعة.",
+  "",
+  "هذه رسالة تأكيد استلام وليست قبولاً للتنفيذ أو عرض سعر نهائياً.",
+  "للتواصل: info@mzcodehub.com",
+  "MZcode Hub"
+ ].join("\n");
+ try{
+  const response=await fetch("https://api.resend.com/emails",{
+   method:"POST",
+   headers:{"Authorization":"Bearer "+env.RESEND_API_KEY,"Content-Type":"application/json","Idempotency-Key":"mzcode-receipt-"+id},
+   body:JSON.stringify({from:"MZcode Hub <info@mzcodehub.com>",to:[email],reply_to:"info@mzcodehub.com",subject:"تأكيد استلام طلبك | "+reference,text:message}),
+   signal:AbortSignal.timeout(8000)
+  });
+  if(!response.ok)throw Error("email_provider_rejected_"+response.status);
+  const result=await response.json();
+  if(!result?.id)throw Error("email_provider_no_confirmation");
+  return {status:"accepted",providerId:String(result.id).slice(0,100),error:null};
+ }catch(e){
+  console.error("customer receipt email not accepted by provider");
+  return {status:"failed",providerId:null,error:"email_delivery_unavailable"};
+ }
+}
+
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname;
  const assetPath=path==="/idea/"||path==="/idea/demo/"?path.slice(0,-1):path;
@@ -17,13 +61,21 @@ export default {async fetch(request,env){
  if(path.startsWith("/api/ideas/")){
   if(request.method!=="GET")return json({error:"Method not allowed"},405);
   if(!env.DB)return json({error:"Service temporarily unavailable"},503);
-  const id=path.slice("/api/ideas/".length);
-  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
-   return json({error:"Invalid tracking ID"},400);
+  const token=path.slice("/api/ideas/".length);
+  const isUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token);
+  const isReference=/^MZ-[A-F0-9]{12}$/i.test(token);
+  if(!isUuid&&!isReference)return json({error:"Invalid tracking ID"},400);
   try {
-   const entry=await env.DB.prepare("SELECT status FROM idea_requests WHERE id=?").bind(id).first();
-   if(!entry)return json({error:"Request not found"},404);
-   return json({ok:true,id,status:entry.status});
+   if(isUuid){
+    const entry=await env.DB.prepare("SELECT status FROM idea_requests WHERE id=?").bind(token).first();
+    if(!entry)return json({error:"Request not found"},404);
+    return json({ok:true,id:token,reference:friendlyReference(token),status:entry.status});
+   }
+   // Only the public status is returned. Check ambiguity rather than disclosing a random record.
+   const matches=await env.DB.prepare("SELECT status FROM idea_requests WHERE (substr(id,1,8)||substr(id,-4))=? LIMIT 2").bind(token.slice(3).toLowerCase()).all();
+   if(!matches.results?.length)return json({error:"Request not found"},404);
+   if(matches.results.length!==1)return json({error:"Ambiguous reference"},409);
+   return json({ok:true,reference:token.toUpperCase(),status:matches.results[0].status});
   }catch(e){console.error("idea tracking lookup failed");return json({error:"Service temporarily unavailable"},503)}
  }
  if(path!=="/api/ideas")return json({error:"Not found"},404);
@@ -54,19 +106,24 @@ export default {async fetch(request,env){
     ON CONFLICT(id) DO NOTHING`).bind(id,idea,email,name,ipHash,now,ipHash,now-3600000).run();
   if(!saved.success)throw Error("Write not confirmed");
   if(saved.meta?.changes!==1){
-    const prior=await env.DB.prepare("SELECT idea,email,name FROM idea_requests WHERE id=?").bind(id).first();
+    const prior=await env.DB.prepare("SELECT idea,email,name,created_ms,receipt_email_status FROM idea_requests WHERE id=?").bind(id).first();
     if(!prior)return json({error:"تجاوزت حد الطلبات لهذه الساعة"},429);
     if(prior.idea!==idea||prior.email!==email||prior.name!==name)return json({error:"تغيّر محتوى الطلب. ابدأ طلبًا جديدًا."},409);
-    return json({ok:true,id});
+    // Idempotent replay returns the original reference without sending a second email.
+    return json(receiptResult(id,prior.created_ms,prior.receipt_email_status));
   }
   // Email failure must never discard a saved lead. Status remains pending for later retry.
   if(env.NOTIFY&&env.NOTIFY_TO){
    try{
-    await env.NOTIFY.send({from:"info@mzcodehub.com",to:env.NOTIFY_TO,subject:"[MZ Code Hub] New project idea — "+id.slice(0,8),
-     text:"New idea received\nRequest: "+id+"\nName: "+name+"\nReply: "+email+"\n\n"+idea.slice(0,5000)});
+    await env.NOTIFY.send({from:"info@mzcodehub.com",to:env.NOTIFY_TO,subject:"[MZ Code Hub] New project idea — "+friendlyReference(id),
+     text:"طلب فكرة جديد\nرقم الطلب: "+friendlyReference(id)+"\nتاريخ الطلب: "+dateForCustomer(now)+"\nالمعرّف الداخلي: "+id+"\nالاسم: "+name+"\nبريد العميل: "+email+"\n\n"+idea.slice(0,5000)});
     await env.DB.prepare("UPDATE idea_requests SET notification_status='sent' WHERE id=?").bind(id).run();
    }catch(e){console.error("idea email notification failed");try{await env.DB.prepare("UPDATE idea_requests SET notification_status='failed',notification_error=? WHERE id=?").bind("delivery_failed",id).run()}catch{}}
   }
-  return json({ok:true,id},201)
+  const receipt=await sendCustomerReceipt(env,{id,created_ms:now,idea,email,name});
+  try{
+   await env.DB.prepare("UPDATE idea_requests SET receipt_email_status=?,receipt_email_provider_id=?,receipt_email_error=? WHERE id=?").bind(receipt.status,receipt.providerId,receipt.error,id).run();
+  }catch(e){console.error("customer receipt status persistence failed")}
+  return json(receiptResult(id,now,receipt.status),201)
  }catch(e){console.error("idea intake storage failure");return json({error:"تعذر حفظ الطلب الآن"},503)}
 }};
