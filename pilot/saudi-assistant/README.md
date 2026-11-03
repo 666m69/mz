@@ -1,3 +1,9 @@
+# MZcode Saudi Assistant — AI connection preview (not deployed)
+
+**Latest status:** Cloudflare Workers AI model adapter and the same-origin /api/assistant endpoint have been implemented on branch `feat/saudi-assistant-workers-ai-20261103`. The integration is disabled by default until account billing/free-quota verification and preview D1 migration. GitHub Actions passes the mocked model and bundled Worker tests. **No actual inference or production deployment has been performed.** See [AI-INTEGRATION.md](./AI-INTEGRATION.md) for activation safeguards.
+
+**Previous local-only v1 notes below** (the standalone preview did not connect to a model):
+
 # MZcode Saudi Assistant — v1 (private preview)
 
 **Scope:** one front-end assistant, Arabic RTL, Saudi green (`#006c35`), tested mobile/desktop layout. It is a **guided intent router with explicit small working tools**, **not** an LLM or a general AI agent. It does not invoke hosted APIs, bill users, log visitors, upload documents, access WhatsApp or verify real-estate licenses.
