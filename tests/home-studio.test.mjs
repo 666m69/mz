@@ -19,7 +19,7 @@ test("the gateway preserves the new playground and does not add the old sales bl
   assert.doesNotMatch(page,/id="mzcode-project-cta"/);
 });
 test("the small MZ mark is vector geometry with no glyph or external asset dependency",()=>{
- const s=read("assets/images/mz-mark.svg");assert.match(s,/viewBox="0 0 64 64"/);assert.doesNotMatch(s,/<text\b|<image\b/);assert.match(s,/path/);
+ const s=read("assets/images/mz-mark.svg");assert.match(s,/viewBox="0 0 256 256"/);assert.doesNotMatch(s,/<text\b|<image\b/);assert.match(s,/path/);
 });
 
 test("studio games, quotes, content plans and booking run locally and remain independent when switching",async()=>{
