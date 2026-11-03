@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="MZ">
+<defs><linearGradient id="g" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#a46d24"/><stop offset=".25" stop-color="#f0c47b"/><stop offset=".53" stop-color="#fff0b9"/><stop offset=".8" stop-color="#c58c39"/><stop offset="1" stop-color="#f4dc8d"/></linearGradient></defs>
+<rect width="128" height="128" rx="25" fill="#141013"/>
+<rect x="1.5" y="1.5" width="125" height="125" rx="24" fill="none" stroke="#73582e" stroke-width="2"/>
+<text x="64" y="90" fill="url(#g)" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="79" font-weight="bold" letter-spacing="-11">MZ</text>
+<path d="M13 74 Q59 99 112 48" stroke="url(#g)" fill="none" stroke-width="5" stroke-linecap="round"/>
+<circle cx="111" cy="48" r="5" fill="#ffe7a4"/></svg>
