@@ -1,0 +1,40 @@
+{
+  "local-checklist": {
+    "name_ar": "قوائم المهام والمشتريات",
+    "default_adapter": "checklist-v1",
+    "adapters": {
+      "checklist-v1": {
+        "entry": "skills-server/runner/child-v1.mjs",
+        "module": "skills-server/runner/checklist-v1.mjs",
+        "sources": [
+          "pilot/builder/engine.mjs",
+          "pilot/builder/runtime.js",
+          "pilot/builder/styles.css",
+          "pilot/capability-gate.mjs",
+          "skills-server/runner/checklist-v1.mjs",
+          "skills-server/runner/child-v1.mjs",
+          "skills-server/runner/smoke-v1.mjs"
+        ],
+        "digest": "38603c20f949e9117d5a6e6900f5207914ac432d2962b95d8218cab68a98518d"
+      }
+    }
+  },
+  "local-counter": {
+    "name_ar": "عدّاد محلي",
+    "default_adapter": "counter-v1",
+    "adapters": {
+      "counter-v1": {
+        "entry": "skills-server/runner/child-v1.mjs",
+        "module": "skills-server/runner/counter-v1.mjs",
+        "sources": [
+          "pilot/capability-gate.mjs",
+          "skills-server/runner/child-v1.mjs",
+          "skills-server/runner/counter-app.js",
+          "skills-server/runner/counter-v1.mjs",
+          "skills-server/runner/smoke-v1.mjs"
+        ],
+        "digest": "26e518779bd0fca4f4f4cf25a83b676f3ac747a4c49c965e49148d72acde867f"
+      }
+    }
+  }
+}
