@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS idea_requests (
  created_ms INTEGER NOT NULL,
  status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','reviewing','quoted','accepted','building','delivered','rejected')),
  notification_status TEXT NOT NULL DEFAULT 'pending',
- notification_error TEXT
+ notification_error TEXT,
+ receipt_email_status TEXT NOT NULL DEFAULT 'pending_setup',
+ receipt_email_provider_id TEXT,
+ receipt_email_error TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_idea_requests_status_created ON idea_requests(status,created_ms DESC);
 CREATE INDEX IF NOT EXISTS idx_idea_requests_ip_created ON idea_requests(ip_hash,created_ms DESC);
