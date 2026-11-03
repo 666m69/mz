@@ -1,0 +1,24 @@
+name: MZcode receipt live read-only acceptance
+
+on:
+  push:
+    branches: [qa/customer-receipt-readonly-20261103]
+    paths:
+      - pilot/receipt-release-smoke.mjs
+      - .github/workflows/receipt-release-readonly.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify deployed order code without creating leads or sending mail
+        run: node pilot/receipt-release-smoke.mjs
