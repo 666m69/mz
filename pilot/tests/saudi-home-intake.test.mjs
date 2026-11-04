@@ -75,7 +75,10 @@ test('rendered homepage keeps approved MZ logo and adds Saudi entry',()=>{
   assert.match(homepage,/mz-quick-idea/);
   assert.match(homepage,/mz-intake-reference/);
   assert.match(homepage,/\/assets\/images\/mz-mark\.svg/);
-  assert.match(homepage,/\/assets\/css\/saudi-entry\.css/);
+  assert.match(homepage,/\/assets\/css\/refined\.css/);
+  const theme=readFileSync(new URL('../../site/assets/css/saudi-entry.css',import.meta.url),'utf8');
+  assert.match(theme,/saudi-greeting/);
+  assert.match(theme,/#18b76b/);
   assert.match(homepage,/\/assets\/js\/saudi-intake\.js/);
   assert.match(homepage,/data-panel="book"/);
   assert.match(homepage,/data-panel="game"/);
