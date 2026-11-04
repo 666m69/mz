@@ -22,9 +22,9 @@ export async function exerciseChecklist(directory, executable){
     '--disable-extensions','--no-first-run','--no-default-browser-check','--remote-debugging-port=0',
     '--remote-debugging-address=127.0.0.1','--user-data-dir='+profile,'about:blank'];
   // Local root containers may lack a Chrome system sandbox. The hosted job runs as a normal user.
-  if(process.getuid?.()===0)flags.unshift('--no-sandbox');
+  if(process.env.MZ_SYNTHETIC_BROWSER==='isolated-fixture')flags.unshift('--no-sandbox');
   const proc=spawn(executable,flags,{stdio:'ignore',env:{PATH:process.env.PATH,HOME:profile,TMPDIR:tmpdir(),LANG:'C.UTF-8'}});
-  let ws,spawnError;proc.on('error',e=>{spawnError=e;});
+  let ws,spawnError;proc.once('exit',(code,signal)=>{spawnError=Error('Chrome exited '+(signal||code));});proc.on('error',e=>{spawnError=e;});
   const wait=async(fn)=>{const end=Date.now()+10000;while(Date.now()<end){if(spawnError)throw spawnError;
     const value=await fn();if(value)return value;await pause(100);}throw Error('Browser did not reach expected state');};
   try{

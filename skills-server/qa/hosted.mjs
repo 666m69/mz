@@ -7,7 +7,6 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {setTimeout as pause} from 'node:timers/promises';
-import {exerciseChecklist} from './browser.mjs';
 import {createRecipient,claimGrant} from './access.mjs';
 const exec=promisify(execFile);
 const host='https://mzcode-skills-qa-20261104.666m69.workers.dev';
@@ -25,7 +24,7 @@ async function prepare(temp){
   await appendFile(process.env.GITHUB_OUTPUT,'owner='+fingerprints.owner+'\nrunner='+fingerprints.runner+
     '\nkey_a='+recipient.slice(0,171)+'\nkey_b='+recipient.slice(171)+'\n');
 }
-export async function accept({url,owner,runnerToken,version,out,chrome,access,waitMs=0}){
+export async function accept({url,owner,runnerToken,version,out,access,waitMs=0}){
   if(access){
     assert.equal(url,host);
     const gate=await fetch(url+'/api/skills',{redirect:'manual',signal:AbortSignal.timeout(10000)});
@@ -81,7 +80,7 @@ export async function accept({url,owner,runnerToken,version,out,chrome,access,wa
     const zip=await api(a.request_token,path+'/'+first.id+'/artifact');assert.ok(zip.length>1000&&zip.length<65536);
     await mkdir(out,{recursive:true,mode:0o700});const archivePath=join(out,'MZcode-Hosted-Checklist.zip');
     await writeFile(archivePath,zip,{mode:0o600});
-    const unpacked=await mkdtemp(join(tmpdir(),'mz-qa-app-'));let browser;
+    const unpacked=await mkdtemp(join(tmpdir(),'mz-qa-app-'));
     try{
       await exec('python3',['-c',`import sys,zipfile,pathlib
 with zipfile.ZipFile(sys.argv[1]) as z:
@@ -90,11 +89,10 @@ with zipfile.ZipFile(sys.argv[1]) as z:
       const files={};for(const n of names)files[n]=await readFile(join(unpacked,n),'utf8');
       assert.equal(digest(JSON.stringify(files)),result.result.sha256);
       assert.equal(Object.values(files).reduce((sum,x)=>sum+Buffer.byteLength(x),0),result.result.bytes);
-      browser=await exerciseChecklist(unpacked,chrome);
     }finally{await rm(unpacked,{recursive:true,force:true});}
     const report={request:a.request_id,job:first.id,release_test:release.test_job,version,skill,zip_sha256:digest(zip),
       zip_bytes:zip.length,files_sha256:result.result.sha256,file_count:result.result.files,checks:verified.test.checks,
-      browser,isolation:probe,idempotent:true,cross_request_denied:true,unauthenticated_denied:true};
+      isolation:probe,idempotent:true,cross_request_denied:true,unauthenticated_denied:true};
     await writeFile(join(out,'acceptance.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
   }finally{
     s=await record();if(s?.enabled&&s.active_version===version)await api(owner,'skills/'+skill+'/disable',{revision:s.revision});
@@ -110,6 +108,6 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
     const version='1.'+(Number(process.env.GITHUB_RUN_NUMBER)%1000)+'.'+Number(process.env.GITHUB_RUN_ATTEMPT);
     const access=await claimGrant(join(temp,'mz-private'),process.env);
     await accept({url:host,owner:k.owner,runnerToken:k.runner,version,access,out:join(temp,'mz-result'),
-      chrome:process.env.MZ_QA_CHROME||'google-chrome',waitMs:90000});
+      waitMs:90000});
   }else throw Error('Expected prepare or accept');
 }

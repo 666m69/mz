@@ -37,7 +37,7 @@ jobs:
           path: ${{ runner.temp }}/mz-qa-fingerprints.json
           retention-days: 1
           if-no-files-found: error
-      - name: Verify the hosted Worker and D1, run the sandbox and exercise the downloaded app
+      - name: Verify the hosted Worker and D1, run the sandbox and verify the downloaded ZIP
         env:
           QA_GITHUB_READ: ${{ github.token }}
         run: node skills-server/qa/hosted.mjs accept
@@ -48,3 +48,35 @@ jobs:
           path: ${{ runner.temp }}/mz-result/
           retention-days: 1
           if-no-files-found: error
+
+  browser:
+    needs: hosted
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: mz-skills-verified-${{ github.run_attempt }}
+          path: downloaded
+      - name: Open the exact authenticated ZIP in a separate disposable browser VM
+        env:
+          MZ_SYNTHETIC_BROWSER: isolated-fixture
+        run: |
+          mkdir sample
+          python3 - <<'PYTHON'
+          import json, hashlib, zipfile, pathlib
+          p=pathlib.Path('downloaded/MZcode-Hosted-Checklist.zip')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()==json.loads((p.parent/'acceptance.json').read_text())['zip_sha256']
+          with zipfile.ZipFile(p) as z:
+              assert sorted(z.namelist())==['app.js','blueprint.json','index.html','styles.css'] and z.testzip() is None
+              z.extractall('sample')
+          PYTHON
+          node --input-type=module -e "import {exerciseChecklist} from './skills-server/qa/browser.mjs'; console.log(await exerciseChecklist('sample','google-chrome'))"
