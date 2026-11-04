@@ -1,3 +1,4 @@
+import {assistantRun} from './assistant.mjs';
 import {catalog,manifest,matches,knownDigest} from './catalog.mjs';
 import {requireThat,fields,id,seal,unseal,capability,readJson,ApiError} from './security.mjs';
 import {first,stmt,all,mutation,registry} from './store.mjs';
@@ -18,6 +19,9 @@ export async function route(req,env,actor,path) {
     return notFound();
   }
   requireThat(actor.role!=='runner',403,'wrong_role');
+  if(area==='assistant'&&item==='runs'&&path.length===2&&method==='POST'){
+    owner(actor);return assistantRun(req,env,await readJson(req));
+  }
   if(area==='skills' && method==='GET' && path.length===1){owner(actor);return {catalog,skills:await registry(db)};}
   if(area==='releases' && method==='POST' && path.length===1){
     owner(actor);const b=await readJson(req);fields(b,['id','version','name_ar','adapter_ref'],['id','version','name_ar']);
@@ -46,6 +50,9 @@ export async function route(req,env,actor,path) {
   if(area==='monitor'&&method==='GET'&&path.length===1){
     owner(actor);return {counts:await all(db,'SELECT status,count(*) AS total FROM ss_jobs GROUP BY status'),
       faults:await all(db,"SELECT id,kind,skill_id,version,error_code,finished_at FROM ss_jobs WHERE status='failed' ORDER BY finished_at DESC LIMIT 30"),
+      improvements:await all(db,`SELECT skill_id,version,error_code,count(*) AS occurrences FROM ss_jobs
+        WHERE status='failed' AND error_code IN ('contract_failed','digest_mismatch','resource_limit','timeout','sandbox_unavailable')
+        GROUP BY skill_id,version,error_code HAVING count(*)>=2 ORDER BY occurrences DESC,skill_id,version,error_code LIMIT 12`),
       oldest_pending:await first(db,"SELECT min(created_at) AS at FROM ss_jobs WHERE status IN ('queued','running')"),
       expired_leases:(await first(db,"SELECT count(*) AS total FROM ss_jobs WHERE status='running' AND lease_until<=unixepoch()")).total,
       audit:await all(db,'SELECT seq,event,target,at FROM ss_audit ORDER BY seq DESC LIMIT 60')};

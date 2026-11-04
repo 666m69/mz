@@ -169,3 +169,16 @@ test('each adapter owns its input schema; a bounded initial count belongs only t
   assert.equal((await call(owner,'requests',counter)).s,200);
   assert.equal((await call(owner,'requests',{...counter,input:{...counter.input,initial_count:10000}})).s,422);
 });
+test('repeated failures suggest an owner review without changing the active skill',async t=>{
+  const {owner,runner,call,enable}=await setup(t);await enable();
+  for(let i=0;i<2;i++){
+    const r=await call(owner,'assistant/runs',{idea:input.input.idea,private_prototype_consent:true});
+    assert.equal(r.s,200);const job=(await call(runner,'runner/claim',{})).b.job;
+    assert.equal(job.id,r.b.job_id);
+    await call(runner,'runner/jobs/'+job.id+'/complete',{lease:job.lease,ok:false,error:'contract_failed'});
+    const monitor=(await call(owner,'monitor')).b;
+    assert.equal(monitor.improvements.length,i);
+    if(i)assert.deepEqual(monitor.improvements[0],{skill_id:'local-checklist',version:'1.0.0',error_code:'contract_failed',occurrences:2});
+  }
+  assert.equal((await call(owner,'skills')).b.skills[0].enabled,true);
+});

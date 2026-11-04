@@ -104,6 +104,11 @@ test('mobile owner UI submits a reviewed release, shows tests, activates and dis
   await page.getByRole('button',{name:'إرسال للمراجعة'}).click();
   await page.getByText('بانتظار الاختبار',{exact:true}).first().waitFor();assert.equal(await c.once(),'succeeded');
   await page.getByRole('button',{name:'تحديث الحالة'}).click();await page.getByRole('button',{name:'تفعيل 1.0.0'}).click();
+  await page.locator('#idea').fill('أريد عداد محاولات محلي يحفظ القيمة على جهازي');
+  await page.locator('#private-consent').check();await page.locator('#assistant button').click();
+  await page.locator('#assistant-result').waitFor();assert.equal(await c.once(),'succeeded');
+  const download=page.waitForEvent('download');await page.locator('#assistant-fetch').click();
+  assert.equal((await download).suggestedFilename(),'local-counter.zip');
   await page.getByRole('button',{name:'تعطيل المهارة'}).click();await page.getByText('معطلة',{exact:true}).first().waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
@@ -127,4 +132,29 @@ test('an unsupported private idea finishes with a visible reason and no download
   assert.equal((await call(receipt.request_token,path+'/'+job.id+'/artifact')).status,409);
   const m=await (await call(c.owner,'monitor')).json();assert.equal(m.faults[0].id,job.id);
   assert.equal(JSON.stringify(m).includes(idea),false);
+});
+
+test('owner assistant selects each tested skill, queues it once and downloads the private project',{timeout:45000},async t=>{
+  const c=await boot(t);
+  const ask=(idea,token=c.owner,consent=true,key=randomUUID())=>fetch(c.url+'/api/assistant/runs',{method:'POST',
+    headers:{Authorization:'Bearer '+token,'Content-Type':'application/json','Idempotency-Key':key},
+    body:JSON.stringify({idea,private_prototype_consent:consent})});
+  const list='أريد تطبيق قائمة مشتريات محلية للاستخدام الشخصي';
+  assert.equal((await ask(list,c.runner)).status,403);
+  assert.equal((await ask(list,c.owner,false)).status,422);
+  assert.equal((await ask(list)).status,409);
+  for(const idea of ['أريد قائمة مهام مع عداد مستقل لتتبع النقاط','أريد قائمة مهام ترسل بالبريد للمستخدمين','أريد إعداد خريطة للمطاعم القريبة مني']){
+    assert.equal((await ask(idea)).status,422);
+  }
+  for(const [skill,idea] of [['local-checklist',list],['local-counter','أريد عدادًا محليًا يحفظ النتيجة على الجهاز']]){
+    const version='1.0.0';await c.call(c.owner,'releases',{id:skill,version,name_ar:'أداة خاصة'});
+    assert.equal(await c.once(),'succeeded');await c.call(c.owner,'skills/'+skill+'/activate',{version,revision:0});
+    const k=randomUUID(),first=await ask(idea,c.owner,true,k);assert.equal(first.status,200);
+    const result=await first.json();assert.equal(result.skill_id,skill);assert.deepEqual(await (await ask(idea,c.owner,true,k)).json(),result);
+    assert.equal(await c.once(),'succeeded');assert.equal(await c.once(),'idle');
+    const path='requests/'+result.request_id+'/runs/'+result.job_id;
+    const zip=await c.call(result.request_token,path+'/artifact');
+    const page=await openProject(t,c.browser,zip);
+    await page.locator(skill==='local-checklist'?'#add-btn':'#plus').waitFor();
+  }
 });

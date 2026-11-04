@@ -26,7 +26,7 @@ async function api(path,body) {
   pendingKeys.delete(signature);return value;
 }
 function reset(){
-  generation++;token='';catalog={};pendingKeys.clear();$('token').value='';$('registry').replaceChildren();$('audit').replaceChildren();
+  assistantJob=null;$('assistant').reset();$('assistant-result').hidden=true;text('assistant-status','');generation++;token='';catalog={};pendingKeys.clear();$('token').value='';$('registry').replaceChildren();$('audit').replaceChildren();
   $('faults').replaceChildren();$('console').hidden=true;$('login').hidden=false;$('draft').reset();message('');
 }
 function button(label,act,quiet=false){const b=node('button',label);b.type='button';if(quiet)b.className='quiet';b.onclick=()=>perform(act);return b;}
@@ -63,6 +63,8 @@ async function refresh(){
     el.append(actions);return el;
   });
   $('registry').replaceChildren(...(cards.length?cards:[node('p','السجل فارغ. أرسل أول إصدار للمراجعة.')]));
+  $('improvements').replaceChildren(...(monitor.improvements.length?monitor.improvements.map(x=>
+    node('li','راجع '+(catalog[x.skill_id]?.name_ar||x.skill_id)+' '+x.version+' — '+label(x.error_code)+' ('+x.occurrences+'). اختبر الإصلاح كإصدار جديد.')):[node('li','لا توجد أعطال متكررة تستدعي اقتراح إصدار.')]));
   const counts=Object.fromEntries(monitor.counts.map(x=>[x.status,x.total]));
   text('queue','انتظار '+(counts.queued||0)+' · تشغيل '+(counts.running||0)+' · نجاح '+(counts.succeeded||0)+' · فشل '+(counts.failed||0)+' · مهل منتهية '+monitor.expired_leases
     +(monitor.oldest_pending?.at?' · أقدم انتظار '+new Date(monitor.oldest_pending.at*1000).toLocaleString('ar-SA'):''));
@@ -77,3 +79,20 @@ $('draft').onsubmit=e=>{e.preventDefault();perform(async()=>{
   await refresh();message('سُجّل الإصدار وأُضيف إلى قائمة الاختبار.');});};
 $('refresh').onclick=()=>perform(async()=>{await refresh();message('الحالة محدثة.');});
 $('logout').onclick=reset;window.addEventListener('pagehide',reset);
+
+let assistantJob=null;
+$('assistant').onsubmit=e=>{e.preventDefault();perform(async()=>{
+  const job=await api('assistant/runs',{idea:$('idea').value,private_prototype_consent:$('private-consent').checked});
+  assistantJob=job;$('assistant-result').hidden=false;$('assistant').reset();
+  text('assistant-status','اختيرت '+catalog[job.skill_id].name_ar+'، الإصدار '+job.version+'، وأُرسل طلب البناء.');
+});};
+$('assistant-fetch').onclick=()=>perform(async()=>{
+  const job=assistantJob;if(!job)return;
+  const path='requests/'+job.request_id+'/runs/'+job.job_id;
+  const r=await api(path);
+  if(r.status!=='succeeded'){text('assistant-status',r.status==='failed'?label(r.error_code):'بانتظار اكتمال البناء.');return;}
+  const file=await fetch('/api/'+path+'/artifact',{headers:{Authorization:'Bearer '+job.request_token},redirect:'error',cache:'no-store'});
+  if(!file.ok)throw Error('تعذر تنزيل المشروع.');
+  const url=URL.createObjectURL(await file.blob()),a=document.createElement('a');a.href=url;a.download=job.skill_id+'.zip';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);text('assistant-status','اكتمل البناء ونُزّل المشروع.');
+});
