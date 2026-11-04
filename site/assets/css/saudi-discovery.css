@@ -3,7 +3,7 @@ body{margin:0;background:radial-gradient(1000px 480px at 85% -20%,#0a633d66,tran
 a{color:#88f0b5}button,input,select,textarea{font:inherit}button{cursor:pointer}
 :focus-visible{outline:3px solid #8df0c3;outline-offset:2px}
 .discovery-head{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--dis-line)}
-.discovery-head .brand{font-size:21px;font-weight:900;color:#f5fff7;text-decoration:none;letter-spacing:-1px}.discovery-head .brand span{color:#66eeb0}.discovery-head nav{display:flex;flex-wrap:wrap;gap:15px;margin-inline-start:auto}.discovery-head nav a{font-size:13px}
+.discovery-head .brand{display:inline-flex;align-items:center;gap:5px;font-size:21px;font-weight:900;color:#f5fff7;text-decoration:none;letter-spacing:-1px}.discovery-head .brand img{width:34px;height:34px;flex:none}.discovery-head .brand span{color:#66eeb0}.discovery-head nav{display:flex;flex-wrap:wrap;gap:15px;margin-inline-start:auto}.discovery-head nav a{font-size:13px}
 main{max-width:1120px;margin:0 auto;padding:26px 20px}.hero{background:linear-gradient(115deg,#075d3a,#0b453b,#14273d);padding:25px clamp(20px,4vw,38px);border:1px solid #59d79855;border-radius:22px;margin:0 0 22px}
 .kicker{color:#a5ffcb;font-size:13px;font-weight:800}.hero h1{font-size:clamp(26px,4.3vw,43px);line-height:1.35;margin:8px 0}.hero p{max-width:780px;color:#e2f9ea;font-size:14px;margin:0}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
