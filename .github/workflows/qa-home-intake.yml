@@ -4,6 +4,7 @@ on:
     branches: [feat/saudi-home-intake-20261104]
     paths:
       - '.github/workflows/qa-home-intake.yml'
+      - 'pilot/qa-home-acceptance.mjs'
 permissions:
   contents: read
 jobs:
