@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#006c35">
   <title>MZcode — مساعدك السعودي</title>
@@ -19,7 +19,7 @@
       <p>مساعد عربي يفهم السياق السعودي، ويوجهك إلى مهارات تعمل فعليًا. دون وعود غير مثبتة.</p>
       <div class="feature-grid"><span>سعودي السياق</span><span>مهام عملية</span><span>خصوصية واضحة</span><span>بدون رسوم تجريبية</span></div>
     </div>
-    <div class="sidebar-foot"><span class="signal" aria-hidden="true"></span>نسخة تجريبية محلية — لا تتصل بخادم ذكاء اصطناعي</div>
+    <div class="sidebar-foot"><span class="signal" aria-hidden="true"></span>نسخة تجريبية — تستخدم Cloudflare Workers AI عند تفعيل الخدمة</div>
   </aside>
   <main id="main" class="main">
     <header class="topbar"><div><span class="tiny">المساعد الذكي</span><h2>حياك الله</h2></div><span class="status"><span class="status-dot"></span>تجربة أولية</span></header>
@@ -40,7 +40,7 @@
     <form id="chat-form" class="composer" autocomplete="off">
       <label for="question" class="sr-only">اكتب طلبك</label>
       <textarea id="question" rows="2" maxlength="1200" placeholder="مثال: أبي أجهز رسالة لقروب أولياء الأمور..." required></textarea>
-      <div class="composer-bottom"><span id="privacy-note">محادثتك لا تُرفع لخادم أو تُحفظ في هذه النسخة</span><button type="submit" id="send">إرسال الطلب <span aria-hidden="true">←</span></button></div>
+      <div class="consent-row"><label for="ai-consent"><input id="ai-consent" type="checkbox" required> أوافق على إرسال نص الطلب إلى النموذج. لن أضع بيانات شخصية أو حساسة.</label></div><div class="composer-bottom"><span id="privacy-note">نص الطلب يُرسل إلى Cloudflare AI بموافقتك؛ لا نخزن المحادثة في قاعدة MZcode</span><button type="submit" id="send">إرسال الطلب <span aria-hidden="true">←</span></button></div>
     </form>
     <div class="bottom-actions"><button id="reset-chat" class="text-btn" type="button">بدء محادثة جديدة</button><button id="delete-local" class="text-btn" type="button">مسح القوائم المحفوظة على الجهاز</button></div>
   </main>

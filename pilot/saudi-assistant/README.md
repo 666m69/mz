@@ -1,3 +1,9 @@
+# MZcode Saudi Assistant — Live model preview (not production)
+
+**As of November 4, 2026:** A Cloudflare Pages **preview-only** build is deployed at [MZcode assistant](https://feat-saudi-assistant-workers.mz702.pages.dev/assistant/). The real Workers AI model has been called successfully via Cloudflare's API, and GitHub CI tests passed. This does **not** verify an end-to-end chat originating in the browser; the owner should test that with a synthetic prompt. The preview code allows only **two requests per IP/day and four requests globally/day**. The production website remains unchanged.
+
+See [AI-INTEGRATION.md](./AI-INTEGRATION.md) for technical details, privacy and billing caveats. The previous local-only design notes are historical and do not describe the hosted preview.
+
 # MZcode Saudi Assistant — v1 (private preview)
 
 **Scope:** one front-end assistant, Arabic RTL, Saudi green (`#006c35`), tested mobile/desktop layout. It is a **guided intent router with explicit small working tools**, **not** an LLM or a general AI agent. It does not invoke hosted APIs, bill users, log visitors, upload documents, access WhatsApp or verify real-estate licenses.
