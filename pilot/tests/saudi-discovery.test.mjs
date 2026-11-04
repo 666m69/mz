@@ -16,7 +16,7 @@ test('teacher produces real parent communication with no automatic sending',()=>
 test('teacher weekly plan contains distinct actionable days',()=>{
   const result=prepareTeacherMessage({kind:'plan',audience:'school',grade:'خامس',subject:'تدريب على الجمع',details:'مراجعة الجمع والطرح'});
   for(const day of ['الأول','الثاني','الثالث','الرابع','الخامس'])assert.ok(result.includes('اليوم '+day));
-  assert.match(result,/دون بيانات طلاب/);
+  assert.match(result,/لا تتضمن بيانات طلاب/);
   assert.throws(()=>prepareTeacherMessage({kind:'notice',audience:'other',grade:'خامس',subject:'اختبار',details:'أهلًا'}),/invalid_option/);
   assert.throws(()=>prepareTeacherMessage({kind:'notice',audience:'parents',grade:'',subject:'اختبار',details:'شرح'}),/invalid_field/);
 });
