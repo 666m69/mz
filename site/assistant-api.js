@@ -2,7 +2,7 @@
 // Requests are not stored; D1 only stores HMAC-hashed rate buckets.
 export const ASSISTANT_MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';
 const SYSTEM = [
-  'أنت مساعد MZcode السعودي. تحدث بالعربية الواضحة القريبة من المستخدم السعودي دون افتراض لهجته أو مهنته.',
+  'أنت مساعد MZcode السعودي. تحدث بالعربية الفصيحة السهلة بلمسة سعودية طبيعية، مثل «حياك الله» أو «أبشر» عند المناسبة. لا تستخدم صياغات لهجات أخرى مثل «بيك» و«إزاي». لا تفترض لهجة المستخدم أو مهنته.',
   'تساعد على فهم الطلب وصياغة نصوص مفيدة وخطوات عملية. تجنب الحشو. اسأل سؤالًا واحدًا فقط عند الضرورة.',
   'أنت لا تملك الوصول للجهات الحكومية ولا للواتساب ولا لحسابات المستخدمين ولا لتحويل ملفات مرفوعة، ولا تستطيع نشر مواقع أو تنفيذ برمجيات مباشرة من هذه المحادثة.',
   'القدرات المنفذة حاليًا في واجهة MZcode: إنشاء مسودة رسالة مدرسية، مسودة إعلان عقاري غير متحقق من ترخيصه، وقائمة مهام/مشتريات محلية. أي ميزة غير ذلك هي اقتراح أو مراجعة وليست تنفيذًا.',
@@ -65,18 +65,22 @@ export async function assistantHandle(req,env,{rateAddress,sign}) {
   const url=new URL(req.url);
   if(req.headers.get('Origin')!==url.origin)return guardError('forbidden_origin',403);
   if(!/^application\/json(?:;|$)/i.test(req.headers.get('Content-Type')||''))return guardError('json_required',415);
-  if(env.MZ_ASSISTANT_AI_ENABLED!=='true')return guardError('ai_disabled',503);
+  // Preview-only trial gate. The verified Pages branch alias is intentionally exact.
+  // Production and all other hosts still require an explicit environment switch.
+  const limitedPreview=url.hostname==='feat-saudi-assistant-workers.mz702.pages.dev';
+  if(env.MZ_ASSISTANT_AI_ENABLED!=='true' && !limitedPreview)return guardError('ai_disabled',503);
   if(!env.AI?.run || !env.DB || !env.MZ_CONTACT_SECRET)return guardError('binding_unavailable',503);
   const parsed=normalized(await jsonBody(req));
   if(!parsed)return guardError('invalid_request',422);
-  if(REJECT_PII.test(parsed.message)||PRIVATE_MEDICAL.test(parsed.message))
+  const allText=[parsed.message,...parsed.history.map(item=>item.content)].join('\n');
+  if(REJECT_PII.test(allText)||PRIVATE_MEDICAL.test(allText))
     return guardError('sensitive_input',422);
   const ip=await rateAddress(req,env);if(!ip)return guardError('origin_unverified',403);
   const today=new Date().toISOString().slice(0,10);
   const hashed=await sign(env.MZ_CONTACT_SECRET,'mz-ai-v1:'+ip+':'+today);
   try {
-    if(!await admit(env.DB,'ip:'+today+':'+hashed,3))return guardError('daily_user_limit',429);
-    if(!await admit(env.DB,'global:'+today,12))return guardError('daily_global_limit',429);
+    if(!await admit(env.DB,'ip:'+today+':'+hashed,limitedPreview?2:3))return guardError('daily_user_limit',429);
+    if(!await admit(env.DB,'global:'+today,limitedPreview?4:12))return guardError('daily_global_limit',429);
     const messages=[{role:'system',content:SYSTEM},...parsed.history,{role:'user',content:parsed.message}];
     const answer=await env.AI.run(ASSISTANT_MODEL,{messages,max_tokens:350,temperature:0.35});
     const reply=answer?.response;
