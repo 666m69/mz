@@ -2,8 +2,16 @@
 
 Standalone prototype developed for discovery of a **B2B hospitality sales workflow**, NOT a worldwide booking calendar or an individual traveler offer portal.
 
+## Updated client role (confirmed 2026-11-04)
+- Client contact works **within the hotel's marketing department**; functional role: **marketing coordinator** (exact HR job title not yet established).
+- The system is an internal **hotel B2B marketing operations assistant**. It is NOT a marketplace, independent agency, personal brokerage or commission platform.
+- Primary workflow: source-market calendar → upcoming opportunity → choose tour operator/travel agency → draft proposed cooperation → internal hotel review/approval → staff-led outreach **only if appropriately authorized** → log response and next follow-up → verify results against the hotel's actual reservation records when a future authorized integration exists.
+- Treat approvals, prices, allocations, attributed bookings and commission calculations as **out of scope for v0.1**, not as implicit privileges of employment.
+- A staff position does not itself establish permission to send using official accounts or grant access to hotel PMS/CRM. Obtain hotel policy and appropriate permission before implementing a sending connector or operational integration.
+- Existing demo stores fictitious company records **on the local device only**. A future multiuser version requires controlled staff sign-in, separate hotel workspaces, audit logs and backup, with hotel-owned data protected.
+
 ## Grounding from customer call
-The target is **tour operators and travel agencies**. The recorded discussion mentions international holiday/season timing, approaching partners in advance, grouping target source markets, proposing hotel offers and tracking outreach/results. No agreed remuneration, hotel authorization, commission evidence, actual price, target country list, confirmed sales, or permission to bulk-message anyone was established.
+The target is **tour operators and travel agencies**. The recorded discussion mentions international holiday/season timing, approaching partners in advance, grouping target source markets, proposing hotel offers and tracking outreach/results. The contact is now confirmed as a hotel marketing-department employee; the exact title remains unclear. No approved remuneration, outbound account authorization, commission entitlement, hotel rates, target country list, confirmed sales or permission for bulk messaging was established.
 
 This implementation intentionally uses a **generic demo**, not the customer's real name, property name, recording, or contact details, since this repository is public.
 
