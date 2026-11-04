@@ -80,6 +80,20 @@ async function submitIdea(event) {
 }
 if(form){
   form.addEventListener('submit',submitIdea);
+  document.getElementById('mz-intake-track').addEventListener('click',async()=>{
+    const reference=document.getElementById('mz-intake-reference').textContent;
+    const track=document.getElementById('mz-intake-track-state');
+    if(!/^MZ-[A-F0-9]{12}$/.test(reference))return;
+    track.textContent='نتحقق من حالة الطلب…';
+    try{
+      const res=await fetch('/api/ideas/'+encodeURIComponent(reference),{cache:'no-store',
+        credentials:'same-origin',signal:AbortSignal.timeout(12000)});
+      const info=await res.json();
+      if(!res.ok||info.ok!==true){track.textContent='تعذّر العثور على الطلب الآن. احتفظ برقمك وجرّب لاحقًا.';return;}
+      const statusLabels={new:'جديد — بانتظار المراجعة',reviewing:'قيد المراجعة',quoted:'تم إعداد عرض السعر',accepted:'مقبول',building:'قيد التنفيذ',delivered:'تم التسليم',rejected:'مغلق'};
+      track.textContent='حالة طلبك: '+(statusLabels[info.status]||'قيد المتابعة');
+    }catch{track.textContent='تعذّر الاتصال للتحقق من الحالة. حاول لاحقًا.';}
+  });
   document.getElementById('mz-intake-copy').addEventListener('click',async()=>{
     const reference=document.getElementById('mz-intake-reference').textContent;
     if(!reference)return;
