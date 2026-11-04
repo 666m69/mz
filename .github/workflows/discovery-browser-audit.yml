@@ -1,0 +1,29 @@
+name: MZcode Saudi discovery browser acceptance
+on:
+  pull_request:
+    paths:
+      - 'site/tools/teacher/**'
+      - 'site/tools/hydroponics/**'
+      - 'site/tools/opportunities/**'
+      - 'site/assets/js/teacher-*'
+      - 'site/assets/js/hydro-*'
+      - 'site/assets/js/opportunities-*'
+      - 'site/assets/css/saudi-discovery.css'
+      - 'pilot/discovery-browser-audit.mjs'
+      - '.github/workflows/discovery-browser-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build static assets without paid dependencies
+        run: npm run build
+      - name: Real Chromium tests — mobile and local tool workflows
+        run: node pilot/discovery-browser-audit.mjs
