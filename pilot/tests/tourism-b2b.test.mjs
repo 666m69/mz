@@ -66,6 +66,7 @@ test('drafts include only planning, never fake price or confirmed availability',
     assert.match(draft,/2026-12-10/);
     assert.match(draft,/وكالة تجريبية للسياحة/);
     assert.match(draft,lang==='ar'?/لم يتم تأكيدهما/:/not been confirmed/);
+    assert.match(draft,lang==='ar'?/منسق التسويق — بعد اعتماد الفندق/:/hotel marketing coordinator — after hotel approval/);
   }
   assert.throws(()=>draftMessage({agency,event:{...event,country:'AE'}}),/country_mismatch/);
 });
@@ -83,6 +84,8 @@ test('standalone interface has safe no-auto-outreach and clear data boundaries',
   assert.match(html,/dir="rtl"/);
   assert.match(html,/connect-src https:\/\/nagerholidays.com/);
   assert.match(html,/لا رسائل تُرسل تلقائيًا/);
+  assert.match(html,/مساعد منسق التسويق الفندقي/);
+  assert.match(html,/مراجعة المسؤول قبل الإرسال/);
   assert.match(source,/localStorage/);
   assert.match(source,/textContent/);
   assert.match(source,/nagerholidays.com\/api\/v4\/Holidays/);
