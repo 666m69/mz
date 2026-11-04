@@ -90,3 +90,31 @@ test('browser intake displays a reference only after the backend confirms storag
   assert.match(js,/idempotency|Idempotency-Key/i);
   assert.doesNotMatch(js,/innerHTML\s*=/);
 });
+
+test('full Pages preview receives anonymous idea and returns persisted tracking reference',async()=>{
+  const worker=(await import('../../build/worker.mjs')).default;
+  const sql=new DatabaseSync(':memory:');
+  sql.exec(readFileSync(new URL('../schema.sql',import.meta.url),'utf8'));
+  const DB={prepare(query){return {bind(...args){const st=sql.prepare(query);return {
+    run:()=>({success:true,meta:st.run(...args)}),
+    first:()=>st.get(...args),
+    all:()=>({results:st.all(...args)})
+  };}}}};
+  const host='https://feat-saudi-home-intake-20261.mz702.pages.dev';
+  const body={idea:'أحتاج أداة لمساعدة المعلمين في ترتيب سجلات المتابعة الشهرية.',email:'',name:'',consent:'yes',website:''};
+  const req=new Request(host+'/api/ideas',{method:'POST',headers:{Origin:host,
+    'Content-Type':'application/json','Idempotency-Key':'3b71de2e-34d5-439b-a4c9-5282cd2f9bb8',
+    'CF-Connecting-IP':'198.51.100.33'},body:JSON.stringify(body)});
+  const res=await worker.fetch(req,{DB,MZ_CONTACT_SECRET:'qa-unit-test'});
+  assert.equal(res.status,201);
+  const received=await res.json();
+  assert.match(received.reference,/^MZ-[0-9A-F]{12}$/);
+  assert.equal(sql.prepare('SELECT COUNT(*) as n FROM idea_requests').get().n,1);
+  const status=await worker.fetch(new Request(host+'/api/ideas/'+received.reference),{DB,MZ_CONTACT_SECRET:'qa-unit-test'});
+  assert.equal(status.status,200);
+  assert.equal((await status.json()).status,'new');
+  const blocked=await worker.fetch(new Request('https://mzcodehub.com/api/ideas',{
+    method:'POST',headers:{Origin:'https://mzcodehub.com','Content-Type':'application/json'},
+    body:JSON.stringify(body)}),{DB,MZ_CONTACT_SECRET:'qa-unit-test'});
+  assert.equal(blocked.status,404,'the Pages bundle must not intercept the real production ideas route');
+});
