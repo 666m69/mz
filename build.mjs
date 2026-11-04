@@ -1,5 +1,5 @@
 import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
-const root=new URL('./site/',import.meta.url),assets={};const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.xml':'application/xml','.txt':'text/plain; charset=utf-8'};
+const root=new URL('./site/',import.meta.url),assets={};const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.xml':'application/xml','.txt':'text/plain; charset=utf-8'};
 // Ship the shared studio styles in one request. Individual styles remain available for existing pages.
 const studioStyles = ['catalog','studio','vision','showcase','refined','offers','saudi-entry'];
 const originalStyles = studioStyles.filter(name => name !== 'saudi-entry');
