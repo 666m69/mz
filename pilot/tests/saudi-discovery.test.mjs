@@ -63,6 +63,7 @@ test('all three tools are built as fully routed standalone browser pages',async(
     assert.equal(page.status,200,slug);
     const html=await page.text();
     assert.match(html,/dir="rtl"/);
+    assert.match(html,/\/assets\/images\/mz-mark\.svg/);
     assert.ok(html.includes('/assets/js/'+jsFile),slug);
     const js=await worker.fetch(new Request('https://mz702.pages.dev/assets/js/'+jsFile),{});
     assert.equal(js.status,200);
