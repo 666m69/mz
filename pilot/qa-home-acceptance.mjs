@@ -8,10 +8,14 @@ const body={idea,email:'',name:'',consent:'yes',website:''};
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 let ready=false;
 for(let i=0;i<5;i++){
-  const result=await fetch(host+'/',{signal:AbortSignal.timeout(12000)}).catch(()=>null);
-  if(result?.ok){
+  const result=await fetch(host+'/',{signal:AbortSignal.timeout(12000)}).catch(error=>{
+    console.log('QA preview connection error:',String(error?.cause?.code||error?.name||'network').slice(0,60));return null;
+  });
+  if(result){
     const html=await result.text();
-    ready=html.includes('mz-quick-idea')&&html.includes('mz-intake-track');
+    ready=result.ok&&html.includes('mz-quick-idea')&&html.includes('mz-intake-track');
+    console.log('QA preview probe:',JSON.stringify({status:result.status,finalHost:new URL(result.url).hostname,
+      contentType:result.headers.get('content-type'),hasForm:html.includes('mz-quick-idea'),hasTracking:html.includes('mz-intake-track')}));
     if(ready)break;
   }
   await pause(3500);
