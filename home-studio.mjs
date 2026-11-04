@@ -50,7 +50,7 @@ export const studio = `<section id="playground" class="studio-hero" aria-labelle
       <strong id="mz-intake-reference" class="saudi-reference" dir="ltr"></strong>
       <span id="mz-intake-date" class="saudi-date"></span>
       <span id="mz-intake-mail" class="saudi-mail-info"></span>
-      <div class="saudi-success-actions"><button id="mz-intake-copy" type="button">انسخ الرقم</button><a href="/idea#track">تابع طلبك</a><a href="#tools">خذلك فَرّة على MZcode 🚶‍♂️</a></div>
+      <div class="saudi-success-actions"><button id="mz-intake-copy" type="button">انسخ الرقم</button><button id="mz-intake-track" type="button">تابع طلبك</button><a href="#tools">خذلك فَرّة على MZcode 🚶‍♂️</a></div><p id="mz-intake-track-state" role="status" aria-live="polite"></p>
       <small>الرقم يؤكد الاستلام فقط، مو وعدًا بتنفيذ الطلب أو سعرًا نهائيًا.</small>
     </div>
     <div class="saudi-browse"><a href="#tools">ما عندك طلب؟ خذلك فَرّة على MZcode <span aria-hidden="true">🚶‍♂️</span></a><a href="/idea">تبي تختبر فكرتك؟ افتح المختبر</a></div>
