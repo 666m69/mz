@@ -1,0 +1,89 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {DatabaseSync} from 'node:sqlite';
+import app from '../../build/mz-ideas.mjs';
+
+const origin='https://mzcodehub.com';
+function fixture(){
+  const sql=new DatabaseSync(':memory:');
+  sql.exec(readFileSync(new URL('../schema.sql',import.meta.url),'utf8'));
+  const DB={prepare(query){return {bind(...args){
+    const stmt=sql.prepare(query);return {
+      run:()=>({success:true,meta:stmt.run(...args)}),
+      first:()=>stmt.get(...args),
+      all:()=>({results:stmt.all(...args)})
+    };
+  }}}};
+  const env={DB,HASH_SALT:'test-only'};
+  const key='bd7b2e37-4533-493a-847f-1b2ae3cb2909';
+  const body={idea:'أحتاج أداة سعودية تسهل تحويل ملفات العمل وتجهيز الخطابات للمعلمين.',email:'',name:'',website:'',consent:'yes'};
+  const post=(data=body,id=key)=>app.fetch(new Request(origin+'/api/ideas',{
+    method:'POST',headers:{Origin:origin,'Content-Type':'application/json','CF-Connecting-IP':'198.51.100.33','Idempotency-Key':id},
+    body:JSON.stringify(data)
+  }),env);
+  return {sql,env,post,body,key};
+}
+test('reference-only homepage request saves in the real ideas table with no fake contact',async()=>{
+  const {sql,post,body}=fixture();
+  const result=await post();
+  assert.equal(result.status,201);
+  const receipt=await result.json();
+  assert.equal(receipt.ok,true);
+  assert.match(receipt.reference,/^MZ-[A-F0-9]{12}$/);
+  assert.equal(receipt.receipt_email_status,'not_requested');
+  assert.ok(Number.isFinite(receipt.created_ms));
+  const saved=sql.prepare('SELECT email,name,idea,status FROM idea_requests').get();
+  assert.equal(saved.email,'');assert.equal(saved.name,'');
+  assert.equal(saved.idea,body.idea);assert.equal(saved.status,'new');
+});
+test('an anonymous retry returns exact original receipt and does not save twice',async()=>{
+  const {sql,post}=fixture();
+  const first=await post();
+  const a=await first.json();
+  const second=await post();
+  const b=await second.json();
+  assert.equal(second.status,200);
+  assert.equal(b.reference,a.reference);
+  assert.equal(b.created_ms,a.created_ms);
+  assert.equal(sql.prepare('SELECT COUNT(*) AS count FROM idea_requests').get().count,1);
+});
+test('no consent, invalid email or honeypot text cannot save anything',async()=>{
+  const {sql,post,body}=fixture();
+  for(const invalid of [
+    {...body,consent:''},
+    {...body,email:'not-an-email'},
+    {...body,website:'bot-data'},
+    {...body,idea:'قصير'}
+  ]) {
+    const response=await post(invalid);
+    assert.equal(response.status,400);
+  }
+  assert.equal(sql.prepare('SELECT COUNT(*) AS count FROM idea_requests').get().count,0);
+});
+test('mismatched payload on the same idempotency key is refused',async()=>{
+  const {sql,post,body}=fixture();
+  assert.equal((await post()).status,201);
+  assert.equal((await post({...body,idea:body.idea+' بزيادة'})).status,409);
+  assert.equal(sql.prepare('SELECT COUNT(*) AS count FROM idea_requests').get().count,1);
+});
+test('rendered homepage keeps approved MZ logo and adds Saudi entry',()=>{
+  const homepage=readFileSync(new URL('../../site/index.html',import.meta.url),'utf8');
+  assert.match(homepage,/ارررحب/);
+  assert.match(homepage,/قول وش الوضع/);
+  assert.match(homepage,/أكبر نتيجة بأقل جهد/);
+  assert.match(homepage,/mz-quick-idea/);
+  assert.match(homepage,/mz-intake-reference/);
+  assert.match(homepage,/\/assets\/images\/mz-mark\.svg/);
+  assert.match(homepage,/\/assets\/css\/saudi-entry\.css/);
+  assert.match(homepage,/\/assets\/js\/saudi-intake\.js/);
+  assert.match(homepage,/data-panel="book"/);
+  assert.match(homepage,/data-panel="game"/);
+});
+test('browser intake displays a reference only after the backend confirms storage',()=>{
+  const js=readFileSync(new URL('../../site/assets/js/saudi-intake.js',import.meta.url),'utf8');
+  assert.match(js,/fetch\('\/api\/ideas'/);
+  assert.match(js,/data\?\.ok!==true/);
+  assert.match(js,/idempotency|Idempotency-Key/i);
+  assert.doesNotMatch(js,/innerHTML\s*=/);
+});
