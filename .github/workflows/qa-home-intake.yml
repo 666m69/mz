@@ -1,0 +1,19 @@
+name: QA Saudi homepage receipt (preview only)
+on:
+  push:
+    branches: [feat/saudi-home-intake-20261104]
+    paths:
+      - '.github/workflows/qa-home-intake.yml'
+permissions:
+  contents: read
+jobs:
+  qa-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe preview-only idea reception, same-origin tracking and replay
+        run: node pilot/qa-home-acceptance.mjs
