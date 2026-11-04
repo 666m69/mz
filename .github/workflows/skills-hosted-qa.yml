@@ -1,0 +1,44 @@
+name: Skills isolated hosted acceptance
+on:
+  push:
+    branches: [test/skills-hosted-acceptance-20261104]
+    paths:
+      - '.github/workflows/skills-hosted-qa.yml'
+      - 'skills-server/qa/**'
+permissions:
+  contents: read
+concurrency:
+  group: mz-skills-isolated-qa
+  cancel-in-progress: false
+jobs:
+  hosted:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Generate ephemeral credentials inside this runner
+        id: identity
+        run: node skills-server/qa/hosted.mjs prepare
+      - name: QA fingerprints ${{ steps.identity.outputs.owner }} ${{ steps.identity.outputs.runner }}
+        run: echo 'Only the two SHA-256 fingerprints are displayed.'
+      - name: Publish public fingerprints for the staging operator
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mz-qa-fingerprints-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/mz-qa-fingerprints.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Verify the hosted Worker and D1, run the sandbox and exercise the downloaded app
+        run: node skills-server/qa/hosted.mjs accept
+      - name: Save synthetic project and verified evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: mz-skills-verified-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/mz-result/
+          retention-days: 1
+          if-no-files-found: error
