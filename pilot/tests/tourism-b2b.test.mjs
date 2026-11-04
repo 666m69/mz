@@ -65,7 +65,7 @@ test('drafts include only planning, never fake price or confirmed availability',
     const draft=draftMessage({agency,event,language:lang});
     assert.match(draft,/2026-12-10/);
     assert.match(draft,/وكالة تجريبية للسياحة/);
-    assert.match(draft,lang==='ar'?/لم يتم تأكيدهما/:/not confirmed/);
+    assert.match(draft,lang==='ar'?/لم يتم تأكيدهما/:/not been confirmed/);
   }
   assert.throws(()=>draftMessage({agency,event:{...event,country:'AE'}}),/country_mismatch/);
 });
@@ -74,7 +74,7 @@ test('CSV export neutralizes spreadsheet formulas and remains UTF-8',()=>{
   const csv=agenciesCsv([agency]);
   assert.ok(csv.startsWith('\ufeff'));
   assert.match(csv,/'=CMD\(1\)/);
-  assert.match(csv,/' \+INJECT/);
+  assert.match(csv,/'\+INJECT/);
   assert.match(csv,/وكالة|تركيا/);
 });
 test('standalone interface has safe no-auto-outreach and clear data boundaries',async()=>{
