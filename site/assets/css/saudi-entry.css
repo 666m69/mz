@@ -43,3 +43,17 @@
 @media(max-width:800px){.saudi-intro #studio-title{font-size:clamp(35px,9vw,55px)}.saudi-intake-form{padding:13px}.saudi-intro~.live-console{margin-top:8px}}
 @media(max-width:460px){.saudi-greeting{font-size:28px!important}.saudi-question{font-size:24px!important}.saudi-intro .studio-label{font-size:11px}.saudi-brand-line{font-size:17px!important}.saudi-intake-form textarea{min-height:105px}.saudi-success-actions>*{flex:1;text-align:center}}
 @media(prefers-reduced-motion:reduce){.saudi-send{transition:none}}
+
+/* Visitor discovery tiles; keep the approved brand mark and original dark-blue design. */
+.saudi-discover{margin-block:34px 44px;min-width:0}
+.discovery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.discovery-card{display:flex;flex-direction:column;gap:10px;border-radius:20px;border:1px solid #307d6377;background:linear-gradient(150deg,#102b30 5%,#102139 80%);padding:clamp(17px,2.7vw,25px);min-width:0;box-shadow:0 13px 40px #001f3020}
+.discovery-card .discovery-tag{font-size:12px;color:#86e9b5;font-weight:800}
+.discovery-card .discovery-icon{width:49px;height:49px;border-radius:14px;display:grid;place-items:center;background:#064c36;color:#9bf5bb;font-size:27px;line-height:1}
+.discovery-card h3{font-size:clamp(18px,2vw,22px);line-height:1.45;color:#f7fff9;margin:4px 0 0}
+.discovery-card p{color:#c4d8d3;font-size:14px;line-height:1.85;flex:1;margin:0}
+.discovery-card a{align-self:flex-start;color:#0a3323;background:#49d99b;padding:9px 14px;font-size:13px;font-weight:900;text-decoration:none;border-radius:10px}
+.discovery-card a:hover{background:#8cf9c2}
+.discovery-disclaimer{font-size:12px;line-height:1.8;color:#b3cebd;margin:12px 0 0}
+@media(max-width:920px){.discovery-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:610px){.discovery-grid{grid-template-columns:1fr}.discovery-card{min-height:0}.saudi-discover{margin-block:22px 35px}}
