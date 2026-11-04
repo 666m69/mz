@@ -26,6 +26,10 @@ jobs:
         run: node skills-server/qa/hosted.mjs prepare
       - name: QA fingerprints ${{ steps.identity.outputs.owner }} ${{ steps.identity.outputs.runner }}
         run: echo 'Only the two SHA-256 fingerprints are displayed.'
+      - name: QA public key A ${{ steps.identity.outputs.key_a }}
+        run: echo 'Ephemeral recipient public key, first half.'
+      - name: QA public key B ${{ steps.identity.outputs.key_b }}
+        run: echo 'Ephemeral recipient public key, second half.'
       - name: Publish public fingerprints for the staging operator
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -34,6 +38,8 @@ jobs:
           retention-days: 1
           if-no-files-found: error
       - name: Verify the hosted Worker and D1, run the sandbox and exercise the downloaded app
+        env:
+          QA_GITHUB_READ: ${{ github.token }}
         run: node skills-server/qa/hosted.mjs accept
       - name: Save synthetic project and verified evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

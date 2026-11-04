@@ -8,6 +8,7 @@ import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {setTimeout as pause} from 'node:timers/promises';
 import {exerciseChecklist} from './browser.mjs';
+import {createRecipient,claimGrant} from './access.mjs';
 const exec=promisify(execFile);
 const host='https://mzcode-skills-qa-20261104.666m69.workers.dev';
 const runner=fileURLToPath(new URL('../runner/agent.py',import.meta.url));
@@ -17,15 +18,23 @@ async function prepare(temp){
   const priv=join(temp,'mz-private');await mkdir(priv,{mode:0o700});
   const keys={owner:randomBytes(32).toString('base64url'),runner:randomBytes(32).toString('base64url')};
   await writeFile(join(priv,'tokens.json'),JSON.stringify(keys),{mode:0o600,flag:'wx'});
+  const recipient=await createRecipient(priv);
   const fingerprints={sha:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT,
     owner:digest(keys.owner),runner:digest(keys.runner)};
   await writeFile(join(temp,'mz-qa-fingerprints.json'),JSON.stringify(fingerprints),{mode:0o600});
-  await appendFile(process.env.GITHUB_OUTPUT,'owner='+fingerprints.owner+'\nrunner='+fingerprints.runner+'\n');
+  await appendFile(process.env.GITHUB_OUTPUT,'owner='+fingerprints.owner+'\nrunner='+fingerprints.runner+
+    '\nkey_a='+recipient.slice(0,171)+'\nkey_b='+recipient.slice(171)+'\n');
 }
-export async function accept({url,owner,runnerToken,version,out,chrome,waitMs=0}){
+export async function accept({url,owner,runnerToken,version,out,chrome,access,waitMs=0}){
+  if(access){
+    assert.equal(url,host);
+    const gate=await fetch(url+'/api/skills',{redirect:'manual',signal:AbortSignal.timeout(10000)});
+    assert.ok([302,401,403].includes(gate.status),'Cloudflare Access did not protect QA');
+  }
   const api=async(token,path,body,expected=200,key=randomUUID())=>{
     const res=await fetch(url+'/api/'+path,{method:body===undefined?'GET':'POST',redirect:'error',signal:AbortSignal.timeout(10000),
-      headers:{...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json','Idempotency-Key':key},
+      headers:{...(access?{'CF-Access-Client-Id':access.id,'CF-Access-Client-Secret':access.secret}:{}),
+        ...(token?{Authorization:'Bearer '+token}:{}),'Content-Type':'application/json','Idempotency-Key':key},
       ...(body===undefined?{}:{body:JSON.stringify(body)})});
     // Bodies may contain credentials. Print only typed error codes when a step fails.
     if(res.status!==expected){let c;try{c=(await res.json()).error;}catch{}
@@ -34,12 +43,16 @@ export async function accept({url,owner,runnerToken,version,out,chrome,waitMs=0}
     return res.json();
   };
   const once=async()=>{const {stdout}=await exec('python3',['-B',runner,'--once'],{timeout:20000,
-    env:{PATH:process.env.PATH,SKILLS_URL:url,SKILLS_RUNNER_TOKEN:runnerToken}});
+    env:{PATH:process.env.PATH,SKILLS_URL:url,SKILLS_RUNNER_TOKEN:runnerToken,...(access?{
+      SKILLS_ACCESS_ORIGIN:url,SKILLS_ACCESS_CLIENT_ID:access.id,SKILLS_ACCESS_CLIENT_SECRET:access.secret}:{})}});
     assert.equal(stdout.trim(),'succeeded','runner returned '+stdout.trim().slice(0,40));};
   if(waitMs){
     const deadline=Date.now()+waitMs;let ready=false;
-    while(Date.now()<deadline){try{await api(owner,'skills');ready=true;break;}catch{await pause(5000);}}
-    assert.ok(ready,'QA owner fingerprint was not authorized before the wait deadline');
+    let last='waiting';
+    while(Date.now()<deadline){try{await api(owner,'skills');ready=true;break;}catch(e){
+      const reason=String(e.message).slice(0,120);
+      if(reason!==last){console.log('QA readiness: '+reason);last=reason;}await pause(5000);}}
+    assert.ok(ready,'QA owner fingerprint was not authorized before the wait deadline: '+last);
   }
   const probe=JSON.parse((await exec('python3',['-B',runner,'--probe'],{timeout:20000,env:{PATH:process.env.PATH}})).stdout);
   assert.equal(probe.network,'denied');assert.equal(probe.spawn,'denied');assert.equal(probe.limits,'verified');
@@ -95,7 +108,8 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   else if(process.argv[2]==='accept'){
     const k=JSON.parse(await readFile(join(temp,'mz-private','tokens.json'),'utf8'));
     const version='1.'+(Number(process.env.GITHUB_RUN_NUMBER)%1000)+'.'+Number(process.env.GITHUB_RUN_ATTEMPT);
-    await accept({url:host,owner:k.owner,runnerToken:k.runner,version,out:join(temp,'mz-result'),
-      chrome:process.env.MZ_QA_CHROME||'google-chrome',waitMs:9*60*1000});
+    const access=await claimGrant(join(temp,'mz-private'),process.env);
+    await accept({url:host,owner:k.owner,runnerToken:k.runner,version,access,out:join(temp,'mz-result'),
+      chrome:process.env.MZ_QA_CHROME||'google-chrome',waitMs:90000});
   }else throw Error('Expected prepare or accept');
 }

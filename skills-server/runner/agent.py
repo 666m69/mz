@@ -145,6 +145,13 @@ def post(path, data, idem=None):
     else:
         raise ValueError("TLS required")
     headers = {"Authorization": "Bearer " + os.environ["SKILLS_RUNNER_TOKEN"], "Content-Type": "application/json"}
+    access_id = os.environ.get("SKILLS_ACCESS_CLIENT_ID")
+    access_secret = os.environ.get("SKILLS_ACCESS_CLIENT_SECRET")
+    if access_id or access_secret:
+        if not (access_id and access_secret and target.scheme == "https"
+                and os.environ.get("SKILLS_ACCESS_ORIGIN") == "https://" + target.netloc):
+            raise ValueError("invalid Access credential origin")
+        headers.update({"CF-Access-Client-Id": access_id, "CF-Access-Client-Secret": access_secret})
     if idem:
         headers["Idempotency-Key"] = idem
     try:
