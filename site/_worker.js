@@ -63,6 +63,12 @@ async function handle(req,env){
   url.protocol='https:';
   return Response.redirect(url.href,308);
  }
+ // This preview-only route never serves production or default Pages addresses.
+ if((path==='/api/ideas'||path.startsWith('/api/ideas/')) &&
+    url.hostname==='feat-saudi-home-intake-20261.mz702.pages.dev'){
+   if(!env.DB||!env.MZ_CONTACT_SECRET)return error('خدمة حفظ الطلبات غير متاحة في المعاينة حاليًا.',503);
+   return previewIdeasModule.fetch(req,{DB:env.DB,HASH_SALT:env.MZ_CONTACT_SECRET});
+ }
  if(path==='/api/menus'||path.startsWith('/api/menus/'))return menuHandle(req,env,{json,error,sign,verified,readBody,rateAddress});
  if(/^\/(admin(?:\.html)?(?:\/|$)|assets\/js\/admin\.js$|api\/admin(?:\/|$))/i.test(path))return error('الإدارة متاحة للمالك عبر حساب الاستضافة فقط.',403);
  if(path==='/api/contact-token'){
