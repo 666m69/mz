@@ -1,8 +1,8 @@
-# MZcode Saudi Assistant — AI connection preview (not deployed)
+# MZcode Saudi Assistant — Live model preview (not production)
 
-**Latest status:** Cloudflare Workers AI model adapter and the same-origin /api/assistant endpoint have been implemented on branch `feat/saudi-assistant-workers-ai-20261103`. The integration is disabled by default until account billing/free-quota verification and preview D1 migration. GitHub Actions passes the mocked model and bundled Worker tests. **No actual inference or production deployment has been performed.** See [AI-INTEGRATION.md](./AI-INTEGRATION.md) for activation safeguards.
+**As of November 4, 2026:** A Cloudflare Pages **preview-only** build is deployed at [MZcode assistant](https://feat-saudi-assistant-workers.mz702.pages.dev/assistant/). The real Workers AI model has been called successfully via Cloudflare's API, and GitHub CI tests passed. This does **not** verify an end-to-end chat originating in the browser; the owner should test that with a synthetic prompt. The preview code allows only **two requests per IP/day and four requests globally/day**. The production website remains unchanged.
 
-**Previous local-only v1 notes below** (the standalone preview did not connect to a model):
+See [AI-INTEGRATION.md](./AI-INTEGRATION.md) for technical details, privacy and billing caveats. The previous local-only design notes are historical and do not describe the hosted preview.
 
 # MZcode Saudi Assistant — v1 (private preview)
 
