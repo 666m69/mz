@@ -50,7 +50,7 @@ async function connect(){
   await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
   ws.addEventListener('message',e=>{
     const x=JSON.parse(e.data);
-    if(x.method==='Runtime.exceptionThrown')exceptions.push(x.params.exceptionDetails?.text||'runtime exception');
+    if(x.method==='Runtime.exceptionThrown')exceptions.push(JSON.stringify({text:x.params.exceptionDetails?.text,description:x.params.exceptionDetails?.exception?.description,url:x.params.exceptionDetails?.url,line:x.params.exceptionDetails?.lineNumber,column:x.params.exceptionDetails?.columnNumber}).slice(0,1300));
     if(!x.id)return;
     const p=pending.get(x.id);if(!p)return;
     pending.delete(x.id);x.error?p.reject(Error(x.error.message)):p.resolve(x.result);
