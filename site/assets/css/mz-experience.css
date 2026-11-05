@@ -1,6 +1,8 @@
 /* MZcode Experience 2.0: futuristic Saudi assistant — original mark and brand tokens unchanged. */
 /* The earlier hero background had a -17% inline inset causing desktop root overflow. */
 .studio-hero:before{inset:-110px 0 -20px!important}
+/* Clip decorative pseudo elements at the hero edge; keep cards/forms intact. */
+.studio-hero{overflow-x:clip!important}
 
 .studio-hero{display:grid!important;grid-template-columns:minmax(0,.87fr) minmax(0,1.13fr)!important;gap:clamp(20px,3.5vw,55px)!important;align-items:start;min-height:0!important;padding-block:clamp(28px,4vw,58px) 35px!important}
 .studio-hero>.studio-pitch{align-self:center;min-width:0}
