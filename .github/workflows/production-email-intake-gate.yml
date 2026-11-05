@@ -1,0 +1,20 @@
+name: MZcode existing email intake — one synthetic acceptance
+on:
+  push:
+    branches: [feat/mzcode-experience-v2-20261105]
+    paths:
+      - '.github/workflows/production-email-intake-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify existing email-required intake once using marked noncustomer QA idea
+        run: node pilot/production-email-intake-gate.mjs
