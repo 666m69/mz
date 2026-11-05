@@ -12,7 +12,7 @@ const loaded=async route=>{
   return response.text();
 };
 test('public pages contain one accessible corner bot and the unchanged approved logo',async()=>{
-  for(const route of ['/','/tools/','/projects/','/tools/quote/','/tools/teacher/','/games/code/','/privacy/']){
+  for(const route of ['/','/tools/','/projects/','/tools/quote/','/tools/teacher/','/games/code/','/privacy']){
     const html=await loaded(route);
     assert.equal((html.match(/id="mz-assistant-root"/g)||[]).length,1,route);
     assert.match(html,/<button id="mz-bot-trigger"[^>]+aria-expanded="false"/,route);
