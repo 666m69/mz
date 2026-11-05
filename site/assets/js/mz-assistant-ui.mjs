@@ -113,7 +113,7 @@ if(panel){
       });
       download.addEventListener('click',()=>{
         if(!generated)return;
-        const file=new Blob(['\\ufeff'+generated.text],{type:'text/plain;charset=utf-8'});
+        const file=new Blob([String.fromCharCode(0xFEFF),generated.text],{type:'text/plain;charset=utf-8'});
         const url=URL.createObjectURL(file),a=document.createElement('a');
         a.href=url;a.download=generated.filename;document.body.append(a);a.click();a.remove();
         window.setTimeout(()=>URL.revokeObjectURL(url),1200);
