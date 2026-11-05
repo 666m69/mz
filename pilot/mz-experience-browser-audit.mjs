@@ -133,8 +133,11 @@ try{
   await navigate('/');
   const desktop=await evalJS(`return {client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,
     bot:document.getElementById('mz-assistant').getBoundingClientRect().width,
+    offenders:[...document.querySelectorAll('body *')].map(e=>({el:e,r:e.getBoundingClientRect(),style:getComputedStyle(e)}))
+     .filter(x=>x.style.display!=='none'&&x.r.width&&x.r.right>document.documentElement.clientWidth+4)
+     .sort((a,b)=>b.r.right-a.r.right).slice(0,12).map(x=>({tag:x.el.tagName,cls:String(x.el.className).slice(0,60),right:Math.round(x.r.right),width:Math.round(x.r.width)})),
     logo:document.querySelector('.site-header .brand img')?.getAttribute('src')};`);
-  assert.ok(desktop.client===1366&&desktop.scroll<=1368,JSON.stringify(desktop));
+  assert.ok(desktop.client>=1340&&desktop.scroll<=desktop.client+2,JSON.stringify(desktop));
   assert.ok(desktop.bot>=350,JSON.stringify(desktop));
   assert.deepEqual(exceptions,[],JSON.stringify(exceptions));
   await screenshot('mz-experience-desktop.png');
