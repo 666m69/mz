@@ -27,6 +27,8 @@ test('public pages contain one accessible corner bot and the unchanged approved 
       assert.match(html,/<link rel="stylesheet" href="\/assets\/css\/mz-floating-assistant\.css">/,route);
     }
     assert.match(html,/id="mz-chat-window"[^>]* hidden>/,route);
+    assert.match(html,/id="mz-chat-ai-consent" type="checkbox"/,route);
+    assert.match(html,/id="mz-chat-ai-status"/,route);
     assert.doesNotMatch(html,/تم استلام الكود البرمجي وجاري تنفيذه بنجاح/,route);
   }
 });
@@ -57,7 +59,10 @@ test('the script and CSS are served locally under current Worker CSP',async()=>{
   assert.match(script,/data-ready|dataset\.ready/);
   assert.match(script,/sendToReview/);
   assert.doesNotMatch(script,/setTimeout\(\s*\(\)\s*=>\s*\{\s*appendMsg/);
-  assert.doesNotMatch(script,/innerHTML\s*=|eval\s*\(|new Function\s*\(|fetch\s*\(/);
+  assert.doesNotMatch(script,/innerHTML\s*=|eval\s*\(|new Function\s*\(/);
+  assert.match(script,/fetch\('\/api\/assistant'/);
+  assert.match(script,/aiConsent\?\.checked/);
+  assert.match(script,/consent:true/);
   assert.doesNotMatch(script,/تم استلام الكود البرمجي وجاري تنفيذه بنجاح/);
   assert.doesNotMatch(script,/متصل ونشط برمجياً/);
 });
