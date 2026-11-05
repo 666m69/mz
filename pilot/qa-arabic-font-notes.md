@@ -1,0 +1,1 @@
+Arabic rendering QA: verify exported PDF and PNG on current Android and desktop.
