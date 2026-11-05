@@ -1,8 +1,8 @@
 import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
 const root=new URL('./site/',import.meta.url),assets={};const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.xml':'application/xml','.txt':'text/plain; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8'};
 // Ship the shared studio styles in one request. Individual styles remain available for existing pages.
-const studioStyles = ['catalog','studio','vision','showcase','refined','offers','saudi-entry','mz-experience'];
-const originalStyles = studioStyles.filter(name => !['saudi-entry','mz-experience'].includes(name));
+const studioStyles = ['catalog','studio','vision','showcase','refined','offers','saudi-entry','mz-experience','mz-floating-assistant'];
+const originalStyles = studioStyles.filter(name => !['saudi-entry','mz-experience','mz-floating-assistant'].includes(name));
 const styleLinks = originalStyles.map(name => `<link rel="stylesheet" href="/assets/css/${name}.css">`).join('');
 const bundlePath = '/assets/css/studio-site.css';
 // Public MZcode pages share one accessible, reviewed, brand-consistent assistant.
@@ -38,7 +38,7 @@ function walk(dir) {
    const publicPage=relative!=='404.html'&&!relative.startsWith('admin/')&&!relative.startsWith('tools/menu/view/');
    if(publicPage&&/<\/head>/i.test(html)&&/<\/body>/i.test(html)){
      if(html.includes('id="mz-assistant-root"'))throw Error('Duplicate floating assistant root: '+relative);
-     html=html.replace(/<\/head>/i,'<link rel="stylesheet" href="/assets/css/mz-floating-assistant.css"></head>');
+     if(!html.includes('href="/assets/css/studio-site.css"'))html=html.replace(/<\/head>/i,'<link rel="stylesheet" href="/assets/css/mz-floating-assistant.css"></head>');
      html=html.replace(/<\/body>/i,floatingAssistantMarkup+'<script type="module" src="/assets/js/mz-floating-assistant.mjs"></script></body>');
    }
    content=Buffer.from(html);
