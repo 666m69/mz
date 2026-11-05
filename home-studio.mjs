@@ -27,10 +27,67 @@ const social = `<div class="demo-stage social-trial" data-panel="social" hidden>
   <p role="status" id="content-status" class="result">تُجهّز المسودة على جهازك.</p></div>`;
 export const mobileNav=`<nav class="mobile-dock" aria-label="روابط الجوال"><a href="/community/"><span aria-hidden="true">✦</span>المختبر</a><a href="/projects/"><span aria-hidden="true">▤</span>المشاريع</a><a href="/idea"><span aria-hidden="true">✧</span>فكرتك</a><a href="/#contact"><span aria-hidden="true">✉</span>تواصل</a></nav>`;
 export const studio = `<section id="playground" class="studio-hero" aria-labelledby="studio-title">
-  <div class="studio-pitch"><span class="studio-label"><i aria-hidden="true"></i> MZcode · استوديو تطوير لأصحاب المشاريع <span class="label-line" aria-hidden="true"></span></span>
-   <h1 id="studio-title">عندك فكرة؟<br><em>خلّها تشتغل.</em></h1>
-   <p>نحوّل فكرتك إلى تجربة تعمل أمامك، ثم ننفّذها. وعندنا أدوات عربية جاهزة تستخدمها مجانًا من المتصفح.</p>
-   <div class="pitch-actions"><a class="primary" href="/idea">ابدأ بفكرتك <span aria-hidden="true">←</span></a><a class="outline-link" href="#tools">جرّب الأدوات <span aria-hidden="true">↙</span></a></div><div class="hero-footnote"><span class="hero-live-dot" aria-hidden="true"></span> تجارب مباشرة <span class="hero-separator" aria-hidden="true">/</span> بدون تسجيل</div></div>
+  <div class="studio-pitch saudi-intro">
+    <span class="studio-label"><i aria-hidden="true"></i> MZcode · مساعد سعودي لإنجاز شغلك <span class="label-line" aria-hidden="true"></span></span>
+    <p class="saudi-greeting">ارررحب <span aria-hidden="true">🫡</span></p>
+    <h1 id="studio-title">قول وش الوضع؟</h1>
+    <p class="saudi-brand-line"><strong dir="ltr">MZcode</strong> <span>— أكبر نتيجة بأقل جهد <span aria-hidden="true">👍</span></span></p>
+    <p class="saudi-question">وش اللي مجهدك؟ <span aria-hidden="true">😌</span></p>
+    <p class="saudi-guide">اكتب اللي تحتاجه بطريقتك، سواء فكرة تطبيق أو شغلة معطّلتك. نستقبل طلبك برقم متابعة، ونوضح لك وش نقدر نسوي.</p>
+
+    <div class="mz-hero-links"><a href="#mz-assistant" class="mz-hero-primary">خلّنا نبدأ <span aria-hidden="true">←</span></a><a href="#mz-live-demos" class="mz-hero-secondary">أبي أجرب الأدوات <span aria-hidden="true">↙</span></a></div>
+    <p class="mz-promise"><span aria-hidden="true">✦</span> جرّب أدواتنا بدون تسجيل أو بطاقة دفع. تنفيذ المشاريع بعد اتفاق واضح.</p>
+  </div>
+  <section class="mz-ai-panel" id="mz-assistant" aria-label="مساعد MZcode">
+    <div class="mz-ai-panel-top"><div><small dir="ltr">MZcode / SKILLS DESK</small><h2>مساعدك السعودي</h2></div><span class="mz-ai-status"><span aria-hidden="true"></span> مهارات تعمل</span></div>
+    <div class="mz-ai-entity" aria-hidden="true"><span class="mz-entity-halo"></span><span class="mz-entity-orbit one"></span><span class="mz-entity-orbit two"></span><span class="mz-entity-orbit three"></span><span class="mz-entity-core"></span><span class="mz-entity-spark a"></span><span class="mz-entity-spark b"></span><span class="mz-entity-spark c"></span></div>
+    <div class="mz-bot-messages" id="mz-bot-messages" role="log" aria-live="polite" aria-label="ردود مساعد المهارات">
+      <div class="mz-bot-bubble assistant"><strong>ارررحب 🫡</strong><span>قول وش تحتاج، وأشوف لك أقرب أداة شغّالة عندنا. وإذا ما لقينا، نفتح لك طلب مراجعة.</span></div>
+    </div>
+    <div class="mz-bot-suggestions" aria-label="أمثلة للتجربة">
+      <button type="button" data-mz-prompt="أنا معلم وأحتاج رسالة لأولياء الأمور">رسالة معلم</button>
+      <button type="button" data-mz-prompt="أبغى عرض سعر">عرض سعر</button>
+      <button type="button" data-mz-prompt="أبي منيو لمطعم">منيو</button>
+      <button type="button" data-mz-prompt="أبي فرص وألعاب سوني مجانية">فرص ومجانيات</button>
+    </div>
+    <form id="mz-bot-form" class="mz-bot-form" autocomplete="off">
+      <label class="sr-only" for="mz-bot-input">وش ودّك تنجز؟</label>
+      <textarea id="mz-bot-input" name="prompt" maxlength="1200" rows="2" required placeholder="اكتب طلبك بطريقتك..."></textarea>
+      <button type="submit" aria-label="أرسل للمساعد">←</button>
+    </form>
+    <p class="mz-bot-disclaimer">هنا مساعد يوجّهك إلى المهارات المتاحة، وليس محادثة AI عامة. الكلام يبقى بجهازك ولا يُرسل لخادم إلا إذا اخترت إرسال طلب مستقل.</p>
+    <div class="mz-tech-truth" aria-label="حالة القدرات">
+      <span><i class="ready"></i> أدوات فعلية</span><span><i class="preview"></i> نماذج AI: تجريبي</span><span><i class="planned"></i> MCP: تطوير</span>
+    </div>
+  </section>
+  <details class="mz-request-area" id="mz-request">
+    <summary class="mz-request-header"><span><small>محتاج شيء خاص؟</small><strong>أرسل طلبك، وخذ رقم متابعة بعد حفظه</strong></span><span aria-hidden="true">+</span></summary>
+    <div class="mz-request-inside">
+      <p class="mz-request-explain">نراجع طلبك قبل أي تسعير أو التزام. خدمة الاستلام الحالية تتطلب بريد تواصل؛ تقدر تتابع برقم الطلب بعد الحفظ.</p>
+    <form id="mz-quick-idea" class="saudi-intake-form" autocomplete="off" aria-label="أرسل طلبك إلى MZcode">
+      <label for="mz-intake-idea" class="sr-only">اكتب وش تحتاج</label>
+      <textarea id="mz-intake-idea" name="idea" rows="4" minlength="20" maxlength="1600" required placeholder="مثال: أنا معلم وأبي أجهّز خطة متابعة سهلة لطلابي..."></textarea>
+      <div class="saudi-optional-contact">
+        <label for="mz-intake-email">بريد التواصل (مطلوب حاليًا)</label><input id="mz-intake-email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" dir="ltr" placeholder="you@example.com" required>
+        <small>الاستلام بدون بريد قيد التطوير. نحتاجه حاليًا لإكمال حفظ الطلب، ولا نطلب منك أي دفع.</small></div>
+      <div class="saudi-consent"><label><input id="mz-intake-consent" name="consent" type="checkbox" required><span>أوافق على حفظ وصفي وبريدي إن أضفته لمراجعة الطلب، وفق <a href="/privacy">سياسة الخصوصية</a>. لا تكتب معلومات شخصية حساسة.</span></label></div>
+      <div class="saudi-honeypot" aria-hidden="true"><label for="mz-intake-website">اترك هذا الحقل فارغًا</label><input type="text" id="mz-intake-website" name="website" tabindex="-1" autocomplete="off"></div>
+      <button type="submit" class="saudi-send" id="mz-intake-send">أرسل وخذ رقم طلبك <span aria-hidden="true">←</span></button>
+      <p id="mz-intake-state" class="saudi-intake-state" role="status" aria-live="polite"></p>
+    </form>
+    <div id="mz-intake-success" class="saudi-intake-success" hidden role="status" aria-live="polite">
+      <span class="saudi-success-label">وصل طلبك، يا هلا فيك</span>
+      <strong id="mz-intake-reference" class="saudi-reference" dir="ltr"></strong>
+      <span id="mz-intake-date" class="saudi-date"></span>
+      <span id="mz-intake-mail" class="saudi-mail-info"></span>
+      <div class="saudi-success-actions"><button id="mz-intake-copy" type="button">انسخ الرقم</button><button id="mz-intake-track" type="button">تابع طلبك</button><a href="#tools">خذلك فَرّة على MZcode 🚶‍♂️</a></div><p id="mz-intake-track-state" role="status" aria-live="polite"></p>
+      <small>الرقم يؤكد الاستلام فقط، مو وعدًا بتنفيذ الطلب أو سعرًا نهائيًا.</small>
+    </div>
+    <div class="saudi-browse"><a href="#tools">ما عندك طلب؟ خذلك فَرّة على MZcode <span aria-hidden="true">🚶‍♂️</span></a><a href="/idea">تبي تختبر فكرتك؟ افتح المختبر</a></div>
+
+    </div>
+  </details>
+  <div class="mz-live-heading" id="mz-live-demos"><div><span>ما يحتاج تسأل…</span><h2>جرّب وتشوف بنفسك.</h2><p>نماذج تفاعلية حقيقية بدون تسجيل، كل تجربة توضّح حدودها.</p></div><a href="/tools/">كل الأدوات <span aria-hidden="true">↗</span></a></div>
   <div class="live-console" aria-label="تجارب فورية">
     <div class="console-line"><span class="console-flag">تجربة حيّة · اضغط وجرّب</span><span class="terminal-id" dir="ltr">INTERACTIVE / 01</span></div>
     <div class="mode-switch" data-controls role="group" aria-label="اختر تجربة"><button type="button" data-mode="book" aria-pressed="true">احجز</button><button type="button" data-mode="quote" aria-pressed="false">سعّر</button><button type="button" data-mode="game" aria-pressed="false">العب</button><button type="button" data-mode="social" aria-pressed="false">خطّط</button></div>

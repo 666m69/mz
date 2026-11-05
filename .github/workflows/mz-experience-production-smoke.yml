@@ -1,0 +1,24 @@
+name: MZcode Experience 2.0 — public release smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'home-studio.mjs'
+      - 'catalog.mjs'
+      - 'site/assets/css/mz-experience.css'
+      - 'site/assets/js/mz-assistant-ui.mjs'
+      - 'pilot/experience-production-smoke.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify live custom domain and assets without writing production data
+        run: node pilot/experience-production-smoke.mjs

@@ -1,0 +1,59 @@
+/* Saudi-first homepage — preserve existing MZcode logo and approved colors.
+   Green is an accent only; all existing demos and projects remain in place. */
+.saudi-intro{position:relative;z-index:1;min-width:0}
+.saudi-intro .studio-label{border-color:#1cc77866;background:#0b382b88;color:#b8f6d5}
+.saudi-greeting{margin:15px 0 0!important;color:#f3fff7!important;font-size:clamp(26px,3vw,39px)!important;font-weight:900;letter-spacing:-.04em}
+.saudi-intro #studio-title{font-size:clamp(39px,5.2vw,67px);line-height:1.3;margin:5px 0 8px;max-width:none}
+.saudi-brand-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;color:#d8f5df!important;font-weight:750!important;font-size:clamp(18px,2vw,24px)!important;margin:8px 0!important}
+.saudi-brand-line strong{color:#4ee49e;font-size:1.18em;letter-spacing:-.03em}
+.saudi-question{color:#fff!important;font-size:clamp(25px,3vw,34px)!important;font-weight:800;margin:6px 0 5px!important}
+.saudi-guide{margin:4px 0 18px!important;font-size:clamp(14px,1.25vw,16px)!important;line-height:1.85;color:#baccd0!important}
+.saudi-intake-form{padding:16px;border:1px solid #36bb805a;border-radius:19px;background:linear-gradient(130deg,#112a28ed,#0a1f29ef);box-shadow:0 15px 50px #0005,0 0 35px #16b4730d}
+.saudi-intake-form textarea,.saudi-intake-form input[type=email]{display:block;width:100%;box-sizing:border-box;border:1px solid #42695f;background:#071822;color:#f1fff6;border-radius:11px;padding:13px 15px;font:inherit;min-height:112px;resize:vertical;line-height:1.75}
+.saudi-intake-form textarea::placeholder,.saudi-intake-form input::placeholder{color:#92a8a9}
+.saudi-intake-form input[type=email]{min-height:42px;direction:ltr;text-align:left}
+.saudi-intake-form :focus-visible,.saudi-intake-success :focus-visible,.saudi-browse a:focus-visible{outline:3px solid #83ffbb;outline-offset:2px}
+.saudi-intake-form .saudi-optional-contact{margin:12px 0 0;border-top:1px solid #5bb89637;padding-top:11px;color:#b3d8c3;font-size:13px}
+.saudi-optional-contact summary{cursor:pointer;list-style:revert;font-weight:650}
+.saudi-optional-contact label{display:block;margin:12px 0 6px;color:#e5fff0;font-weight:750}
+.saudi-optional-contact small{display:block;margin-top:6px;color:#bbd8c5;font-size:12px;line-height:1.6}
+.saudi-consent{margin:12px 0}
+.saudi-consent label{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.75;color:#c8ddce;cursor:pointer}
+.saudi-consent input{width:18px;height:18px;flex:none;accent-color:#22b571;margin:3px 0}
+.saudi-consent a{color:#84e6b0}
+.saudi-honeypot{position:absolute!important;inset-inline-start:0!important;top:0!important;left:auto!important;height:1px!important;width:1px!important;overflow:hidden!important;clip-path:inset(50%);pointer-events:none}
+.saudi-send{border:0;background:#18b76b;color:#052519;border-radius:11px;font:inherit;font-size:15px;font-weight:900;min-height:49px;padding:10px 20px;width:100%;cursor:pointer;transition:filter .15s}
+.saudi-send:hover{filter:brightness(1.17)}
+.saudi-send:disabled{opacity:.55;cursor:progress}
+.saudi-intake-state{font-size:13px!important;line-height:1.7!important;color:#d9fae1!important;margin:9px 0 0!important}
+.saudi-intake-state:empty{display:none}
+.saudi-intake-success{padding:17px 19px;border:1px solid #5ae9a675;background:linear-gradient(130deg,#0f4836,#10262c);border-radius:16px;margin-top:16px;display:flex;flex-direction:column;gap:7px;overflow-wrap:anywhere}
+.saudi-intake-success[hidden]{display:none!important}
+.saudi-success-label{color:#bbfbd1;font-weight:800}
+.saudi-reference{font:750 clamp(20px,3.5vw,28px)/1.5 ui-monospace,Consolas,monospace;letter-spacing:.02em;color:#fff;align-self:flex-start}
+.saudi-date,.saudi-mail-info{color:#c3dccd;font-size:12px;line-height:1.65}
+.saudi-success-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px}
+.saudi-success-actions a,.saudi-success-actions button{border:1px solid #62da9b;border-radius:9px;padding:9px 11px;background:#16ae67;color:#07241a;text-decoration:none;font-size:12px;font-weight:800;cursor:pointer}
+.saudi-success-actions a:last-child{background:transparent;color:#c7f4d8}
+.saudi-intake-success small{color:#b5cbbe;font-size:11px;line-height:1.6}
+.saudi-browse{display:flex;flex-wrap:wrap;gap:10px 18px;margin:17px 0 0}
+.saudi-browse a{font-size:13px;color:#8feac0;text-underline-offset:4px}
+.saudi-browse a:hover{color:#d8ffe9}
+.saudi-intro~.live-console{border-color:#276c5c;background:linear-gradient(140deg,#132b32,#111d2a 70%,#122b27)}
+@media(max-width:800px){.saudi-intro #studio-title{font-size:clamp(35px,9vw,55px)}.saudi-intake-form{padding:13px}.saudi-intro~.live-console{margin-top:8px}}
+@media(max-width:460px){.saudi-greeting{font-size:28px!important}.saudi-question{font-size:24px!important}.saudi-intro .studio-label{font-size:11px}.saudi-brand-line{font-size:17px!important}.saudi-intake-form textarea{min-height:105px}.saudi-success-actions>*{flex:1;text-align:center}}
+@media(prefers-reduced-motion:reduce){.saudi-send{transition:none}}
+
+/* Visitor discovery tiles; keep the approved brand mark and original dark-blue design. */
+.saudi-discover{margin-block:34px 44px;min-width:0}
+.discovery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.discovery-card{display:flex;flex-direction:column;gap:10px;border-radius:20px;border:1px solid #307d6377;background:linear-gradient(150deg,#102b30 5%,#102139 80%);padding:clamp(17px,2.7vw,25px);min-width:0;box-shadow:0 13px 40px #001f3020}
+.discovery-card .discovery-tag{font-size:12px;color:#86e9b5;font-weight:800}
+.discovery-card .discovery-icon{width:49px;height:49px;border-radius:14px;display:grid;place-items:center;background:#064c36;color:#9bf5bb;font-size:27px;line-height:1}
+.discovery-card h3{font-size:clamp(18px,2vw,22px);line-height:1.45;color:#f7fff9;margin:4px 0 0}
+.discovery-card p{color:#c4d8d3;font-size:14px;line-height:1.85;flex:1;margin:0}
+.discovery-card a{align-self:flex-start;color:#0a3323;background:#49d99b;padding:9px 14px;font-size:13px;font-weight:900;text-decoration:none;border-radius:10px}
+.discovery-card a:hover{background:#8cf9c2}
+.discovery-disclaimer{font-size:12px;line-height:1.8;color:#b3cebd;margin:12px 0 0}
+@media(max-width:920px){.discovery-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:610px){.discovery-grid{grid-template-columns:1fr}.discovery-card{min-height:0}.saudi-discover{margin-block:22px 35px}}

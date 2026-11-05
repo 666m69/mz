@@ -6,6 +6,7 @@ const friendlyReference=id=>"MZ-"+id.slice(0,8).toUpperCase()+id.slice(-4).toUpp
 const dateForCustomer=ms=>new Intl.DateTimeFormat("ar-SA-u-ca-gregory",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(ms));
 const receiptResult=(id,created_ms,receipt_email_status)=>({ok:true,id,reference:friendlyReference(id),created_ms,receipt_email_status});
 async function sendCustomerReceipt(env,{id,created_ms,idea,email,name}){
+ if(!email)return {status:'not_requested',providerId:null,error:null};
  if(!env.RESEND_API_KEY)return {status:"pending_setup",providerId:null,error:null};
  const reference=friendlyReference(id);
  const message=[
@@ -95,7 +96,7 @@ export default {async fetch(request,env){
  const idea=typeof data.idea==="string"?data.idea.trim():"",email=typeof data.email==="string"?data.email.trim().toLowerCase():"",name=typeof data.name==="string"?data.name.trim():"";
  if(data.website)return json({error:"تعذر قبول الطلب"},400);
  if(data.consent!=="yes")return json({error:"يجب الموافقة على معالجة البيانات"},400);
- if(idea.length<20||idea.length>5000||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||name.length>100)return json({error:"تحقق من الفكرة والبريد"},400);
+ if(idea.length<20||idea.length>5000||email.length>254||(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||name.length>100)return json({error:"تحقق من الفكرة والبريد"},400);
  const key=request.headers.get("Idempotency-Key");
  if(key&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(key))return json({error:"معرف الطلب غير صالح"},400);
  const id=key||crypto.randomUUID(),ip=request.headers.get("CF-Connecting-IP")||"unknown",now=Date.now();
@@ -116,7 +117,7 @@ export default {async fetch(request,env){
   if(env.NOTIFY&&env.NOTIFY_TO){
    try{
     await env.NOTIFY.send({from:"info@mzcodehub.com",to:env.NOTIFY_TO,subject:"[MZ Code Hub] New project idea — "+friendlyReference(id),
-     text:"طلب فكرة جديد\nرقم الطلب: "+friendlyReference(id)+"\nتاريخ الطلب: "+dateForCustomer(now)+"\nالمعرّف الداخلي: "+id+"\nالاسم: "+name+"\nبريد العميل: "+email+"\n\n"+idea.slice(0,5000)});
+     text:"طلب فكرة جديد\nرقم الطلب: "+friendlyReference(id)+"\nتاريخ الطلب: "+dateForCustomer(now)+"\nالمعرّف الداخلي: "+id+"\nالاسم: "+(name||'زائر الموقع')+"\nبريد العميل: "+(email||'لم يُذكر — متابعة برقم الطلب فقط')+"\n\n"+idea.slice(0,5000)});
     await env.DB.prepare("UPDATE idea_requests SET notification_status='sent' WHERE id=?").bind(id).run();
    }catch(e){console.error("idea email notification failed");try{await env.DB.prepare("UPDATE idea_requests SET notification_status='failed',notification_error=? WHERE id=?").bind("delivery_failed",id).run()}catch{}}
   }
