@@ -18,7 +18,9 @@
   width:84px;height:84px;padding:0;border:0!important;background:transparent!important;
   border-radius:50%;box-shadow:none!important;overflow:visible;transition:transform .24s ease;
 }
+#mz-bot-trigger{touch-action:none;user-select:none;cursor:grab}
 #mz-bot-trigger:hover{transform:scale(1.075)}
+#mz-assistant-root[data-dragging="true"] #mz-bot-trigger{cursor:grabbing;transform:none!important;transition:none!important}
 #mz-portal-canvas{width:84px;height:84px;pointer-events:none;display:block}
 #mz-bot-trigger .mz-floating-logo{
   position:absolute;top:50%;left:50%;width:35px;height:35px;
@@ -31,7 +33,7 @@
   pointer-events:none
 }
 #mz-chat-window{
-  position:absolute;bottom:98px;right:0;
+  position:fixed;top:auto;left:auto;bottom:auto;right:auto;
   width:min(358px,calc(100vw - 24px));
   height:min(500px,calc(100dvh - 140px));
   min-height:220px;display:flex;flex-direction:column;
@@ -137,12 +139,12 @@
 @media(max-width:650px){
   #mz-assistant-root{right:12px;bottom:calc(78px + env(safe-area-inset-bottom,0px))}
   #mz-bot-trigger,#mz-portal-canvas{width:74px;height:74px}
-  #mz-chat-window{right:0;bottom:83px;width:min(360px,calc(100vw - 24px));
+  #mz-chat-window{right:auto;bottom:auto;width:min(360px,calc(100vw - 24px));
     height:min(490px,calc(100dvh - 190px));max-height:calc(100dvh - 190px)}
 }
 @media(max-height:480px){
   #mz-assistant-root{bottom:7px}
-  #mz-chat-window{bottom:66px;min-height:145px;height:calc(100dvh - 85px)}
+  #mz-chat-window{bottom:auto;min-height:145px;height:calc(100dvh - 85px)}
   #mz-bot-trigger,#mz-portal-canvas{width:61px;height:61px}
 }
 @media(prefers-reduced-motion:reduce){
@@ -179,3 +181,6 @@
   #mz-chat-window .mz-chat-quick{padding-block:5px}
   #mz-chat-window .mz-chat-ai-controls small{font-size:9px}
 }
+
+/* Mobile gesture: icon drag stays independent of page scroll; chat opens only on tap. */
+#mz-assistant-root[data-dragging="true"] #mz-bot-trigger{filter:drop-shadow(0 0 15px rgba(249,168,37,.55))}
