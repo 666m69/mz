@@ -19,7 +19,13 @@ test('public pages contain one accessible corner bot and the unchanged approved 
     assert.match(html,/id="mz-portal-canvas" width="160" height="160"/,route);
     assert.match(html,/class="mz-floating-logo" src="\/assets\/images\/mz-mark\.svg"/,route);
     assert.match(html,/<script type="module" src="\/assets\/js\/mz-floating-assistant\.mjs"><\/script>/,route);
-    assert.match(html,/<link rel="stylesheet" href="\/assets\/css\/mz-floating-assistant\.css">/,route);
+    // Studio pages reuse the existing single CSS bundle; standalone tools load the isolated stylesheet.
+    if(['/','/tools/','/projects/'].includes(route)){
+      assert.match(html,/<link rel="stylesheet" href="\/assets\/css\/studio-site\.css">/,route);
+      assert.doesNotMatch(html,/href="\/assets\/css\/mz-floating-assistant\.css"/,route);
+    }else{
+      assert.match(html,/<link rel="stylesheet" href="\/assets\/css\/mz-floating-assistant\.css">/,route);
+    }
     assert.match(html,/id="mz-chat-window"[^>]* hidden>/,route);
     assert.doesNotMatch(html,/تم استلام الكود البرمجي وجاري تنفيذه بنجاح/,route);
   }
