@@ -5,6 +5,9 @@ const studioStyles = ['catalog','studio','vision','showcase','refined','offers',
 const originalStyles = studioStyles.filter(name => !['saudi-entry','mz-experience'].includes(name));
 const styleLinks = originalStyles.map(name => `<link rel="stylesheet" href="/assets/css/${name}.css">`).join('');
 const bundlePath = '/assets/css/studio-site.css';
+// Public MZcode pages share one accessible, reviewed, brand-consistent assistant.
+const floatingAssistantMarkup = "<div id=\"mz-assistant-root\" dir=\"rtl\" aria-label=\"مساعد MZcode العائم\">\n  <section id=\"mz-chat-window\" role=\"region\" aria-labelledby=\"mz-floating-title\" hidden>\n    <div class=\"mz-chat-header\">\n      <div class=\"mz-brand-badge\"><img src=\"/assets/images/mz-mark.svg\" alt=\"\" width=\"29\" height=\"29\"></div>\n      <div class=\"mz-chat-heading\">\n        <h2 id=\"mz-floating-title\">مساعد MZcode الذكي</h2>\n        <span>مهارات MZcode المتاحة • تشغيل محلي</span>\n      </div>\n      <button id=\"mz-chat-close\" type=\"button\" aria-label=\"إغلاق المساعد\">×</button>\n    </div>\n    <div id=\"mz-chat-messages\" role=\"log\" aria-live=\"polite\" aria-relevant=\"additions\">\n      <div class=\"mz-floating-msg mz-floating-bot\"><strong>ارررحب 🫡</strong><span>قول وش تحتاج، وأشوف لك أداة شغّالة أو أجهّز لك مسودة. وإذا ما توفرت المهارة، نسجل طلب مراجعة.</span></div>\n    </div>\n    <div class=\"mz-chat-quick\" role=\"group\" aria-label=\"اقتراحات جاهزة\">\n      <button type=\"button\" data-mz-quick=\"أنا معلم وأحتاج رسالة لأولياء الأمور\">رسالة معلم</button>\n      <button type=\"button\" data-mz-quick=\"أبغى عرض سعر لعميل\">عرض سعر</button>\n      <button type=\"button\" data-mz-quick=\"أبغى منيو لمطعم\">منيو</button>\n    </div>\n    <form id=\"mz-chat-form\" autocomplete=\"off\">\n      <label for=\"mz-chat-input\" class=\"mz-floating-only-screen-reader\">اكتب استفسارك أو طلبك</label>\n      <textarea id=\"mz-chat-input\" maxlength=\"1200\" rows=\"2\" required placeholder=\"اكتب اللي مجهدك هنا...\"></textarea>\n      <button id=\"mz-chat-send\" type=\"submit\">إرسال</button>\n    </form>\n    <p class=\"mz-chat-note\">هذا مساعد مهارات وليس محادثة ذكاء اصطناعي عامة. لا يرسل رسائلك إلى الخادم إلا إذا اخترت تقديم طلب منفصل.</p>\n  </section>\n  <button id=\"mz-bot-trigger\" type=\"button\" title=\"مساعد MZcode\" aria-label=\"افتح مساعد MZcode\" aria-controls=\"mz-chat-window\" aria-expanded=\"false\">\n    <canvas id=\"mz-portal-canvas\" width=\"160\" height=\"160\" aria-hidden=\"true\"></canvas>\n    <img class=\"mz-floating-logo\" src=\"/assets/images/mz-mark.svg\" alt=\"\" width=\"35\" height=\"35\">\n  </button>\n</div>";
+
 function addAsset(pathname, bytes, type) {
  assets[pathname] = [bytes.toString('base64'),type,crypto.createHash('sha256').update(bytes).digest('hex')];
 }
@@ -31,6 +34,13 @@ function walk(dir) {
    // Build fails instead of shipping an unbranded standalone MZcode-owned tool.
    if(isStandalone&&!/<img\b[^>]*\bsrc=["']\/assets\/images\/mz-mark\.svg["']/i.test(html))
     throw Error('Visible MZcode emblem required: '+relative);
+   // Exclude privileged administration and visitors' independently published menus.
+   const publicPage=relative!=='404.html'&&!relative.startsWith('admin/')&&!relative.startsWith('tools/menu/view/');
+   if(publicPage&&/<\/head>/i.test(html)&&/<\/body>/i.test(html)){
+     if(html.includes('id="mz-assistant-root"'))throw Error('Duplicate floating assistant root: '+relative);
+     html=html.replace(/<\/head>/i,'<link rel="stylesheet" href="/assets/css/mz-floating-assistant.css"></head>');
+     html=html.replace(/<\/body>/i,floatingAssistantMarkup+'<script type="module" src="/assets/js/mz-floating-assistant.mjs"></script></body>');
+   }
    content=Buffer.from(html);
   }
   addAsset('/'+relative,content,types[path.extname(file)]||'application/octet-stream');
