@@ -16,7 +16,7 @@ function mock(){
         const old=counts.get(bucket)||0;
         if(old>=limit)return null;
         counts.set(bucket,old+1);return {hits:old+1};
-      }}};
+      }}}};
     }}
   };
   const deps={
