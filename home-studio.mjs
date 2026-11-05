@@ -63,13 +63,13 @@ export const studio = `<section id="playground" class="studio-hero" aria-labelle
   <details class="mz-request-area" id="mz-request">
     <summary class="mz-request-header"><span><small>محتاج شيء خاص؟</small><strong>أرسل طلبك، وخذ رقم متابعة بعد حفظه</strong></span><span aria-hidden="true">+</span></summary>
     <div class="mz-request-inside">
-      <p class="mz-request-explain">نراجع طلبك قبل أي تسعير أو التزام. البريد اختياري؛ إذا ما أضفته، احتفظ برقم المتابعة.</p>
+      <p class="mz-request-explain">نراجع طلبك قبل أي تسعير أو التزام. خدمة الاستلام الحالية تتطلب بريد تواصل؛ تقدر تتابع برقم الطلب بعد الحفظ.</p>
     <form id="mz-quick-idea" class="saudi-intake-form" autocomplete="off" aria-label="أرسل طلبك إلى MZcode">
       <label for="mz-intake-idea" class="sr-only">اكتب وش تحتاج</label>
       <textarea id="mz-intake-idea" name="idea" rows="4" minlength="20" maxlength="1600" required placeholder="مثال: أنا معلم وأبي أجهّز خطة متابعة سهلة لطلابي..."></textarea>
-      <details class="saudi-optional-contact"><summary>تبغانا نرد عليك؟ أضف بريدك (اختياري)</summary>
-        <label for="mz-intake-email">بريد التواصل</label><input id="mz-intake-email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" dir="ltr" placeholder="you@example.com">
-        <small>بدون بريد تقدر تتابع حالة الطلب برقم المتابعة، لكن ما نقدر نراسلك.</small></details>
+      <div class="saudi-optional-contact">
+        <label for="mz-intake-email">بريد التواصل (مطلوب حاليًا)</label><input id="mz-intake-email" name="email" type="email" maxlength="254" autocomplete="email" inputmode="email" dir="ltr" placeholder="you@example.com" required>
+        <small>الاستلام بدون بريد قيد التطوير. نحتاجه حاليًا لإكمال حفظ الطلب، ولا نطلب منك أي دفع.</small></div>
       <div class="saudi-consent"><label><input id="mz-intake-consent" name="consent" type="checkbox" required><span>أوافق على حفظ وصفي وبريدي إن أضفته لمراجعة الطلب، وفق <a href="/privacy">سياسة الخصوصية</a>. لا تكتب معلومات شخصية حساسة.</span></label></div>
       <div class="saudi-honeypot" aria-hidden="true"><label for="mz-intake-website">اترك هذا الحقل فارغًا</label><input type="text" id="mz-intake-website" name="website" tabindex="-1" autocomplete="off"></div>
       <button type="submit" class="saudi-send" id="mz-intake-send">أرسل وخذ رقم طلبك <span aria-hidden="true">←</span></button>
