@@ -3,7 +3,9 @@
  * Uses the SAME reviewed router/teacher skill as the existing homepage assistant.
  * No mock replies, network calls, automated external messages or client data storage.
  */
-import {guideRequest} from './mz-assistant-router.mjs';
+import {guideRequest,CAPABILITIES} from './mz-assistant-router.mjs';
+import {professionDiscovery} from './mz-profession-guide.mjs';
+import {iconPosition,storedIconPoint,floatingWindowPoint} from './mz-assistant-position.mjs';
 import {executeInlineSkill} from './mz-inline-skills.mjs';
 
 const root=document.getElementById('mz-assistant-root');
@@ -25,6 +27,11 @@ if(root && root.dataset.initialized!=='true'){
   let requestsRouted=0;
   let aiHistory=[];
   let aiBusy=false;
+  const recentNeeds=[]; // tab memory only, never stored or sent without review
+  const positionKey='mzcode:assistant-icon-position:v1';
+  let savedPosition=null;
+  let pointerDrag=null;
+  let suppressClickUntil=0;
 
   function node(tag,text,cls){
     const element=document.createElement(tag);
@@ -32,15 +39,120 @@ if(root && root.dataset.initialized!=='true'){
     if(cls)element.className=cls;
     return element;
   }
+  function viewport(){
+    const icon=trigger.getBoundingClientRect();
+    return {width:window.innerWidth,height:window.innerHeight,
+      iconWidth:icon.width,iconHeight:icon.height,margin:10,
+      dock:window.matchMedia('(max-width:650px)').matches?76:0};
+  }
+  function moveIcon(x,y,save=false){
+    const dimensions=viewport();
+    const point=iconPosition(x,y,dimensions);
+    if(!point)return;
+    root.style.left=point.x+'px';
+    root.style.top=point.y+'px';
+    root.style.right='auto';
+    root.style.bottom='auto';
+    if(save){
+      savedPosition={
+        x:point.x/Math.max(1,dimensions.width-dimensions.iconWidth),
+        y:point.y/Math.max(1,dimensions.height-dimensions.iconHeight)
+      };
+      try{localStorage.setItem(positionKey,JSON.stringify(savedPosition));}catch{}
+    }
+    if(!windowEl.hidden)placeWindow();
+  }
+  function placeWindow(){
+    if(windowEl.hidden)return;
+    const icon=trigger.getBoundingClientRect();
+    const panel={width:windowEl.offsetWidth,height:windowEl.offsetHeight};
+    const point=floatingWindowPoint(icon,panel,{width:window.innerWidth,height:window.innerHeight});
+    windowEl.style.left=point.x+'px';
+    windowEl.style.top=point.y+'px';
+    windowEl.style.right='auto';
+    windowEl.style.bottom='auto';
+  }
   function setOpen(open,returnFocus=false){
     windowEl.hidden=!open;
     trigger.setAttribute('aria-expanded',String(open));
     trigger.setAttribute('aria-label',open?'أغلق مساعد MZcode':'افتح مساعد MZcode');
     root.dataset.open=String(open);
-    if(open)field.focus({preventScroll:true});
-    else if(returnFocus)trigger.focus({preventScroll:true});
+    if(open){
+      placeWindow();
+      field.focus({preventScroll:true});
+    }else if(returnFocus)trigger.focus({preventScroll:true});
   }
-  trigger.addEventListener('click',()=>setOpen(windowEl.hidden));
+  try{savedPosition=JSON.parse(localStorage.getItem(positionKey)||'null');}catch{savedPosition=null;}
+  if(savedPosition){
+    const point=storedIconPoint(savedPosition,viewport());
+    if(point)moveIcon(point.x,point.y);
+    else savedPosition=null;
+  }
+  trigger.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='mouse'&&event.button!==0)return;
+    const rect=trigger.getBoundingClientRect();
+    pointerDrag={id:event.pointerId,startX:event.clientX,startY:event.clientY,
+      initialX:rect.left,initialY:rect.top,moved:false};
+    try{trigger.setPointerCapture(event.pointerId);}catch{}
+  });
+  trigger.addEventListener('pointermove',event=>{
+    if(!pointerDrag||event.pointerId!==pointerDrag.id)return;
+    const dx=event.clientX-pointerDrag.startX;
+    const dy=event.clientY-pointerDrag.startY;
+    if(!pointerDrag.moved&&Math.hypot(dx,dy)<8)return;
+    if(!pointerDrag.moved){
+      pointerDrag.moved=true;
+      root.dataset.dragging='true';
+      setOpen(false);
+    }
+    event.preventDefault();
+    moveIcon(pointerDrag.initialX+dx,pointerDrag.initialY+dy);
+  });
+  function endDrag(event){
+    if(!pointerDrag||pointerDrag.id!==event.pointerId)return;
+    if(pointerDrag.moved){
+      suppressClickUntil=performance.now()+500;
+      const rect=trigger.getBoundingClientRect();
+      moveIcon(rect.left,rect.top,true);
+    }
+    pointerDrag=null;
+    delete root.dataset.dragging;
+    try{if(trigger.hasPointerCapture(event.pointerId))trigger.releasePointerCapture(event.pointerId);}catch{}
+  }
+  trigger.addEventListener('pointerup',endDrag);
+  trigger.addEventListener('pointercancel',endDrag);
+  trigger.addEventListener('click',event=>{
+    if(performance.now()<suppressClickUntil){
+      event.preventDefault();return;
+    }
+    setOpen(windowEl.hidden);
+  });
+  trigger.addEventListener('keydown',event=>{
+    const delta={'ArrowLeft':[-24,0],'ArrowRight':[24,0],
+      'ArrowUp':[0,-24],'ArrowDown':[0,24]}[event.key];
+    if(event.altKey&&delta){
+      event.preventDefault();
+      const rect=trigger.getBoundingClientRect();
+      moveIcon(rect.left+delta[0],rect.top+delta[1],true);
+    }
+    if(event.altKey&&event.key==='Home'){
+      event.preventDefault();savedPosition=null;
+      try{localStorage.removeItem(positionKey);}catch{}
+      root.style.left='';root.style.top='';root.style.right='';root.style.bottom='';
+      placeWindow();
+    }
+  });
+  window.addEventListener('resize',()=>{
+    if(savedPosition){
+      const point=storedIconPoint(savedPosition,viewport());
+      if(point)moveIcon(point.x,point.y);
+    }
+    placeWindow();
+  },{passive:true});
+  window.visualViewport?.addEventListener('resize',placeWindow,{passive:true});
+  for(const button of document.querySelectorAll('[data-mz-open-assistant]')){
+    button.addEventListener('click',()=>setOpen(true));
+  }
   closeButton.addEventListener('click',()=>setOpen(false,true));
   root.addEventListener('keydown',event=>{
     if(event.key==='Escape'&&!windowEl.hidden){
@@ -86,10 +198,25 @@ if(root && root.dataset.initialized!=='true'){
     text.focus({preventScroll:true});
     return true;
   }
+  function rememberNeed(text){
+    // No personal records, email, phone number or sensitive medical content in the handoff.
+    if(typeof text!=='string'||!text.trim()||
+      /@|(?:\b05\d{8}\b|\+9665\d{8}|\b\d{10}\b)|(?:سجل طبي|هوية وطنية|بيانات مريض)/i.test(text))return;
+    recentNeeds.push(text.trim().slice(0,410));
+    if(recentNeeds.length>3)recentNeeds.shift();
+  }
+  function leadDraft(raw){
+    const recent=recentNeeds.slice(-3);
+    if(!recent.length)recent.push(raw.slice(0,410));
+    const draft='أرغب في مراجعة مجانية لاحتياجي التقني، دون التزام بالتنفيذ أو الدفع:\n'+
+      recent.map((text,index)=>(index+1)+') '+text).join('\n');
+    return draft.slice(0,1200);
+  }
   function sendToReview(value){
-    if(intakeOnHome(value))return;
+    const draft=leadDraft(value);
+    if(intakeOnHome(draft))return;
     // Session-scoped local handoff avoids placing visitor ideas in URLs or server logs.
-    try{sessionStorage.setItem(transferKey,value);}catch{}
+    try{sessionStorage.setItem(transferKey,draft);}catch{}
     window.location.assign('/#mz-request');
   }
   if(location.pathname==='/' && document.getElementById('mz-request')){
@@ -180,7 +307,11 @@ if(root && root.dataset.initialized!=='true'){
     // All actions below originate from the reviewed local router, never from generated text.
     const result=guideRequest(raw);
     const row=actions(bubble);
+    const occupation=professionDiscovery(raw);
+    const additional=occupation?.links||[];
+    const paths=new Set();
     if(result.url&&result.skill_name){
+      paths.add(result.url);
       addLink(row,result.url,'افتح '+result.skill_name);
       if(result.skill_id==='teacher'){
         const button=addButton(row,'جهز مسودة هنا',()=>{
@@ -189,7 +320,16 @@ if(root && root.dataset.initialized!=='true'){
         });
       }
     }
-    if(result.request_allowed)addButton(row,'أرسل فكرتك للمراجعة',()=>sendToReview(raw));
+    for(const id of additional){
+      const approved=CAPABILITIES.find(item=>item.id===id);
+      if(approved&&!paths.has(approved.href)){
+        paths.add(approved.href);
+        addLink(row,approved.href,'جرّب '+approved.name+' مجانًا');
+      }
+    }
+    if(result.url||result.request_allowed||additional.length){
+      addButton(row,'ارفع طلبًا للمراجعة المجانية',()=>sendToReview(raw));
+    }
     if(!row.childElementCount)row.remove();
   }
   async function sendAI(raw){
@@ -202,6 +342,7 @@ if(root && root.dataset.initialized!=='true'){
     if(submit)submit.disabled=true;
     field.value='';
     message('user','',prompt);
+    rememberNeed(prompt);
     const bubble=message('bot','جاري التواصل مع نموذج الذكاء الاصطناعي','لا توجد عمليات تنفيذ أو نشر تجري الآن.');
     aiStatus.textContent='جاري معالجة الرسالة...';
     state='thinking';
@@ -263,6 +404,22 @@ if(root && root.dataset.initialized!=='true'){
     const text=raw.trim().slice(0,1200);
     field.value='';
     message('user','',text);
+    rememberNeed(text);
+    const occupation=professionDiscovery(text);
+    if(occupation){
+      const bubble=message('bot','أبشر، خلنا نفهم مهامك',occupation.intro);
+      const row=actions(bubble);
+      for(const id of occupation.links){
+        const approved=CAPABILITIES.find(item=>item.id===id);
+        if(approved)addLink(row,approved.href,'جرّب '+approved.name+' مجانًا');
+      }
+      addButton(row,'خلّنا نراجع احتياجك مجانًا',()=>sendToReview(text));
+      requestsRouted++;
+      root.dataset.requestsRouted=String(requestsRouted);
+      messages.scrollTop=messages.scrollHeight;
+      pulse();
+      return;
+    }
     let result;
     try{result=guideRequest(text);}
     catch{
@@ -280,8 +437,8 @@ if(root && root.dataset.initialized!=='true'){
         });
       }
     }
-    if(result.request_allowed){
-      addButton(row,'أرسل فكرتك للمراجعة',()=>sendToReview(text));
+    if(result.url||result.request_allowed){
+      addButton(row,'ارفع طلبًا للمراجعة المجانية',()=>sendToReview(text));
     }
     if(!row.childElementCount)row.remove();
     requestsRouted++;
