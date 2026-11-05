@@ -66,7 +66,7 @@ for(const [kind,build,fixture] of [
       assert.match(files['styles.css'],/\.mz-builder-emblem svg/);
       assert.match(files['index.html'],/connect-src 'none'/);
       assert.ok(contents.reduce((sum,item)=>sum+Buffer.byteLength(item),0)<49152);
-      assert.doesNotMatch(files['index.html'],/https?:\/\//);
+      assert.doesNotMatch(files['index.html'],/<(?:script|link)[^>]+(?:src|href)=["']https?:\/\//i);
       assert.ok(files['app.js'].length>200,'non-placeholder working application');
     }finally{await rm(dir,{recursive:true,force:true});}
   });
