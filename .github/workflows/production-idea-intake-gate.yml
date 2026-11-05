@@ -1,0 +1,20 @@
+name: MZcode Production Idea Intake Gate (synthetic record only)
+on:
+  push:
+    branches: [feat/mzcode-experience-v2-20261105]
+    paths:
+      - '.github/workflows/production-idea-intake-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anon-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Send ONE marked synthetic idea through live public intake and verify ticket
+        run: node pilot/production-anonymous-intake-gate.mjs
