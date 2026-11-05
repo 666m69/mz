@@ -224,7 +224,7 @@ if(root && root.dataset.initialized!=='true'){
         node('small','الرد مولّد بالذكاء الاصطناعي؛ راجعه قبل الاعتماد. لم تُنفّذ أي مهارة تلقائيًا.')
       );
       routeLinks(bubble,prompt);
-      aiHistory.push({role:'user',content:prompt},{role:'assistant',content:payload.reply.slice(0,450)});
+      aiHistory.push({role:'user',content:prompt.slice(0,450)},{role:'assistant',content:payload.reply.slice(0,450)});
       aiHistory=aiHistory.slice(-4);
       root.dataset.aiLive='true';
       aiStatus.textContent='متصل بنموذج '+(payload.model?.split('/').at(-1)||'Cloudflare AI');
