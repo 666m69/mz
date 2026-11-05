@@ -100,3 +100,13 @@
 .mz-inline-status{color:#c0ebcb;font-size:12px;line-height:1.75}
 .mz-inline-workspace .mz-bot-actions button{min-height:38px}
 @media(max-width:500px){.mz-inline-workspace{padding:10px}.mz-inline-form input,.mz-inline-form textarea,.mz-inline-form select{font-size:16px}}
+
+/* Experience 2.1: one floating assistant. Center the Saudi hero after removing the old chat panel. */
+.studio-hero{grid-template-columns:minmax(0,1fr)!important;gap:clamp(22px,3vw,38px)!important}
+.studio-hero>.studio-pitch{width:100%;max-width:830px;margin-inline:auto;text-align:center;justify-self:center}
+.studio-hero>.studio-pitch .saudi-guide,.studio-hero>.studio-pitch .mz-promise{margin-inline:auto;max-width:760px!important}
+.studio-hero>.studio-pitch .mz-hero-links{justify-content:center}
+.mz-hero-links button.mz-hero-primary{display:inline-flex;align-items:center;justify-content:center;gap:14px;border:0;border-radius:11px;min-height:47px;padding:10px 19px;font:850 14px/1.5 system-ui,Tahoma,sans-serif;cursor:pointer}
+.mz-hero-links button.mz-hero-primary:hover{filter:brightness(1.14)}
+.studio-hero>.mz-request-area,.studio-hero>.mz-live-heading,.studio-hero>.live-console{grid-column:1/-1}
+@media(max-width:720px){.studio-hero>.studio-pitch{max-width:100%}.mz-hero-links button.mz-hero-primary{flex:1}}
