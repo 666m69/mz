@@ -17,7 +17,18 @@ function walk(dir) {
   if(relative.startsWith('_')||relative==='menu-server.js')continue;
   let content=fs.readFileSync(file);
   if(relative.endsWith('.html')){
-   content=Buffer.from(content.toString('utf8').replace(styleLinks,`<link rel="stylesheet" href="${bundlePath}">`));
+   let html=content.toString('utf8').replace(styleLinks,`<link rel="stylesheet" href="${bundlePath}">`);
+   // Every standalone MZcode-owned web tool/game receives the original approved visible mark.
+   // Existing visible marks are left alone; favicon-only references do not count.
+   const isStandalone=/^(?:tools\/[^/]+\/|games\/[^/]+\/|coreresto\/).*\.html$/.test(relative);
+   const hasVisibleMark=/<img\b[^>]*\bsrc=["']\/assets\/images\/mz-mark\.svg["']/i.test(html);
+   if(isStandalone&&!hasVisibleMark){
+    if(!/<\/head>/i.test(html)||!/<\/body>/i.test(html))throw Error('Missing HTML document boundaries: '+relative);
+    const css='<link rel="stylesheet" href="/assets/css/mz-project-signature.css">';
+    const stamp='<div class="mz-made-by"><a href="/" aria-label="صُنع بواسطة MZcode — الصفحة الرئيسية"><img src="/assets/images/mz-mark.svg" width="27" height="27" alt=""><span>صُنع بواسطة MZcode</span></a></div>';
+    html=html.replace(/<\/head>/i,css+'</head>').replace(/<\/body>/i,stamp+'</body>');
+   }
+   content=Buffer.from(html);
   }
   addAsset('/'+relative,content,types[path.extname(file)]||'application/octet-stream');
  }
