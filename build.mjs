@@ -28,6 +28,9 @@ function walk(dir) {
     const stamp='<div class="mz-made-by"><a href="/" aria-label="صُنع بواسطة MZcode — الصفحة الرئيسية"><img src="/assets/images/mz-mark.svg" width="27" height="27" alt=""><span>صُنع بواسطة MZcode</span></a></div>';
     html=html.replace(/<\/head>/i,css+'</head>').replace(/<\/body>/i,stamp+'</body>');
    }
+   // Build fails instead of shipping an unbranded standalone MZcode-owned tool.
+   if(isStandalone&&!/<img\b[^>]*\bsrc=["']\/assets\/images\/mz-mark\.svg["']/i.test(html))
+    throw Error('Visible MZcode emblem required: '+relative);
    content=Buffer.from(html);
   }
   addAsset('/'+relative,content,types[path.extname(file)]||'application/octet-stream');
