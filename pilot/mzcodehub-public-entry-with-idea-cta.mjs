@@ -204,7 +204,7 @@ export default {
     }
     if (request.method === 'POST' || request.method === 'PUT') {
       if (request.headers.get('Origin') !== canonical) return new Response('Forbidden', {status:403});
-      if (!/^\/api\/(contact|menus(?:\/[a-f0-9]{32})?)$/.test(url.pathname)) return new Response('Not found', {status:404});
+      if (!/^\/api\/(contact|assistant|menus(?:\/[a-f0-9]{32})?)$/.test(url.pathname)) return new Response('Not found', {status:404});
       headers.set('Origin', origin);
       if (!await signVisitor(request, headers, env.MZ_EDGE_SIGNING_KEY)) return new Response('Service unavailable', {status:503});
     }
