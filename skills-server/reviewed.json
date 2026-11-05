@@ -37,6 +37,44 @@
           }
         },
         "daily_builds": 8
+      },
+      "checklist-branded-v2": {
+        "entry": "skills-server/runner/child-v1.mjs",
+        "module": "skills-server/runner/checklist-branded-v2.mjs",
+        "sources": [
+          "pilot/builder/engine.mjs",
+          "pilot/builder/runtime.js",
+          "pilot/builder/styles.css",
+          "pilot/capability-gate.mjs",
+          "site/assets/images/mz-mark.svg",
+          "skills-server/runner/brand-v2.mjs",
+          "skills-server/runner/checklist-branded-v2.mjs",
+          "skills-server/runner/checklist-v1.mjs",
+          "skills-server/runner/child-v1.mjs",
+          "skills-server/runner/smoke-v1.mjs"
+        ],
+        "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "input_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "idea"
+          ],
+          "properties": {
+            "idea": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 2000
+            },
+            "title": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 59,
+              "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N} \\u060C.,()،\\-]{1,58}$"
+            }
+          }
+        },
+        "daily_builds": 8
       }
     }
   },
@@ -55,6 +93,47 @@
           "skills-server/runner/smoke-v1.mjs"
         ],
         "digest": "1627e39b660e0f4d08e6e8d9c758c0a281fab66e407ed76594d7b78e0a9f210c",
+        "input_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "idea"
+          ],
+          "properties": {
+            "idea": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 2000
+            },
+            "title": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 59,
+              "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N} \\u060C.,()،\\-]{1,58}$"
+            },
+            "initial_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9999
+            }
+          }
+        },
+        "daily_builds": 8
+      },
+      "counter-branded-v2": {
+        "entry": "skills-server/runner/child-v1.mjs",
+        "module": "skills-server/runner/counter-branded-v2.mjs",
+        "sources": [
+          "pilot/capability-gate.mjs",
+          "site/assets/images/mz-mark.svg",
+          "skills-server/runner/brand-v2.mjs",
+          "skills-server/runner/child-v1.mjs",
+          "skills-server/runner/counter-app.js",
+          "skills-server/runner/counter-branded-v2.mjs",
+          "skills-server/runner/counter-v1.mjs",
+          "skills-server/runner/smoke-v1.mjs"
+        ],
+        "digest": "0000000000000000000000000000000000000000000000000000000000000000",
         "input_schema": {
           "type": "object",
           "additionalProperties": false,
