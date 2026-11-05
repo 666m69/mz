@@ -4,18 +4,16 @@ import {readFile} from 'node:fs/promises';
 import {setTimeout as delay} from 'node:timers/promises';
 import assert from 'node:assert/strict';
 
-const root=new URL('../site/',import.meta.url);
+const {default:builtWorker}=await import('../build/worker.mjs');
+// Serve exactly the Cloudflare Pages Worker bundle, not source HTML/CSS. 
 const server=createServer(async(req,res)=>{
-  let p;
-  try{p=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch{res.writeHead(400).end();return;}
-  if(p.includes('..')||p.includes('\\')||!/^\/[a-zA-Z0-9_.\/\-]*$/.test(p)){res.writeHead(400).end();return;}
-  if(p.endsWith('/'))p+='index.html';
-  const extension=p.slice(p.lastIndexOf('.')+1);
   try{
-    const bytes=await readFile(new URL('.'+p,root));
-    const type={html:'text/html',css:'text/css',js:'text/javascript',mjs:'text/javascript',svg:'image/svg+xml',png:'image/png'}[extension]||'application/octet-stream';
-    res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-store'}).end(bytes);
-  }catch{res.writeHead(404).end('Missing');}
+    const url=new URL(req.url,'https://mz702.pages.dev');
+    const upstream=await builtWorker.fetch(new Request(url,{method:req.method}),{});
+    const headers=Object.fromEntries(upstream.headers);
+    const body=Buffer.from(await upstream.arrayBuffer());
+    res.writeHead(upstream.status,headers).end(body);
+  }catch(error){res.writeHead(500).end('Built Worker asset error');}
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const port=9500+(process.pid%900);
