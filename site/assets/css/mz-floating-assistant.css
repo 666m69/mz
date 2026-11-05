@@ -12,6 +12,7 @@
 #mz-assistant-root textarea:focus-visible,#mz-assistant-root input:focus-visible,
 #mz-assistant-root select:focus-visible{outline:3px solid #81f8b9;outline-offset:3px}
 #mz-assistant-root [hidden]{display:none!important}
+#mz-assistant-root .mz-floating-only-screen-reader{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
 #mz-bot-trigger{
   position:relative;display:flex;align-items:center;justify-content:center;
   width:84px;height:84px;padding:0;border:0!important;background:transparent!important;
