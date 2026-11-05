@@ -1,4 +1,5 @@
 import {menuHandle} from './menu-server.js';
+import {assistantHandle} from './assistant-api.js';
 const SERVICES=['متجر إلكتروني','صفحة هبوط تسويقية','موقع شركة أو مؤسسة','تطبيق ويب / لوحة تحكم','تحسين سرعة وسيو','استشارة أخرى'];
 const enc=new TextEncoder();
 const security={'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'strict-origin-when-cross-origin','Permissions-Policy':'camera=(), microphone=(), geolocation=()'};
@@ -69,6 +70,7 @@ async function handle(req,env){
    if(!env.DB||!env.MZ_CONTACT_SECRET)return error('خدمة حفظ الطلبات غير متاحة في المعاينة حاليًا.',503);
    return previewIdeasModule.fetch(req,{DB:env.DB,HASH_SALT:env.MZ_CONTACT_SECRET});
  }
+ if(path==='/api/assistant')return assistantHandle(req,env,{rateAddress,sign});
  if(path==='/api/menus'||path.startsWith('/api/menus/'))return menuHandle(req,env,{json,error,sign,verified,readBody,rateAddress});
  if(/^\/(admin(?:\.html)?(?:\/|$)|assets\/js\/admin\.js$|api\/admin(?:\/|$))/i.test(path))return error('الإدارة متاحة للمالك عبر حساب الاستضافة فقط.',403);
  if(path==='/api/contact-token'){
