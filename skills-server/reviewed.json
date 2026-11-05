@@ -53,7 +53,7 @@
           "skills-server/runner/child-v1.mjs",
           "skills-server/runner/smoke-v1.mjs"
         ],
-        "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "digest": "01432d585423404650125e0af91973b50addf7cdceb7a4d6789d10337965d273",
         "input_schema": {
           "type": "object",
           "additionalProperties": false,
@@ -133,7 +133,7 @@
           "skills-server/runner/counter-v1.mjs",
           "skills-server/runner/smoke-v1.mjs"
         ],
-        "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "digest": "fb82c595ec90f1a5742739f4f8f2e0a5f211f96e85dafabdeb34e571009fae7d",
         "input_schema": {
           "type": "object",
           "additionalProperties": false,
