@@ -83,91 +83,50 @@ async function screenshot(name){
 try{
   await connect();
   await navigate('/');
-  const loaded=await evalJS(`return {ready:document.getElementById('mz-assistant')?.dataset.ready,
-   heading:document.getElementById('studio-title')?.textContent,
-   assistant:!!document.getElementById('mz-bot-form'),
-   request:!!document.getElementById('mz-quick-idea'),
-   brand:document.querySelector('.site-header .brand img')?.getAttribute('src'),
-   demo:!!document.getElementById('slot-book'),
-   scripts:[...document.scripts].map(s=>s.src).filter(x=>x.includes('mz-assistant-ui'))};`);
+  const loaded=await evalJS("return {ready:document.getElementById('mz-assistant-root')?.dataset.ready,heading:document.getElementById('studio-title')?.textContent,embedded:!!document.getElementById('mz-assistant'),duplicate:!!document.getElementById('mz-bot-form'),launch:!!document.querySelector('[data-mz-open-assistant]'),request:!!document.getElementById('mz-quick-idea'),logo:document.querySelector('.site-header .brand img')?.getAttribute('src'),demo:!!document.getElementById('slot-book')};");
   assert.equal(loaded.ready,'true',JSON.stringify(loaded));
   assert.match(loaded.heading,/قول وش الوضع/);
-  assert.ok(loaded.request&&loaded.demo&&loaded.assistant);
-  assert.equal(loaded.brand,'/assets/images/mz-mark.svg');
-
-  const fromChip=await evalJS(`
-   document.querySelector('[data-mz-prompt="أبغى عرض سعر"]').click();
-   return {chat:document.getElementById('mz-bot-messages').textContent,
-     url:document.querySelector('.mz-bot-actions a')?.getAttribute('href'),
-     count:document.getElementById('mz-assistant').dataset.requestsRouted};`);
-  assert.equal(fromChip.url,'/tools/quote/');
-  assert.equal(fromChip.count,'1');
-  assert.match(fromChip.chat,/أداة تعمل/);
-  // A real in-chat execution, with no network or redirection.
-  const teacher=await evalJS(`
-   const box=document.getElementById('mz-bot-input');
-   box.value='أنا معلم وأحتاج رسالة لأولياء الأمور';
-   document.getElementById('mz-bot-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
-   const trigger=[...document.querySelectorAll('.mz-inline-trigger')].at(-1);
-   trigger?.click();
-   const form=[...document.querySelectorAll('.mz-inline-form')].at(-1);
-   if(!form)return {form:false};
-   form.elements.grade.value='الصف الرابع';
-   form.elements.subject.value='متابعة القراءة';
-   form.elements.details.value='الرجاء قراءة فقرة قصيرة يوميًا';
-   form.elements.date.value='الخميس';
-   form.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
-   const workspace=form.closest('.mz-inline-workspace');
-   return {form:true,text:workspace.querySelector('.mz-inline-output').textContent,
-     hidden:workspace.querySelector('.mz-inline-output').hidden,
-     actionCount:workspace.querySelectorAll('.mz-bot-actions button').length,
-     ready:document.getElementById('mz-assistant').dataset.ready};
-  `);
+  assert.ok(loaded.launch&&loaded.request&&loaded.demo);
+  assert.equal(loaded.embedded,false);
+  assert.equal(loaded.duplicate,false);
+  assert.equal(loaded.logo,'/assets/images/mz-mark.svg');
+  const cta=await evalJS("document.querySelector('[data-mz-open-assistant]').click();const root=document.getElementById('mz-assistant-root'),win=document.getElementById('mz-chat-window'),trigger=document.getElementById('mz-bot-trigger');return {opened:!win.hidden,aria:trigger.getAttribute('aria-expanded'),ready:root.dataset.ready};");
+  assert.deepEqual(cta,{opened:true,aria:'true',ready:'true'});
+  const quote=await evalJS("const input=document.getElementById('mz-chat-input');input.value='أبغى عرض سعر للعميل';document.getElementById('mz-chat-form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));return {link:[...document.querySelectorAll('#mz-chat-messages a')].at(-1)?.getAttribute('href'),intakeAction:[...document.querySelectorAll('#mz-chat-messages button')].some(x=>x.textContent.includes('المراجعة المجانية'))};");
+  assert.equal(quote.link,'/tools/quote/');
+  assert.equal(quote.intakeAction,true);
+  const teacher=await evalJS("const input=document.getElementById('mz-chat-input');input.value='أنا معلم وأحتاج رسالة لأولياء الأمور';document.getElementById('mz-chat-form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));const button=[...document.querySelectorAll('#mz-chat-messages button')].find(x=>x.textContent.includes('جهز مسودة هنا'));button?.click();const form=document.querySelector('.mz-floating-teacher-form');if(!form)return {form:false};form.elements.grade.value='الصف الرابع';form.elements.subject.value='متابعة القراءة';form.elements.details.value='الرجاء قراءة فقرة يوميًا';form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));return {form:true,content:document.querySelector('.mz-floating-output')?.textContent||'',displayed:!document.querySelector('.mz-floating-output').hidden};");
   assert.equal(teacher.form,true,JSON.stringify(teacher));
-  assert.match(teacher.text,/الصف الرابع/);
-  assert.match(teacher.text,/متابعة القراءة/);
-  assert.equal(teacher.hidden,false);
-  assert.equal(teacher.actionCount,2);
-  assert.equal(teacher.ready,'true');
-  const fromText=await evalJS(`
-   const input=document.getElementById('mz-bot-input');
-   input.value='أبي نظام جديد لإدارة مخزون المعدات وعملاء المنشأة';
-   document.getElementById('mz-bot-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
-   const button=[...document.querySelectorAll('.mz-bot-actions button')].at(-1);
-   const didOffer=!!button;
-   button?.click();
-   return {offered:didOffer,opened:document.getElementById('mz-request').open,
-     prefill:document.getElementById('mz-intake-idea').value,
-     consent:document.getElementById('mz-intake-consent').checked,
-     messages:document.querySelectorAll('.mz-bot-bubble').length};`);
-  assert.ok(fromText.offered&&fromText.opened,JSON.stringify(fromText));
-  assert.match(fromText.prefill,/إدارة مخزون/);
-  assert.equal(fromText.consent,false);
-  const noXSS=await evalJS(`
-   const box=document.getElementById('mz-bot-input');
-   box.value='<img src=x onerror=alert(1)>';
-   document.getElementById('mz-bot-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
-   return {imgCount:document.querySelectorAll('#mz-bot-messages img').length,
-    text:document.getElementById('mz-bot-messages').textContent.includes('<img src=x onerror=alert(1)>')};`);
-  assert.equal(noXSS.imgCount,0);assert.equal(noXSS.text,true);
+  assert.match(teacher.content,/متابعة القراءة/);
+  assert.equal(teacher.displayed,true);
+  const profession=await evalJS("const input=document.getElementById('mz-chat-input');input.value='أنا منسق تسويق في فندق';document.getElementById('mz-chat-form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));const bubble=[...document.querySelectorAll('.mz-floating-bot')].at(-1);const links=[...bubble.querySelectorAll('a')].map(x=>x.getAttribute('href'));const action=[...bubble.querySelectorAll('button')].find(x=>x.textContent.includes('مجانًا'));action?.click();return {links,requestOpen:document.getElementById('mz-request').open,prefill:document.getElementById('mz-intake-idea').value,consent:document.getElementById('mz-intake-consent').checked};");
+  assert.deepEqual(profession.links,['/tools/images/','/tools/quote/','/tools/clients/']);
+  assert.equal(profession.requestOpen,true);
+  assert.match(profession.prefill,/فندق/);
+  assert.equal(profession.consent,false);
+  const safety=await evalJS("const input=document.getElementById('mz-chat-input');document.getElementById('mz-bot-trigger').click();input.value='<img src=x onerror=alert(1)>';document.getElementById('mz-chat-form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));return {added:document.querySelectorAll('#mz-chat-messages img').length,text:document.getElementById('mz-chat-messages').textContent.includes('<img src=x onerror=alert(1)>')};");
+  assert.equal(safety.added,0);
+  assert.equal(safety.text,true);
+  const drag=await evalJS("const root=document.getElementById('mz-assistant-root'),trigger=document.getElementById('mz-bot-trigger'),start=trigger.getBoundingClientRect();const x=start.left+10,y=start.top+10;root.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));const event=(type,cx,cy)=>new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:21,pointerType:'mouse',button:0,clientX:cx,clientY:cy});trigger.dispatchEvent(event('pointerdown',x,y));trigger.dispatchEvent(event('pointermove',x-70,y-160));trigger.dispatchEvent(event('pointerup',x-70,y-160));trigger.click();const after=trigger.getBoundingClientRect();return {moved:Math.abs(start.left-after.left)>20&&Math.abs(start.top-after.top)>20,closed:document.getElementById('mz-chat-window').hidden,saved:!!localStorage.getItem('mzcode:assistant-icon-position:v1'),x:after.left,y:after.top,width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth};");
+  assert.equal(drag.moved,true,JSON.stringify(drag));
+  assert.equal(drag.closed,true);
+  assert.equal(drag.saved,true);
+  assert.ok(drag.scroll<=drag.width+2,JSON.stringify(drag));
   await ensureMobile('/');
   await screenshot('mz-experience-mobile.png');
-
+  await navigate('/');
+  const persistent=await evalJS("const r=document.getElementById('mz-bot-trigger').getBoundingClientRect();return {x:r.left,y:r.top,saved:!!localStorage.getItem('mzcode:assistant-icon-position:v1')};");
+  assert.equal(persistent.saved,true);
+  assert.ok(Math.abs(persistent.x-drag.x)<3&&Math.abs(persistent.y-drag.y)<3,JSON.stringify({persistent,drag}));
   await send('Emulation.setDeviceMetricsOverride',{width:1366,height:900,mobile:false,deviceScaleFactor:1});
   await navigate('/');
-  const desktop=await evalJS(`return {client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,
-    bot:document.getElementById('mz-assistant').getBoundingClientRect().width,
-    hideProbe:['.studio-hero','.community-invite','.featured-showcase','.site-header','.catalog-section','.projects-hero','.discovery-grid','.live-console','main','.site-footer']
-      .map(selector=>{const el=document.querySelector(selector);if(!el)return null;const previous=el.style.display;el.style.display='none';const width=document.documentElement.scrollWidth;el.style.display=previous;return {selector,width};}).filter(Boolean),
-    offenders:[...document.querySelectorAll('body *')].map(e=>({el:e,r:e.getBoundingClientRect(),style:getComputedStyle(e)}))
-     .filter(x=>x.style.display!=='none'&&x.r.width&&x.r.right>document.documentElement.clientWidth+4)
-     .sort((a,b)=>b.r.right-a.r.right).slice(0,12).map(x=>({tag:x.el.tagName,cls:String(x.el.className).slice(0,60),right:Math.round(x.r.right),width:Math.round(x.r.width)})),
-    logo:document.querySelector('.site-header .brand img')?.getAttribute('src')};`);
-  assert.ok(desktop.client>=1340&&desktop.scroll<=desktop.client+2,JSON.stringify(desktop));
-  assert.ok(desktop.bot>=350,JSON.stringify(desktop));
+  const desktop=await evalJS("const root=document.getElementById('mz-assistant-root');return {width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,ready:root.dataset.ready,duplicate:!!document.getElementById('mz-assistant'),logo:document.querySelector('.site-header .brand img')?.getAttribute('src')};");
+  assert.ok(desktop.width>=1340&&desktop.scroll<=desktop.width+2,JSON.stringify(desktop));
+  assert.equal(desktop.ready,'true');
+  assert.equal(desktop.duplicate,false);
   assert.deepEqual(exceptions,[],JSON.stringify(exceptions));
   await screenshot('mz-experience-desktop.png');
-  console.log('MZ_EXPERIENCE_BROWSER_PASS: route, request prefill without consent, XSS, mobile 390px, desktop 1366px, brand');
+  console.log('MZ_EXPERIENCE_BROWSER_PASS: single assistant, CTA, teacher, profession review, no XSS, drag and persistence, 390px and desktop');
 }finally{
   ws?.close();chrome.kill('SIGKILL');server.close();
 }
