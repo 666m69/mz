@@ -103,6 +103,32 @@ try{
   assert.equal(fromChip.url,'/tools/quote/');
   assert.equal(fromChip.count,'1');
   assert.match(fromChip.chat,/أداة تعمل/);
+  // A real in-chat execution, with no network or redirection.
+  const teacher=await evalJS(`
+   const box=document.getElementById('mz-bot-input');
+   box.value='أنا معلم وأحتاج رسالة لأولياء الأمور';
+   document.getElementById('mz-bot-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
+   const trigger=[...document.querySelectorAll('.mz-inline-trigger')].at(-1);
+   trigger?.click();
+   const form=[...document.querySelectorAll('.mz-inline-form')].at(-1);
+   if(!form)return {form:false};
+   form.elements.grade.value='الصف الرابع';
+   form.elements.subject.value='متابعة القراءة';
+   form.elements.details.value='الرجاء قراءة فقرة قصيرة يوميًا';
+   form.elements.date.value='الخميس';
+   form.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
+   const workspace=form.closest('.mz-inline-workspace');
+   return {form:true,text:workspace.querySelector('.mz-inline-output').textContent,
+     hidden:workspace.querySelector('.mz-inline-output').hidden,
+     actionCount:workspace.querySelectorAll('.mz-bot-actions button').length,
+     ready:document.getElementById('mz-assistant').dataset.ready};
+  `);
+  assert.equal(teacher.form,true,JSON.stringify(teacher));
+  assert.match(teacher.text,/الصف الرابع/);
+  assert.match(teacher.text,/متابعة القراءة/);
+  assert.equal(teacher.hidden,false);
+  assert.equal(teacher.actionCount,2);
+  assert.equal(teacher.ready,'true');
   const fromText=await evalJS(`
    const input=document.getElementById('mz-bot-input');
    input.value='أبي نظام جديد لإدارة مخزون المعدات وعملاء المنشأة';

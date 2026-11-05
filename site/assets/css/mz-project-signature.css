@@ -1,0 +1,8 @@
+/* Shared signature for MZcode-built web tools and games that lack a visible mark.
+   Uses the original approved SVG asset; never edits its paths or colors. */
+.mz-made-by{display:flex;justify-content:center;align-items:center;min-height:58px;padding:11px 16px;margin:6px auto 20px;width:100%;max-width:1100px;box-sizing:border-box;direction:rtl}
+.mz-made-by a{display:inline-flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid #5bbb8e66;border-radius:12px;background:#0b1b21;color:#e1f6eb!important;font:700 12px/1.5 system-ui,Tahoma,sans-serif;text-decoration:none;max-width:100%}
+.mz-made-by img{height:27px;width:27px;flex-shrink:0;object-fit:contain}
+.mz-made-by a:hover{border-color:#63e7a2}
+.mz-made-by a:focus-visible{outline:3px solid #83f2b3;outline-offset:3px}
+@media(max-width:440px){.mz-made-by{padding:8px 10px;margin-block:5px 14px}}

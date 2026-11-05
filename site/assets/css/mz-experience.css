@@ -83,3 +83,20 @@
 @media(max-width:720px){.studio-hero{display:flex!important;flex-direction:column;gap:21px!important;padding-block:25px 35px!important}.studio-hero>*{width:100%!important}.mz-ai-panel{padding:15px;border-radius:22px}.mz-ai-entity{height:125px}.mz-entity-orbit.one{width:190px;height:94px}.mz-entity-orbit.two{width:182px;height:90px}.mz-entity-orbit.three{width:184px;height:90px}.mz-entity-spark.a{transform:translate(92px,-20px)}.mz-entity-spark.b{transform:translate(-93px,20px)}.mz-entity-spark.c{transform:translate(35px,50px)}.mz-bot-suggestions button{min-height:37px}.mz-live-heading{align-items:start;flex-wrap:wrap}.mz-hero-links a{flex:1}.mz-request-inside{padding:12px}.mz-request-header{padding:16px}.saudi-guide{font-size:14px!important}}
 @media(max-width:420px){.mz-ai-panel-top h2{font-size:17px}.mz-ai-status{font-size:10px;padding:5px 8px}.mz-ai-panel{padding:12px}.mz-bot-messages{max-height:240px}.mz-bot-bubble{font-size:12px}.mz-hero-links{gap:9px}.mz-request-header strong{font-size:17px}.mz-request-header small{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.mz-entity-orbit,.mz-entity-core{animation:none!important}.mz-hero-links a{transition:none!important}}
+
+
+/* Reviewed browser-local execution panel: preserve original MZcode logo and colors. */
+.mz-inline-workspace{display:grid;gap:11px;width:100%;margin-top:12px;padding:14px;border-radius:14px;background:#091c27;border:1px solid #65b99673;color:#eafff1;min-width:0}
+.mz-inline-workspace>strong{font-size:13px}
+.mz-inline-workspace>p{margin:0;color:#c7dbd1;font-size:12px;line-height:1.8}
+.mz-inline-form{display:grid;gap:10px;width:100%;min-width:0}
+.mz-inline-form label{display:grid;gap:4px;font-size:12px;font-weight:650;color:#d3f9e3}
+.mz-inline-form input,.mz-inline-form select,.mz-inline-form textarea{display:block;box-sizing:border-box;width:100%;min-width:0;background:#102b32!important;color:#f6fff9!important;border:1px solid #548a79!important;border-radius:9px;padding:9px 10px;font:inherit;font-size:13px;line-height:1.65}
+.mz-inline-form textarea{resize:vertical;min-height:74px}
+.mz-inline-form button{background:#58e4a0;color:#082c1e;font-weight:850;border:0;border-radius:9px;min-height:40px;cursor:pointer}
+.mz-inline-form :focus-visible{outline:3px solid #86f4ba;outline-offset:2px}
+.mz-inline-trigger:disabled{opacity:.6}
+.mz-inline-output{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow-y:auto;min-width:0;padding:11px;border-radius:10px;background:#03161b;border:1px solid #569875;color:#e9f9ed;font:12px/1.85 system-ui,Tahoma,sans-serif}
+.mz-inline-status{color:#c0ebcb;font-size:12px;line-height:1.75}
+.mz-inline-workspace .mz-bot-actions button{min-height:38px}
+@media(max-width:500px){.mz-inline-workspace{padding:10px}.mz-inline-form input,.mz-inline-form textarea,.mz-inline-form select{font-size:16px}}
