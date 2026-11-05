@@ -105,7 +105,9 @@ try{
   assert.match(fromChip.chat,/أداة تعمل/);
   // A real in-chat execution, with no network or redirection.
   const teacher=await evalJS(`
-   document.querySelector('[data-mz-prompt="أنا معلم وأحتاج رسالة لأولياء الأمور"]').click();
+   const box=document.getElementById('mz-bot-input');
+   box.value='أنا معلم وأحتاج رسالة لأولياء الأمور';
+   document.getElementById('mz-bot-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
    const trigger=[...document.querySelectorAll('.mz-inline-trigger')].at(-1);
    trigger?.click();
    const form=[...document.querySelectorAll('.mz-inline-form')].at(-1);
