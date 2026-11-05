@@ -14,6 +14,8 @@ if(root && root.dataset.initialized!=='true'){
   const closeButton=root.querySelector('#mz-chat-close');
   const field=root.querySelector('#mz-chat-input');
   const form=root.querySelector('#mz-chat-form');
+  const aiConsent=root.querySelector('#mz-chat-ai-consent');
+  const aiStatus=root.querySelector('#mz-chat-ai-status');
   const messages=root.querySelector('#mz-chat-messages');
   const canvas=root.querySelector('#mz-portal-canvas');
   const context=canvas?.getContext('2d');
@@ -21,6 +23,8 @@ if(root && root.dataset.initialized!=='true'){
   const transferKey='mzcode:floating-assistant-intake:v1';
   let state='idle',raf=0,elapsed=0,spread=32,lastReply=0;
   let requestsRouted=0;
+  let aiHistory=[];
+  let aiBusy=false;
 
   function node(tag,text,cls){
     const element=document.createElement(tag);
@@ -171,6 +175,89 @@ if(root && root.dataset.initialized!=='true'){
   function pulse(){
     state='replying';lastReply=performance.now();
   }
+
+  function routeLinks(bubble,raw){
+    // All actions below originate from the reviewed local router, never from generated text.
+    const result=guideRequest(raw);
+    const row=actions(bubble);
+    if(result.url&&result.skill_name){
+      addLink(row,result.url,'افتح '+result.skill_name);
+      if(result.skill_id==='teacher'){
+        const button=addButton(row,'جهز مسودة هنا',()=>{
+          button.disabled=true;button.hidden=true;
+          teacherForm(bubble);
+        });
+      }
+    }
+    if(result.request_allowed)addButton(row,'أرسل فكرتك للمراجعة',()=>sendToReview(raw));
+    if(!row.childElementCount)row.remove();
+  }
+  async function sendAI(raw){
+    if(aiBusy)return;
+    const prompt=raw.trim().slice(0,1200);
+    if(!prompt)return;
+    aiBusy=true;
+    field.disabled=true;
+    const submit=form.querySelector('button[type="submit"]');
+    if(submit)submit.disabled=true;
+    field.value='';
+    message('user','',prompt);
+    const bubble=message('bot','جاري التواصل مع نموذج الذكاء الاصطناعي','لا توجد عمليات تنفيذ أو نشر تجري الآن.');
+    aiStatus.textContent='جاري معالجة الرسالة...';
+    state='thinking';
+    const controller=new AbortController();
+    const timeout=window.setTimeout(()=>controller.abort(),22000);
+    try{
+      const response=await fetch('/api/assistant',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        credentials:'same-origin',cache:'no-store',
+        body:JSON.stringify({message:prompt,history:aiHistory.slice(-4),consent:true}),
+        signal:controller.signal
+      });
+      let payload;
+      try{payload=await response.json()}catch{payload=null}
+      if(!response.ok||payload?.ok!==true||typeof payload.reply!=='string'||!payload.reply.trim())
+        throw Object.assign(new Error('unavailable'),{status:response.status,code:payload?.error});
+      bubble.replaceChildren(
+        node('strong','ردّ النموذج الذكي'),
+        node('span',payload.reply.trim()),
+        node('small','الرد مولّد بالذكاء الاصطناعي؛ راجعه قبل الاعتماد. لم تُنفّذ أي مهارة تلقائيًا.')
+      );
+      routeLinks(bubble,prompt);
+      aiHistory.push({role:'user',content:prompt},{role:'assistant',content:payload.reply.slice(0,450)});
+      aiHistory=aiHistory.slice(-4);
+      root.dataset.aiLive='true';
+      aiStatus.textContent='متصل بنموذج '+(payload.model?.split('/').at(-1)||'Cloudflare AI');
+      requestsRouted++;
+      root.dataset.requestsRouted=String(requestsRouted);
+      pulse();
+    }catch(error){
+      const messageText=error.name==='AbortError'?'انتهت مهلة الرد. جرّب مرة أخرى أو استخدم الأدوات المتاحة.':
+        error.status===429?'وصلت إلى الحد المجاني المؤقت للمساعد. الأدوات ما زالت متاحة.':
+        error.code==='sensitive_input'?'لا ترسل أرقام الجوال أو البريد أو بيانات الأشخاص إلى النموذج. احذفها ثم أعد المحاولة.':
+        error.status===422?'راجع نص الطلب وموافقتك على الإرسال.':
+        'النموذج غير متاح الآن. تقدر تستخدم أدوات MZcode دون انتظار.';
+      bubble.replaceChildren(node('strong','تعذر الحصول على رد AI'),node('span',messageText));
+      try{routeLinks(bubble,prompt)}catch{}
+      aiStatus.textContent='لم تُنفذ عملية AI بنجاح';
+      state='idle';
+    }finally{
+      window.clearTimeout(timeout);
+      aiBusy=false;
+      field.disabled=false;
+      if(submit)submit.disabled=false;
+      messages.scrollTop=messages.scrollHeight;
+    }
+  }
+  aiConsent?.addEventListener('change',()=>{
+    if(!aiConsent.checked){
+      aiHistory=[];
+      aiStatus.textContent='وضع الأدوات المحلي · لا إرسال إلى AI';
+      root.dataset.aiLive='false';
+    }else{
+      aiStatus.textContent='AI مفعّل بموافقتك · الحد اليومي محدود';
+    }
+  });
   function send(raw){
     if(typeof raw!=='string'||!raw.trim())return;
     const text=raw.trim().slice(0,1200);
@@ -204,6 +291,7 @@ if(root && root.dataset.initialized!=='true'){
   }
   form.addEventListener('submit',event=>{
     event.preventDefault();
+    if(aiConsent?.checked){void sendAI(field.value);return;}
     send(field.value);
   });
   field.addEventListener('keydown',event=>{
@@ -213,7 +301,7 @@ if(root && root.dataset.initialized!=='true'){
     }
   });
   for(const chip of root.querySelectorAll('[data-mz-quick]')){
-    chip.addEventListener('click',()=>send(chip.dataset.mzQuick));
+    chip.addEventListener('click',()=>{if(aiConsent?.checked){void sendAI(chip.dataset.mzQuick)}else send(chip.dataset.mzQuick)});
   }
 
   // Supplied visual concept: luminous code portal. The actual MZ logo is the
@@ -262,5 +350,6 @@ if(root && root.dataset.initialized!=='true'){
   document.addEventListener('visibilitychange',resume);
   if(reducedMotion.addEventListener)reducedMotion.addEventListener('change',resume);
   resume();
+  root.dataset.aiLive='false';
   root.dataset.ready='true';
 }
