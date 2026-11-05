@@ -26,8 +26,8 @@ async function submitIdea(event) {
     show('اكتب وصفًا واضحًا لا يقل عن 20 حرفًا، عشان نقدر نفهم طلبك.');
     idea.focus(); return;
   }
-  if(address && !email.checkValidity()) {
-    show('راجع صيغة البريد الإلكتروني، أو اتركه فارغًا إذا تبي تتابع برقم الطلب فقط.');
+  if(!address || !email.checkValidity()) {
+    show('أدخل بريد تواصل صحيحًا. خدمة استقبال الطلبات الحالية ما تقبل الإرسال بدون بريد؛ التسجيل المجاني لا يحتاج دفع.');
     email.focus(); return;
   }
   if(!consent.checked) { show('قبل الإرسال، وافق على حفظ الطلب ومراجعته.'); consent.focus(); return; }
@@ -62,9 +62,7 @@ async function submitIdea(event) {
     const date=Number.isFinite(data.created_ms)
       ? new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Riyadh'}).format(new Date(data.created_ms))
       : '';
-    const emailMessage = !address
-      ? 'ما أضفت بريد، لذلك ما أرسلنا رسالة تأكيد. احتفظ برقم المتابعة.'
-      : data.receipt_email_status==='accepted'
+    const emailMessage = data.receipt_email_status==='accepted'
         ? 'قبلت خدمة البريد رسالة التأكيد. راجع بريدك والوارد غير الهام.'
         : data.receipt_email_status==='failed'
           ? 'طلبك محفوظ لكن تعذّر إرسال التأكيد للبريد. احتفظ بالرقم.'
