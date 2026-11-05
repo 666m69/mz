@@ -30,19 +30,22 @@ test('inline execution refuses unknown skills, fields and missing inputs',()=>{
   assert.throws(()=>executeInlineSkill('teacher-draft-v1',{...payload,grade:''}),/invalid_field/);
   assert.throws(()=>executeInlineSkill('teacher-draft-v1',null),/invalid_input/);
 });
-test('the homepage provides an in-chat skill form, not a fictional server execution',async()=>{
-  assert.equal(guideRequest('أنا معلم وأحتاج رسالة لأولياء الأمور').skill_id,'teacher');
-  const source=fs.readFileSync(new URL('../../site/assets/js/mz-assistant-ui.mjs',import.meta.url),'utf8');
-  assert.match(source,/executeInlineSkill\('teacher-draft-v1'/);
-  assert.match(source,/offerTeacherExecution\(reply\)/);
-  assert.match(source,/String\.fromCharCode\(0xFEFF\)/);
-  assert.doesNotMatch(source,/fetch\s*\(/);
-  assert.doesNotMatch(source,/innerHTML\s*=/);
-  for(const pathname of ['/assets/js/mz-inline-skills.mjs','/assets/js/mz-assistant-ui.mjs']){
-    const response=await worker.fetch(new Request('https://mz702.pages.dev'+pathname),{});
-    assert.equal(response.status,200,pathname);
-    assert.match(response.headers.get('Content-Type'),/javascript/);
-  }
+test('the only visible assistant keeps reviewed teacher skill, no hidden automatic execution',async()=>{
+ assert.equal(guideRequest('أنا معلم وأحتاج رسالة لأولياء الأمور').skill_id,'teacher');
+ const code=fs.readFileSync(new URL('../../site/assets/js/mz-floating-assistant.mjs',import.meta.url),'utf8');
+ assert.match(code,/executeInlineSkill\('teacher-draft-v1'/);
+ assert.match(code,/teacherForm\(bubble\)/);
+ assert.match(code,/String\.fromCharCode\(0xFEFF\)/);
+ assert.doesNotMatch(code,/innerHTML\s*=/);
+ assert.match(code,/aiConsent\?\.checked/);
+ for(const pathname of ['/assets/js/mz-inline-skills.mjs','/assets/js/mz-floating-assistant.mjs']){
+  const response=await worker.fetch(new Request('https://mz702.pages.dev'+pathname),{});
+  assert.equal(response.status,200,pathname);
+  assert.match(response.headers.get('Content-Type'),/javascript/);
+ }
+ const homepage=await (await worker.fetch(new Request('https://mz702.pages.dev/'),{})).text();
+ assert.doesNotMatch(homepage,/id="mz-bot-form"/);
+ assert.match(homepage,/id="mz-chat-form"/);
 });
 test('every MZcode-owned standalone tool/game displays the unchanged approved MZ emblem, not just favicon',async()=>{
   const main=new URL('../../site/',import.meta.url);

@@ -53,13 +53,13 @@ test('unsupported and sensitive requests never hallucinate capabilities',()=>{
   assert.throws(()=>guideRequest(''),/invalid_request/);
   assert.throws(()=>guideRequest('x'.repeat(1201)),/invalid_request/);
 });
-test('prompts are deterministic, tools do not need paid AI calls',()=>{
-  assert.equal(featuredChips().length,4);
-  const code=fs.readFileSync(new URL('../../site/assets/js/mz-assistant-ui.mjs',import.meta.url),'utf8');
-  assert.match(code,/guideRequest\(raw\)/);
-  assert.doesNotMatch(code,/fetch\s*\(/);
-  assert.doesNotMatch(code,/innerHTML\s*=/);
-  assert.match(code,/requestDetails.open=true/);
+test('prompts are deterministic; local mode never secretly runs paid AI',()=>{
+ assert.equal(featuredChips().length,4);
+ const code=fs.readFileSync(new URL('../../site/assets/js/mz-floating-assistant.mjs',import.meta.url),'utf8');
+ assert.match(code,/guideRequest\(text\)/);
+ assert.doesNotMatch(code,/innerHTML\s*=/);
+ assert.match(code,/aiConsent\?\.checked/);
+ assert.match(code,/intakeOnHome/);
 });
 test('homepage renders accepted brand, Saudi hero, honest capabilities and demos',async()=>{
   const result=await worker.fetch(new Request('https://mz702.pages.dev/'),{});
@@ -67,25 +67,28 @@ test('homepage renders accepted brand, Saudi hero, honest capabilities and demos
   const html=await result.text();
   for(const expected of [
     'ارررحب','قول وش الوضع','أكبر نتيجة بأقل جهد',
-    'id="mz-assistant"','id="mz-bot-form"','id="mz-bot-input"',
+    'id="mz-assistant-root"','id="mz-chat-form"','id="mz-chat-input"',
     'id="mz-quick-idea"','id="mz-intake-consent"','id="mz-intake-reference"',
     'id="mz-request"','id="mz-live-demos"','id="slot-book"','data-panel="game"',
-    'MCP: تطوير','نماذج AI: تجريبي',
-    '/assets/images/mz-mark.svg','/assets/js/mz-assistant-ui.mjs'
+    'المراجعة الأولية مجانًا','بدون بطاقة',
+    '/assets/images/mz-mark.svg','/assets/js/mz-floating-assistant.mjs'
   ]) assert.ok(html.includes(expected),'missing '+expected);
   const js=await worker.fetch(new Request('https://mz702.pages.dev/assets/js/mz-assistant-ui.mjs'),{});
   assert.equal(js.status,200);
   assert.match(js.headers.get('Content-Type'),/javascript/);
   const css=await worker.fetch(new Request('https://mz702.pages.dev/assets/css/studio-site.css'),{});
   assert.equal(css.status,200);
-  assert.match(await css.text(),/\.mz-ai-entity/);
+  assert.match(await css.text(),/\.mz-hero-links/);
 });
-test('request form is separate, no duplicate identifiers for critical IDs',async()=>{
-  const html=await (await worker.fetch(new Request('https://mz702.pages.dev/'),{})).text();
-  for(const id of ['mz-quick-idea','mz-intake-idea','mz-intake-consent','mz-bot-form','mz-bot-input','mz-assistant']){
-    assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1,id);
-  }
-  const source=fs.readFileSync(new URL('../../site/assets/js/mz-assistant-ui.mjs',import.meta.url),'utf8');
-  assert.match(source,/requestText\.value=text/);
-  assert.match(source,/requestDetails\.open=true/);
+test('lead form remains explicit and separate from the one floating assistant',async()=>{
+ const html=await (await worker.fetch(new Request('https://mz702.pages.dev/'),{})).text();
+ for(const id of ['mz-quick-idea','mz-intake-idea','mz-intake-consent','mz-chat-form','mz-chat-input','mz-assistant-root']){
+  assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1,id);
+ }
+ assert.doesNotMatch(html,/id="mz-assistant"/);
+ const source=fs.readFileSync(new URL('../../site/assets/js/mz-floating-assistant.mjs',import.meta.url),'utf8');
+ assert.match(source,/details.open=true/);
+ assert.match(source,/text.value=value/);
+ assert.match(source,/intakeOnHome/);
+ assert.match(source,/sendToReview/);
 });

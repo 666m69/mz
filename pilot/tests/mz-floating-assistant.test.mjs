@@ -50,7 +50,7 @@ test('the script and CSS are served locally under current Worker CSP',async()=>{
     assert.match(response.headers.get('Content-Type')||'',new RegExp(kind));
   }
   const script=await loaded('/assets/js/mz-floating-assistant.mjs');
-  assert.match(script,/import \{guideRequest\}/);
+  assert.match(script,/import \{guideRequest,CAPABILITIES\}/);
   assert.match(script,/executeInlineSkill\('teacher-draft-v1'/);
   assert.match(script,/document\.createElement/);
   assert.match(script,/textContent=/);
