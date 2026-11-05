@@ -8,7 +8,7 @@ const root=new URL('../site/',import.meta.url);
 const server=createServer(async(req,res)=>{
   let p;
   try{p=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch{res.writeHead(400).end();return;}
-  if(p.includes('..')||p.includes('\\')||!/^\/[a-zA-Z0-9_.\/\-]+$/.test(p)){res.writeHead(400).end();return;}
+  if(p.includes('..')||p.includes('\\')||!/^\/[a-zA-Z0-9_.\/\-]*$/.test(p)){res.writeHead(400).end();return;}
   if(p.endsWith('/'))p+='index.html';
   const extension=p.slice(p.lastIndexOf('.')+1);
   try{
