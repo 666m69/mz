@@ -133,6 +133,8 @@ try{
   await navigate('/');
   const desktop=await evalJS(`return {client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,
     bot:document.getElementById('mz-assistant').getBoundingClientRect().width,
+    hideProbe:['.studio-hero','.community-invite','.featured-showcase','.site-header','.catalog-section','.projects-hero','.discovery-grid','.live-console','main','.site-footer']
+      .map(selector=>{const el=document.querySelector(selector);if(!el)return null;const previous=el.style.display;el.style.display='none';const width=document.documentElement.scrollWidth;el.style.display=previous;return {selector,width};}).filter(Boolean),
     offenders:[...document.querySelectorAll('body *')].map(e=>({el:e,r:e.getBoundingClientRect(),style:getComputedStyle(e)}))
      .filter(x=>x.style.display!=='none'&&x.r.width&&x.r.right>document.documentElement.clientWidth+4)
      .sort((a,b)=>b.r.right-a.r.right).slice(0,12).map(x=>({tag:x.el.tagName,cls:String(x.el.className).slice(0,60),right:Math.round(x.r.right),width:Math.round(x.r.width)})),
