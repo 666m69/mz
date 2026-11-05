@@ -5,5 +5,6 @@ export function setArabicCanvasText(ctx,size){
   ctx.textAlign='right';
 }
 export async function readyForArabicExport(){
+  if(document.fonts?.load)await document.fonts.load('24px Tahoma','نص عربي للاختبار');
   if(document.fonts?.ready)await document.fonts.ready;
 }
