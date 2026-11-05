@@ -1,0 +1,35 @@
+name: MZcode Experience 2.0 — browser acceptance
+on:
+  pull_request:
+    paths:
+      - 'home-studio.mjs'
+      - 'catalog.mjs'
+      - 'build.mjs'
+      - 'site/assets/js/mz-assistant-*'
+      - 'site/assets/css/mz-experience.css'
+      - 'pilot/mz-experience-browser-audit.mjs'
+      - 'pilot/tests/mz-experience-v2.test.mjs'
+      - '.github/workflows/mz-experience-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  experience-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build
+        run: npm run build
+      - name: Exercise actual headless Chromium at mobile and desktop sizes
+        run: node pilot/mz-experience-browser-audit.mjs
+      - name: Save visual acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mzcode-experience-v2-screenshots
+          path: audit-output/*.png
+          if-no-files-found: ignore
