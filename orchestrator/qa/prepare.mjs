@@ -19,7 +19,7 @@ if(process.env.CF_PAGES_BRANCH!==onlyBranch){
       throw new Error('synthetic_app_unverified');
     const target=fileURLToPath(new URL('../../site/qa-orchestrator/',import.meta.url));
     await mkdir(target,{recursive:true});
-    for(const name of ['app.js','styles.css','blueprint.json']){
+    for(const name of ['app.js','styles.css']){
       await copyFile(join(result.artifact_path,'..',name),join(target,name));
     }
     // This synthetic test script is never included in the ZIP delivered by Orchestrator.
@@ -28,12 +28,6 @@ if(process.env.CF_PAGES_BRANCH!==onlyBranch){
     if(!source.includes('</body>'))throw new Error('invalid_app_html');
     const html=source.replace('</body>','<script defer src="./browser-acceptance.js"></script></body>');
     await writeFile(join(target,'index.html'),html);
-    await writeFile(join(target,'qa-receipt.json'),JSON.stringify({
-      schema_version:1,synthetic:true,source_verified:true,
-      zip_sha256:result.receipt.artifact_sha256,
-      skill_id:result.receipt.skill_id,adapter_digest:result.receipt.adapter_digest,
-      browser_qa:'pending_external_chromium'
-    },null,2)+'\n');
     console.log('Synthetic browser fixture built by reviewed Orchestrator, awaiting Chromium acceptance.');
   }finally{
     await rm(tmp,{recursive:true,force:true});
