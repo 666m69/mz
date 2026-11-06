@@ -23,4 +23,6 @@ test('approved MZ emblem remains in header, and third-party logos are not co-bra
   const css=read('assets/css/mz-positioning.css');
   assert.match(css,/@media\(max-width:520px\)/);
   assert.match(css,/\.mz-method-grid/);
+  assert.match(css,/@media\(max-width:360px\)/);
+  assert.match(css,/#mz-bot-trigger,#mz-portal-canvas\{width:50px;height:50px\}/);
 });
