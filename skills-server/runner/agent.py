@@ -13,6 +13,8 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import urllib.parse
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -182,13 +184,53 @@ def once():
                 raise
     return "succeeded" if result.get("ok") else result["error"]
 
+def serve(poll_seconds=10.0, max_jobs=0, max_seconds=0, *, stop_event=None, run_once=None, clock=None):
+    """Process reviewed jobs while a trusted supervisor keeps this process alive.
+
+    A control/API error stops the loop (fail closed); the host must decide
+    whether to restart. Polling never executes unreviewed code or bypasses D1.
+    """
+    stop = stop_event if stop_event is not None else threading.Event()
+    work = run_once if run_once is not None else once
+    now = clock if clock is not None else time.monotonic
+    deadline = now() + max_seconds if max_seconds else None
+    processed = 0
+    while not stop.is_set():
+        if deadline is not None and now() >= deadline:
+            break
+        try:
+            result = work()
+        except (OSError, ValueError, KeyError, RuntimeError, http.client.HTTPException):
+            # Never print an exception: it may contain a URL or private credentials.
+            print("control_unavailable", file=sys.stderr)
+            return 1
+        if result != "idle":
+            processed += 1
+            if max_jobs and processed >= max_jobs:
+                break
+        else:
+            delay = poll_seconds if deadline is None else min(poll_seconds, max(0, deadline - now()))
+            if delay:
+                stop.wait(delay)
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser()
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--once", action="store_true")
+    modes.add_argument("--serve", action="store_true")
     modes.add_argument("--probe", action="store_true")
     modes.add_argument("--fingerprints", action="store_true")
+    parser.add_argument("--poll-seconds", type=float, default=10.0)
+    parser.add_argument("--max-jobs", type=int, default=0)
+    parser.add_argument("--max-seconds", type=int, default=0)
     opts = parser.parse_args()
+    if (not 1 <= opts.poll_seconds <= 60 or not 0 <= opts.max_jobs <= 24
+            or not 0 <= opts.max_seconds <= 86400):
+        parser.error("invalid bounded runner parameters")
+    if not opts.serve and (opts.poll_seconds != 10.0 or opts.max_jobs or opts.max_seconds):
+        parser.error("service options require --serve")
     if opts.probe:
         file = "skills-server/runner/probe.mjs"
         result = isolated({file: (ROOT / file).read_bytes()}, file, [], {}, probe=True)
@@ -199,6 +241,13 @@ def main():
             for ref, adapter in item["adapters"].items():
                 print(skill, ref, source_bytes(adapter)[1])
         return 0
+    if opts.serve:
+        stop = threading.Event()
+        def request_stop(_signal, _frame):
+            stop.set()
+        signal.signal(signal.SIGTERM, request_stop)
+        signal.signal(signal.SIGINT, request_stop)
+        return serve(opts.poll_seconds, opts.max_jobs, opts.max_seconds, stop_event=stop)
     try:
         print(once())
     except (OSError, ValueError, KeyError, RuntimeError, http.client.HTTPException):
