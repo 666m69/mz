@@ -11,6 +11,7 @@ import {classifySkill} from '../skills-server/worker/intent.mjs';
 import {catalog,artifactNames} from '../skills-server/worker/catalog.mjs';
 import {zipFiles} from '../skills-server/worker/zip.mjs';
 import {verifyChecklistRuntime} from './runtime-qa.mjs';
+import {verifyReviewedAdapter} from './source-integrity.mjs';
 
 const EXPECTED_ADAPTER='checklist-v1';
 const MAX_OUTPUT_BYTES=49152;
@@ -69,6 +70,9 @@ function inspectZip(zip,expected){
 export async function executeIdea({idea,title}={}, {outputRoot}={}){
   const plan=planIdea({idea,title});
   if(plan.state!=='ready_for_staging')return {ok:false,state:plan.state,reason:plan.reason,automatic_delivery:false};
+  // Must fail before allocating an output directory if an adapter has changed.
+  const reviewedDigest=verifyReviewedAdapter(plan.skill_id,plan.adapter_ref);
+  if(reviewedDigest!==plan.adapter_digest)throw new Error('reviewed_digest_mismatch');
   const root=outputRoot===undefined?await mkdtemp(join(tmpdir(),'mz-orchestrator-')):resolve(outputRoot);
   let app;
   try{
@@ -88,7 +92,7 @@ export async function executeIdea({idea,title}={}, {outputRoot}={}){
     await writeFile(join(app.directory,zipName),zipped,{mode:0o600,flag:'wx'});
     const receipt={
       schema_version:1,id:randomUUID(),state:'staging_verified',
-      skill_id:plan.skill_id,adapter:plan.adapter_ref,adapter_digest:plan.adapter_digest,
+      skill_id:plan.skill_id,adapter:plan.adapter_ref,adapter_digest:reviewedDigest,source_verified:true,
       type:plan.app_type,files:[...artifactNames],artifact_sha256:sha256(zipped),artifact_bytes:zipped.byteLength,
       tests:{behavior:behavioral.checks,zip_contents:packed.files,html_security:true,source_limit:true},
       limits:plan.limits,delivery:'local_private_zip_only',
