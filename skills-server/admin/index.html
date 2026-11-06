@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة المهارات | MZcode</title><link rel="stylesheet" href="/admin.css"><script src="/admin.js" defer></script></head>
+<body><main><header><span class="mark" lang="en">MZ</span><div><p class="eyebrow">استوديو التنفيذ · مساحة المالك</p>
+<h1>إدارة المهارات</h1></div></header>
+<p class="intro">راجع إصدار المهارة واختبره قبل السماح له ببناء مشروع خاص.</p>
+<p id="status" role="status" aria-live="polite"></p>
+<form id="login" class="panel"><h2>دخول المالك</h2><label for="token">رمز المالك</label>
+<input id="token" type="password" required maxlength="160" autocomplete="off" spellcheck="false">
+<button>دخول</button><small>تنتهي الجلسة عند إعادة تحميل الصفحة.</small></form>
+<div id="console" hidden><nav><button id="refresh" type="button">تحديث الحالة</button><button type="button" id="logout" class="quiet">خروج</button></nav>
+<section aria-label="سجل المهارات"><h2>المهارات وإصداراتها</h2><div id="registry"></div></section>
+<form id="assistant" class="panel"><h2>نفّذ فكرة خاصة</h2>
+<label for="idea">صف قائمة مهام أو مشتريات أو عدادًا محليًا</label>
+<textarea id="idea" minlength="20" maxlength="2000" required></textarea>
+<label><input type="checkbox" id="private-consent" required> أوافق على بناء نموذج خاص لهذه الفكرة.</label>
+<button>اختر المهارة واطلب البناء</button></form>
+<section id="assistant-result" hidden class="panel" aria-live="polite"><h2>نتيجة الطلب</h2><p id="assistant-status"></p><button id="assistant-fetch" type="button">تحقق من النتيجة ونزّل المشروع عند اكتماله</button></section>
+<form id="draft" class="panel"><h2>إضافة مهارة أو إصدار</h2><p>اختر تنفيذًا راجعه المطور. عند الإرسال يبدأ طلب اختبار مستقل، ثم يقرر المالك التفعيل.</p>
+<label for="skill">المهارة المراجعة</label><select id="skill" required></select>
+<label for="adapter">التنفيذ المعتمد</label><select id="adapter" required></select>
+<div class="pair"><div><label for="arabic">اسم العرض</label><input id="arabic" maxlength="64" required></div>
+<div><label for="version">رقم الإصدار</label><input id="version" dir="ltr" placeholder="1.0.0" maxlength="11" required></div></div>
+<button>إرسال للمراجعة</button></form>
+<section class="panel"><h2>متابعة التشغيل</h2><p id="queue"></p><div id="faults"></div>
+<h3>مقترحات تحسين من الأعطال المتكررة</h3><ul id="improvements"></ul><details><summary>آخر أحداث التدقيق</summary><ol id="audit"></ol></details></section>
+</div></main></body></html>
