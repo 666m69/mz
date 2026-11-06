@@ -1,0 +1,28 @@
+/* MZcode one-stop delivery positioning. Added last to the site's stylesheet bundle. */
+.saudi-intro .mz-main-promise{color:#ecfff4;display:block;max-inline-size:14ch;text-wrap:balance;letter-spacing:-.04em}
+.saudi-intro .saudi-guide{max-inline-size:56ch}
+.mz-method{position:relative;isolation:isolate;box-sizing:border-box;margin:clamp(28px,4vw,58px) auto 18px;padding:clamp(20px,3vw,32px);max-inline-size:1180px;inline-size:calc(100% - 24px);border:1px solid #2e736080;border-radius:24px;background:linear-gradient(125deg,#0c222a,#102b31 45%,#091b2c);color:#e9fff4;box-shadow:0 20px 65px #0003}
+.mz-method *{box-sizing:border-box}
+.mz-method-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-block-end:22px}
+.mz-method-kicker{font-size:12px;font-weight:800;letter-spacing:.04em;color:#8df4c4}
+.mz-method h2{font-size:clamp(22px,2.8vw,34px);line-height:1.45;margin:6px 0 0;color:#fff}
+.mz-method-heading>a{display:inline-flex;align-items:center;justify-content:center;min-block-size:44px;border:1px solid #87d5ae9c;border-radius:12px;color:#c6ffe5;text-decoration:none;padding:10px 18px;font-size:14px;font-weight:750}
+.mz-method-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0;margin:0;list-style:none;counter-reset:mz-step}
+.mz-method-grid li{min-inline-size:0;border:1px solid #5e918257;background:#19363a77;border-radius:17px;padding:16px;overflow-wrap:anywhere}
+.mz-method-grid li>span{display:grid;place-items:center;inline-size:35px;block-size:35px;border:1px solid #68daaa8f;border-radius:11px;color:#b7ffdb;background:#145e4370;font:800 12px/1 system-ui,sans-serif}
+.mz-method-grid h3{margin:11px 0 7px;font-size:16px;line-height:1.5;color:#f8fff9}
+.mz-method-grid p{margin:0;font-size:13px;line-height:1.8;color:#bdd7cd}
+.mz-method-trust{display:grid;gap:10px;margin-block-start:17px;padding-block-start:17px;border-block-start:1px solid #8ac9aa35}
+.mz-method-trust p{font-size:12px;line-height:1.9;margin:0;color:#cce4d8}
+.mz-method-trust strong{color:#a9ffce}
+.mz-method-trust .mz-brand-clarifier{font-size:11px;color:#adcbc0}
+.mz-method :focus-visible{outline:3px solid #a0ffd0;outline-offset:3px}
+@media(max-width:800px){.mz-method-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.mz-method{inline-size:calc(100% - 16px);border-radius:17px;padding:16px}.mz-method-heading{align-items:start}.mz-method-heading>a{width:100%}.mz-method-grid{grid-template-columns:minmax(0,1fr);gap:9px}.mz-method-grid li{padding:12px 14px}.mz-method-grid h3{margin:6px 0 3px}.mz-method-grid li>span{float:right;margin-inline-end:12px}.mz-method-grid li:after{content:"";display:block;clear:both}}
+
+/* On 320px phones the floating portal must not cover the hero paragraph. */
+@media(max-width:360px){
+  #mz-assistant-root{right:2px}
+  #mz-bot-trigger,#mz-portal-canvas{width:50px;height:50px}
+  #mz-bot-trigger .mz-floating-logo{width:25px;height:25px}
+}

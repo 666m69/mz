@@ -66,7 +66,7 @@ test('homepage renders accepted brand, Saudi hero, honest capabilities and demos
   assert.equal(result.status,200);
   const html=await result.text();
   for(const expected of [
-    'ارررحب','قول وش الوضع','أكبر نتيجة بأقل جهد',
+    'ارررحب','خلّ التقنية علينا','عندك فكرة؟ خلّها تشتغل',
     'id="mz-assistant-root"','id="mz-chat-form"','id="mz-chat-input"',
     'id="mz-quick-idea"','id="mz-intake-consent"','id="mz-intake-reference"',
     'id="mz-request"','id="mz-live-demos"','id="slot-book"','data-panel="game"',

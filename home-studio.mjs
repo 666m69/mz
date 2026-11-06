@@ -28,14 +28,13 @@ const social = `<div class="demo-stage social-trial" data-panel="social" hidden>
 export const mobileNav=`<nav class="mobile-dock" aria-label="روابط الجوال"><a href="/community/"><span aria-hidden="true">✦</span>المختبر</a><a href="/projects/"><span aria-hidden="true">▤</span>المشاريع</a><a href="/idea"><span aria-hidden="true">✧</span>فكرتك</a><a href="/#contact"><span aria-hidden="true">✉</span>تواصل</a></nav>`;
 export const studio = `<section id="playground" class="studio-hero" aria-labelledby="studio-title">
   <div class="studio-pitch saudi-intro">
-    <span class="studio-label"><i aria-hidden="true"></i> MZcode · مساعد سعودي لإنجاز شغلك <span class="label-line" aria-hidden="true"></span></span>
+    <span class="studio-label"><i aria-hidden="true"></i> MZcode · من الفكرة إلى التنفيذ <span class="label-line" aria-hidden="true"></span></span>
     <p class="saudi-greeting">ارررحب <span aria-hidden="true">🫡</span></p>
-    <h1 id="studio-title">قول وش الوضع؟</h1>
-    <p class="saudi-brand-line"><strong dir="ltr">MZcode</strong> <span>— أكبر نتيجة بأقل جهد <span aria-hidden="true">👍</span></span></p>
-    <p class="saudi-question">وش اللي مجهدك؟ <span aria-hidden="true">😌</span></p>
-    <p class="saudi-guide">اكتب اللي تحتاجه بطريقتك، سواء فكرة تطبيق أو شغلة معطّلتك. نستقبل طلبك برقم متابعة، ونوضح لك وش نقدر نسوي.</p>
-
-    <div class="mz-hero-links"><button type="button" data-mz-open-assistant class="mz-hero-primary">اسأل مساعد MZcode <span aria-hidden="true">←</span></button><a href="#mz-live-demos" class="mz-hero-secondary">أبي أجرب الأدوات <span aria-hidden="true">↙</span></a></div>
+    <h1 id="studio-title"><span class="mz-main-promise">خلّ التقنية علينا.</span></h1>
+    <p class="saudi-brand-line"><strong dir="ltr">MZcode</strong> <span>— عندك فكرة؟ خلّها تشتغل.</span></p>
+    <p class="saudi-question">وش ودك نسوي لك؟</p>
+    <p class="saudi-guide">قل لنا وش تحتاج بطريقتك. نختار الأدوات والتقنيات المناسبة، ونبدأ بتصور واضح وتجربة ممكنة، ثم نتفق معك على نطاق التنفيذ والتسليم. بدون ما تتشتت بين الخدمات والمنصات.</p>
+    <div class="mz-hero-links"><button type="button" data-mz-open-assistant class="mz-hero-primary">ابدأ بفكرتك <span aria-hidden="true">←</span></button><a href="#mz-live-demos" class="mz-hero-secondary">أبي أجرب الأدوات <span aria-hidden="true">↙</span></a></div>
     <p class="mz-promise"><span aria-hidden="true">✦</span> التجارب الأساسية ورفع الطلب للمراجعة مجانًا وبدون بطاقة. تنفيذ المشاريع الخاصة بعد اتفاق واضح.</p>
   </div>
   <details class="mz-request-area" id="mz-request">
@@ -71,4 +70,15 @@ export const studio = `<section id="playground" class="studio-hero" aria-labelle
     <div class="mode-switch" data-controls role="group" aria-label="اختر تجربة"><button type="button" data-mode="book" aria-pressed="true">احجز</button><button type="button" data-mode="quote" aria-pressed="false">سعّر</button><button type="button" data-mode="game" aria-pressed="false">العب</button><button type="button" data-mode="social" aria-pressed="false">خطّط</button></div>
     ${booking}${quoting}${gaming}${social}
     <noscript><p>تحتاج التجارب المضمّنة إلى JavaScript. يمكنك فتح <a href="/tools/">دليل الأدوات</a>.</p></noscript>
-  </div></section><section id="mz-community-invite" class="community-invite" aria-labelledby="mz-community-title"><div><span>جديد · للأهل والأصدقاء وكل زائر</span><h2 id="mz-community-title">جرّب، صوّت، وشاركنا أفكارك.</h2><p>تجارب ومشاريع مفتوحة لرأيك، من غير تسجيل ولا طلب شراء.</p><p class="community-browse">ما عندك فكرة؟ ولا ودّك تشارك؟ 😏 ولا يهمك، <a href="/projects/">خذ لك فَرّة بالموقع</a> واستكشف المشاريع والأدوات والألعاب على راحتك 🫡</p></div><a href="/community/">ادخل مختبر MZ ←</a></section><div class="capability-strip" aria-label="ما يقدمه MZcode"><div><strong>فكرة غير تقليدية؟</strong><span>نحوّلها لمسار واضح قابل للتجربة</span></div><div><strong>منتجات جاهزة للاستخدام</strong><span>أدوات عربية تعمل من المتصفح</span></div><div><strong>من التجربة إلى التنفيذ</strong><span>نبدأ بما يحتاجه العميل فعلًا</span></div></div>`;
+  </div></section><section id="mz-method" class="mz-method" aria-labelledby="mz-method-title">
+  <div class="mz-method-heading"><div><span class="mz-method-kicker">فكرتك عندنا لها طريق واضح</span><h2 id="mz-method-title">الفكرة ثم التجربة ثم الاتفاق ثم التسليم.</h2></div><a href="/idea">خلّنا نبدأ بفكرتك ←</a></div>
+  <ol class="mz-method-grid">
+    <li><span aria-hidden="true">01</span><h3>تقول وش تبي</h3><p>اكتب فكرتك بالعربي؛ تطبيق، موقع، أداة، أو شغلة تحتاج لها حل.</p></li>
+    <li><span aria-hidden="true">02</span><h3>نختار التقنية</h3><p>نحدّد ما يمكن تجربته من مهاراتنا، وما يحتاج مراجعة أو تطويرًا إضافيًا.</p></li>
+    <li><span aria-hidden="true">03</span><h3>نجرّب ونتفق</h3><p>نوضح النموذج الممكن والتكلفة والنطاق قبل أي تنفيذ مدفوع.</p></li>
+    <li><span aria-hidden="true">04</span><h3>ننفّذ ونسلّم</h3><p>نبني ونختبر ونسلّم وفق الاتفاق؛ مع بيان ما أُنجز فعلًا.</p></li>
+  </ol>
+  <div class="mz-method-trust"><p><strong>المراجعة الأولية مجانية.</strong> النماذج الآلية حاليًا محدودة بالمهارات المختبرة، وبقية الطلبات تُراجع قبل الوعد بالتنفيذ. لا يوجد دفع قبل الاتفاق.</p>
+  <p>يمكن الاستفادة من خدمات مثل <b dir="ltr">ChatGPT</b> و<b dir="ltr">Claude</b> وأدوات البرمجة والنشر حسب احتياج المشروع وتوفّر الربط النظامي.</p>
+  <p class="mz-brand-clarifier">ذكر أسماء خدمات الأطراف الأخرى للتوضيح فقط، ولا يعني شراكة أو ربطًا آليًا مفعلًا.</p></div>
+</section><section id="mz-community-invite" class="community-invite" aria-labelledby="mz-community-title"><div><span>جديد · للأهل والأصدقاء وكل زائر</span><h2 id="mz-community-title">جرّب، صوّت، وشاركنا أفكارك.</h2><p>تجارب ومشاريع مفتوحة لرأيك، من غير تسجيل ولا طلب شراء.</p><p class="community-browse">ما عندك فكرة؟ ولا ودّك تشارك؟ 😏 ولا يهمك، <a href="/projects/">خذ لك فَرّة بالموقع</a> واستكشف المشاريع والأدوات والألعاب على راحتك 🫡</p></div><a href="/community/">ادخل مختبر MZ ←</a></section><div class="capability-strip" aria-label="ما يقدمه MZcode"><div><strong>فكرة غير تقليدية؟</strong><span>نحوّلها لمسار واضح قابل للتجربة</span></div><div><strong>منتجات جاهزة للاستخدام</strong><span>أدوات عربية تعمل من المتصفح</span></div><div><strong>من التجربة إلى التنفيذ</strong><span>نبدأ بما يحتاجه العميل فعلًا</span></div></div>`;
