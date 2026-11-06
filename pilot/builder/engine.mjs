@@ -22,14 +22,16 @@ export function planApp({ idea, title } = {}) {
   if (typeof idea !== 'string' || idea.trim().length < 20 || idea.length > 2000) {
     throw new AppBuildError('INVALID_IDEA', 'يجب كتابة فكرة بين 20 و2000 حرف');
   }
+  // Distinguish unsupported app types from apparently supported templates that
+  // actually require a backend, commerce, synchronization or physical devices.
+  const category = SHOP_IDEA.test(idea) ? 'shopping' : TASK_IDEA.test(idea) ? 'tasks' : null;
+  if (!category) {
+    throw new AppBuildError('UNSUPPORTED_IDEA', 'المحرك الأول يدعم قوائم المهام والمشتريات المحلية فقط');
+  }
   const assessment = assessCapability(idea);
   // Rules are advisory and never authorization to execute source supplied by visitors.
   if (assessment.decision !== 'prototype_only') {
     throw new AppBuildError('REVIEW_REQUIRED', 'هذه الفكرة تتطلب مراجعة تقنية وبشرية قبل البناء');
-  }
-  const category = SHOP_IDEA.test(idea) ? 'shopping' : TASK_IDEA.test(idea) ? 'tasks' : null;
-  if (!category) {
-    throw new AppBuildError('UNSUPPORTED_IDEA', 'المحرك الأول يدعم قوائم المهام والمشتريات المحلية فقط');
   }
   const displayTitle = title === undefined
     ? (category === 'shopping' ? 'قائمة مشترياتي' : 'منظم مهامي')
