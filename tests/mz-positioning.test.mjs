@@ -26,3 +26,12 @@ test('approved MZ emblem remains in header, and third-party logos are not co-bra
   assert.match(css,/@media\(max-width:360px\)/);
   assert.match(css,/#mz-bot-trigger,#mz-portal-canvas\{width:50px;height:50px\}/);
 });
+
+test('mobile sharing action stays above hero CTAs instead of floating over the buttons',()=>{
+  const css=read('assets/css/mz-positioning.css');
+  const mobile=css.slice(css.lastIndexOf('@media(max-width:640px)'));
+  assert.match(mobile,/html body #mz-share-float\s*\{/);
+  assert.match(mobile,/top:calc\(9px \+ env\(safe-area-inset-top\)\)/);
+  assert.match(mobile,/bottom:auto/);
+  assert.match(mobile,/html body #mz-share-status\s*\{/);
+});
