@@ -1,0 +1,29 @@
+name: Skills runner fail-closed service QA
+on:
+  push:
+    branches: [feat/skills-runner-loop-20261106]
+    paths:
+      - 'skills-server/**'
+      - '.github/workflows/skills-runner-service-qa.yml'
+permissions:
+  contents: read
+concurrency:
+  group: mz-skills-runner-service-qa
+  cancel-in-progress: true
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Test bounded service mode without credentials
+        run: python3 -B -m unittest discover -s skills-server/test -p 'test_service.py' -v
+      - name: Verify existing Linux sandbox and pinned sources
+        run: python3 -B skills-server/test/isolation.py
+      - name: Verify existing worker contracts and runner boundary
+        run: node --test skills-server/test/boundary.test.mjs skills-server/test/control.test.mjs skills-server/test/restart.test.mjs skills-server/test/runner.test.mjs
