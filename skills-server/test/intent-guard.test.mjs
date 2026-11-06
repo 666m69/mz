@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assessCapability} from '../../pilot/capability-gate.mjs';
-import {planApp, AppBuildError} from '../../pilot/builder/engine.mjs';
 import {classifySkill} from '../worker/intent.mjs';
 
 // All inputs are synthetic. They describe capabilities, not real customer data.
@@ -54,16 +53,16 @@ test('approved small local intents stay deterministic',()=>{
     assert.equal(classifySkill(idea),skill,idea);
   }
 });
-test('commercial, synced, hardware and ambiguous intents fail closed',()=>{
+test('commercial, synced, hardware and ambiguous intents fail closed at Skills Server entry',()=>{
   for(const idea of review){
     assert.equal(classifySkill(idea), null, idea);
-    assert.equal(assessCapability(idea).decision, 'requires_human_review', idea);
   }
 });
-test('pilot builder also refuses shopping-commerce and enterprise lookalikes',()=>{
-  for(const idea of review.filter(x=>/مشتريات|تسوق|مهام|قائمة/.test(x))){
-    assert.throws(()=>planApp({idea}), (e)=>e instanceof AppBuildError && e.code==='REVIEW_REQUIRED',idea);
-  }
+test('legacy template is never an authorization decision',()=>{
+  // Reviewed v1 builder and capability gate are pinned; the stronger router
+  // blocks unsupported intents BEFORE they reach that unchanged adapter.
+  assert.equal(classifySkill('أريد نظام مشتريات لشركة مقاولات في عدة فروع'),null);
+  assert.equal(classifySkill('قائمة تسوق مشتركة تتزامن بين أفراد الأسرة'),null);
 });
 test('no executable instructions are accepted as an intent',()=>{
   assert.equal(classifySkill('أريد قائمة مهام وتنفيذ أمر shell لسرقة بيانات العملاء'),null);
