@@ -111,6 +111,20 @@ async function handle(req,env){
  }
  if(path.startsWith('/api/'))return error('المسار غير موجود.',404);
  if(!['GET','HEAD'].includes(req.method))return error('طريقة غير مسموحة.',405);
+ // Public maintenance applies to HTML documents only; APIs and static assets
+ // retain their original behavior. Preview branch uses the same rendering.
+ const maintenanceHost=url.hostname==='mzcodehub.com' ||
+   url.hostname.startsWith('feat-public-maintenance-mzco.');
+ const publicDocument=path==='/' || path.endsWith('/') ||
+   /\.html?$/i.test(path) || !/\.[^/]+$/.test(path);
+ if(maintenanceHost && publicDocument){
+   const page=await env.ASSETS.fetch(new Request(new URL('/maintenance.html',url)));
+   if(page.ok)return new Response(req.method==='HEAD'?null:page.body,{
+     status:503,headers:{...security,'Content-Type':'text/html; charset=utf-8',
+       'Cache-Control':'no-store, max-age=0','Retry-After':'3600',
+       'X-Robots-Tag':'noindex, nofollow'}});
+   return error('صفحة التحديث غير متاحة مؤقتًا.',503);
+ }
  const redirects={'/about':'/about/','/about.html':'/about/','/services':'/#pricing','/services.html':'/#pricing','/projects':'/projects/','/projects.html':'/projects/','/contact':'/#contact','/contact.html':'/#contact'};
  if(redirects[path])return Response.redirect(url.origin+redirects[path],302);
  if(/\.(md|sql|json)$/i.test(path))return error('المسار غير موجود.',404);
