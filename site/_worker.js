@@ -114,7 +114,7 @@ async function handle(req,env){
  // Public maintenance applies to HTML documents only; APIs and static assets
  // retain their original behavior. Preview branch uses the same rendering.
  const maintenanceHost=url.hostname==='mzcodehub.com' ||
-   url.hostname.startsWith('feat-public-maintenance-mzcod.');
+   url.hostname.startsWith('feat-public-maintenance-mzco.');
  const publicDocument=path==='/' || path.endsWith('/') ||
    /\.html?$/i.test(path) || !/\.[^/]+$/.test(path);
  if(maintenanceHost && publicDocument){
