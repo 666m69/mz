@@ -6,7 +6,7 @@
     "node": ">=22.13"
   },
   "scripts": {
-    "build": "node catalog.mjs && node build.mjs && node pilot/build-lab.mjs && node --test tests/*.test.mjs pilot/tests/*.test.mjs",
+    "build": "node catalog.mjs && node build.mjs && node pilot/build-lab.mjs && node --test tests/*.test.mjs pilot/tests/*.test.mjs && node --test skills-server/test/registry-integrity.test.mjs skills-server/test/intent-guard.test.mjs",
     "test": "npm run build && node --test tests/*.test.mjs pilot/tests/*.test.mjs"
   }
 }
