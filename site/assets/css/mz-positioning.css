@@ -19,3 +19,10 @@
 .mz-method :focus-visible{outline:3px solid #a0ffd0;outline-offset:3px}
 @media(max-width:800px){.mz-method-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.mz-method{inline-size:calc(100% - 16px);border-radius:17px;padding:16px}.mz-method-heading{align-items:start}.mz-method-heading>a{width:100%}.mz-method-grid{grid-template-columns:minmax(0,1fr);gap:9px}.mz-method-grid li{padding:12px 14px}.mz-method-grid h3{margin:6px 0 3px}.mz-method-grid li>span{float:right;margin-inline-end:12px}.mz-method-grid li:after{content:"";display:block;clear:both}}
+
+/* On 320px phones the floating portal must not cover the hero paragraph. */
+@media(max-width:360px){
+  #mz-assistant-root{right:2px}
+  #mz-bot-trigger,#mz-portal-canvas{width:50px;height:50px}
+  #mz-bot-trigger .mz-floating-logo{width:25px;height:25px}
+}
