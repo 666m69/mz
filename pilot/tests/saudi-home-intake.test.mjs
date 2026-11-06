@@ -70,8 +70,8 @@ test('mismatched payload on the same idempotency key is refused',async()=>{
 test('rendered homepage keeps approved MZ logo and adds Saudi entry',()=>{
   const homepage=readFileSync(new URL('../../site/index.html',import.meta.url),'utf8');
   assert.match(homepage,/ارررحب/);
-  assert.match(homepage,/قول وش الوضع/);
-  assert.match(homepage,/أكبر نتيجة بأقل جهد/);
+  assert.match(homepage,/خلّ التقنية علينا/);
+  assert.match(homepage,/عندك فكرة؟ خلّها تشتغل/);
   assert.match(homepage,/mz-quick-idea/);
   assert.match(homepage,/mz-intake-reference/);
   assert.match(homepage,/\/assets\/images\/mz-mark\.svg/);
