@@ -2,7 +2,7 @@
 // Source: pilot/builder/engine.mjs + runtime.js + styles.css at staging review.
 // This is NOT a Linux sandbox or an open-ended code generator. Refuse unreviewed skills.
 // Parity tests compare all four files to the original source-pinned Node builder.
-import {assessCapability} from '../../pilot/capability-gate.mjs';
+import {assessCapability} from '../pilot/capability-gate.mjs';
 const TASK_IDEA = /مهام|مهامي|مهمات|to[ -]?do|tasks?|قائمة إنجاز|checklist|قائمة متابعة/i;
 const SHOP_IDEA = /مشتريات|تسوق|shopping(?: list)?|قائمة البقالة/i;
 const SAFE_TITLE = /^[\p{L}\p{N}][\p{L}\p{N} \u060C.,()،\-]{1,58}$/u;
