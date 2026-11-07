@@ -5,7 +5,7 @@ import core from '../worker/index.mjs';
 import {checks} from '../worker/catalog.mjs';
 import {capability} from '../worker/security.mjs';
 import {purgeExpiredArtifacts,mayDownloadArtifact} from '../worker/delivery-policy.mjs';
-import {baseSchema,retentionSchema,nullGuardSchema} from './migrations.mjs';
+import {baseSchema,retentionSchema,nullGuardSchema,migrationStatements} from './migrations.mjs';
 
 export const names=['init','release','review','activate','intake-a','intake-b','build-a','claim-a','finish-a','verify-a','revoke-a','build-b','claim-b','finish-b','verify-b','sql-guard','purge'];
 const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow','X-Content-Type-Options':'nosniff'};
@@ -45,14 +45,14 @@ async function perform(name,env){
   if(name==='init'){
     const old=await db.prepare("SELECT count(*) n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'").first();
     check(old?.n===0,'REFUSE_NONEMPTY_DATABASE');
-    await db.exec(baseSchema);
+    for(const statement of migrationStatements(baseSchema))await db.prepare(statement).run();
     // Old historical row gives a genuinely expired purge fixture after 0002 backfill.
     await db.prepare("INSERT INTO ss_skills(id) VALUES('qa-retention-fixture')").run();
     await db.prepare("INSERT INTO ss_releases(skill_id,version,manifest,digest,test_status) VALUES('qa-retention-fixture','1.0.0','{}',?,'passed')").bind('0'.repeat(64)).run();
     await db.prepare("INSERT INTO ss_jobs(id,kind,skill_id,version,digest,status,finished_at) VALUES(?,'test','qa-retention-fixture','1.0.0',?,'succeeded',unixepoch()-2678400)").bind(fixtureId,'0'.repeat(64)).run();
     await db.prepare('INSERT INTO ss_artifacts(job_id,cipher) VALUES(?,?)').bind(fixtureId,'QA_FAKE_EXPIRED_BYTES').run();
-    await db.exec(retentionSchema);
-    await db.exec(nullGuardSchema);
+    for(const statement of migrationStatements(retentionSchema))await db.prepare(statement).run();
+    for(const statement of migrationStatements(nullGuardSchema))await db.prepare(statement).run();
     await db.prepare('CREATE TABLE qa_state(key TEXT PRIMARY KEY,value TEXT NOT NULL)').run();
     const r=await db.prepare('SELECT purge_after FROM ss_artifacts WHERE job_id=?').bind(fixtureId).first();
     check(r?.purge_after<now,'OLD_ARTIFACT_NOT_EXPIRED');
