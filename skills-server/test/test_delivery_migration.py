@@ -12,7 +12,8 @@ class DeliveryMigrationTest(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(":memory:")
         # Cloudflare D1 has unixepoch(); some Python/OS SQLite builds do not.
-        self.db.create_function("unixepoch", -1,\n            lambda *args: (int(time.time())//86400*86400) if "start of day" in args else int(time.time()))
+        self.db.create_function("unixepoch", -1,
+            lambda *args: (int(time.time())//86400*86400) if "start of day" in args else int(time.time()))
         self.db.execute("PRAGMA foreign_keys=ON")
         self.db.executescript((ROOT / "0001_skills.sql").read_text())
         self.db.execute("INSERT INTO ss_skills(id) VALUES(?)", (SKILL,))
