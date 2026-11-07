@@ -56,3 +56,23 @@ After saving the result evidence, all disposable resources were deleted successf
 Follow-up Cloudflare account read confirmed **5 D1 databases (original count), 0 extra Queues, 0 KV namespaces**, original QA Worker subdomain disabled. Production Pages remains `b6bc35d8` with `success`, automatic production deployments disabled, and the visitor-facing maintenance redirect still active.
 
 No production code, live database, Cloudflare Access policy, billing, or customer record was changed in this acceptance.
+
+---
+
+## Upgrade: real generated Arabic apps on hosted Cloudflare (same day, 05:12:56 UTC)
+
+This result is **separate from and supersedes the earlier synthetic-file hosted ZIP fixture for the limited checklist builder scenario**. An isolated QA Worker imported a reviewed, source-pinned Cloudflare-native deterministic version of the local checklist builder (`qa/reviewed-edge-builder.mjs`), decrypted the actual synthetic client input stored in the QA D1 database, generated all four app files from that input, completed the running build job via the real Skills Server API, and downloaded and inspected the resulting authenticated ZIP from hosted D1.
+
+Evidence read through the authenticated Cloudflare KV management API at `2026-11-07T05:12:56Z`:
+
+- `qa-complete = {"ok":true,"executed":17,"lastPhase":"purge"}`. All 17 individual phase results were `ok:true`, zero failures.
+- Client **A (tasks)**: `finish-a.generated=true`, `category="tasks"`, four generated files encrypted; `verify-a.realGenerated=true`, downloaded ZIP **10,574 bytes**.
+- Client **B (shopping)**: `finish-b.generated=true`, `category="shopping"`, four different generated files encrypted; `verify-b.realGenerated=true`, downloaded ZIP **10,597 bytes**.
+- In both authenticated downloads, the QA Worker independently decoded the ZIP STORE members, parsed `blueprint.json`, checked the expected category/title, verified the actual generated `index.html` contains the matching Arabic title and RTL, and verified `app.js` provides localStorage persistence.
+- Each user capability was denied access to the other user's ZIP. Anonymous and runner-role accesses were denied. Owner revoke of A succeeded and was immutable; nullable expiry manipulation failed; purge removed one expired artifact and retained both newer artifacts.
+- The QA Worker had **no public subdomain** and all phases self-chained using Cloudflare Queues with temporary random secret credentials, rather than bypassing Cloudflare Access.
+- A Cloudflare upload validation caught an incorrect relative module import in the edge builder, corrected in commit `0d8c16608b74e0923c5dc251700e2186769427f1` before successful deployment.
+
+**Important boundary:** The hosted deterministic edge renderer is limited to the reviewed `local-checklist` category (tasks/shopping). It is *not* the external digest-pinned Linux runner, and does not support open-ended application construction. Existing separate Linux runner + local integration CI results remain distinct. Real-customer identity assurance, external runner operations, automated commercial public intake, PDF/quotes/payment, full security review and launch approval remain outside this test.
+
+**Next actions:** securely delete the isolated QA resources after evidence capture, reconfirm no production changes, add source parity regression and document remaining release gates.
