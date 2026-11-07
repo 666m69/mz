@@ -1,5 +1,6 @@
 """QA-only SQLite contract tests for the staged Cloudflare D1 artifact retention migration."""
 import sqlite3
+import time
 import unittest
 from pathlib import Path
 
@@ -10,6 +11,8 @@ SKILL = "local-checklist"
 class DeliveryMigrationTest(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(":memory:")
+        # Cloudflare D1 has unixepoch(); some Python/OS SQLite builds do not.
+        self.db.create_function("unixepoch", 0, lambda: int(time.time()))
         self.db.execute("PRAGMA foreign_keys=ON")
         self.db.executescript((ROOT / "0001_skills.sql").read_text())
         self.db.execute("INSERT INTO ss_skills(id) VALUES(?)", (SKILL,))
