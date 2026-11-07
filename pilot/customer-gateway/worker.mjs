@@ -73,6 +73,17 @@ async function sendCode(env,to,reference,code){
       '\nرقم الطلب: '+reference+'\nتنتهي صلاحية الرمز خلال 10 دقائق.'+
       '\nإذا لم تطلب هذا الرمز، تجاهل الرسالة. لا تشارك الرمز مع أحد.'};
   if(env.TEST_MAILER?.send)return env.TEST_MAILER.send(payload);
+  // Free Cloudflare Email Routing supports sending only to account-verified
+  // destinations. QA binds QA_EMAIL to exactly one recipient, never arbitrary.
+  if(env.QA_EMAIL?.send){
+    if(typeof env.QA_VERIFIED_TO!=='string'||to.toLowerCase()!==env.QA_VERIFIED_TO.toLowerCase())
+      return false;
+    const receipt=await env.QA_EMAIL.send({
+      from:'info@mzcodehub.com',to,subject:payload.subject,text:payload.text,
+      replyTo:'info@mzcodehub.com'
+    });
+    return typeof receipt?.messageId==='string'&&receipt.messageId.length>0;
+  }
   const response=await fetch('https://api.resend.com/emails',{
     method:'POST',headers:{Authorization:'Bearer '+env.RESEND_API_KEY,'Content-Type':'application/json'},
     body:JSON.stringify(payload),signal:AbortSignal.timeout(8000)});
@@ -95,7 +106,7 @@ async function start(req,env){
   const ack=()=>json({ok:true,message:'if_matched_a_code_was_sent'},202);
   const idea=await lookup(env,reference);
   if(!idea||!idea.email||idea.email.toLowerCase()!==email)return ack();
-  if(!env.RESEND_API_KEY&&!env.TEST_MAILER)return fail(503,'verification_unavailable');
+  if(!env.RESEND_API_KEY&&!env.TEST_MAILER&&!env.QA_EMAIL)return fail(503,'verification_unavailable');
   if(!await limit(env,'start-idea',idea.id,3))return ack();
   const challengeId=crypto.randomUUID(),code=newCode(),digest=await codeDigest(env,idea.id,challengeId,code);
   await stmt(env.GATEWAY_DB,`INSERT INTO cv_challenges
