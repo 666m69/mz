@@ -7,7 +7,7 @@ import {localBinding,localEnvironment} from '../../skills-server/dev/local.mjs';
 import skills from '../../skills-server/worker/index.mjs';
 import {checks} from '../../skills-server/worker/catalog.mjs';
 import {buildReviewedEdgeApp} from '../../skills-server/qa/reviewed-edge-builder.mjs';
-import gateway from '../customer-gateway/worker.mjs';
+import gateway,{purgeExpiredCustomerProofs} from '../customer-gateway/worker.mjs';
 
 const origin='https://mzcodehub.com', b64=()=>randomBytes(32).toString('base64url');
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -187,4 +187,25 @@ test('customer gateway rejects foreign origins, unapproved delivery links and ab
  ctx.env.GATEWAY_HMAC_KEY='';
  assert.equal((await ctx.call('/api/customer/verification/start',
    {reference:a.reference,email:a.email})).status,503);
+});
+
+test('logout revokes the HttpOnly session and cron purge removes only expired proof data',async t=>{
+ const ctx=await setup(t),a=await ctx.addClient(0);
+ assert.equal((await ctx.owner('link',link(a))).status,200);
+ const cookie=await prove(ctx,a);
+ assert.equal((await ctx.call('/api/customer/requests/'+a.reference,undefined,{Cookie:cookie})).status,200);
+ const logout=await ctx.call('/api/customer/session/logout',{}, {Cookie:cookie});
+ assert.equal(logout.status,200);
+ assert.match(logout.headers.get('set-cookie'),/Max-Age=0/);
+ assert.equal((await ctx.call('/api/customer/requests/'+a.reference,undefined,{Cookie:cookie})).status,404);
+ ctx.sql.prepare('UPDATE cv_challenges SET expires_at=0').run();
+ ctx.sql.prepare('INSERT INTO cv_sessions(token_hash,idea_id,expires_at) VALUES(?,?,0)')
+   .run('a'.repeat(64),a.ideaId);
+ ctx.sql.prepare("UPDATE cv_limits SET hour_bucket=0").run();
+ const purged=await purgeExpiredCustomerProofs(ctx.env);
+ assert.ok(purged.challenges>=1);
+ assert.ok(purged.sessions>=1);
+ assert.ok(purged.limits>=1);
+ assert.equal(ctx.sql.prepare('SELECT count(*) n FROM cv_deliveries').get().n,1,
+  'Scheduled cleanup must never delete delivery bindings or customer records');
 });
