@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {issueProof,verifyProof,normalizeEmail,authorizeCustomerDownload} from '../customer/verified-delivery.mjs';
+const secret='A'.repeat(43),requestId='a1f62451-a8aa-40cd-8ef4-bca10acfe809',otherId='b1f62451-a8aa-40cd-8ef4-bca10acfe809',runId='e1f62451-a8aa-40cd-8ef4-bca10acfe809',now=Date.UTC(2026,10,7,12,0);
+test('mailbox proof is scoped to the exact customer, email, and 10-minute expiry',async()=>{
+ const {proof,emailHash}=await issueProof({secret,requestId,email:' Client@Example.COM ',now});
+ assert.match(emailHash,/^[0-9a-f]{64}$/);
+ assert.equal(await verifyProof({secret,requestId,email:'client@example.com',proof,now:now+1000}),true);
+ assert.equal(await verifyProof({secret,requestId:otherId,email:'client@example.com',proof,now}),false);
+ assert.equal(await verifyProof({secret,requestId,email:'attacker@example.com',proof,now}),false);
+ assert.equal(await verifyProof({secret,requestId,email:'client@example.com',proof,now:now+600001}),false);
+ assert.equal(await verifyProof({secret,requestId,email:'client@example.com',proof:proof.slice(0,-1)+'0',now}),false);
+ assert.throws(()=>normalizeEmail('not-an-email'),/invalid_email/);
+ await assert.rejects(issueProof({secret:'short',requestId,email:'client@example.com',now}),/verification_secret_missing/);
+});
+test('download requires verified, nonrevoked customer and matching nonexpired artifact',async()=>{
+ const {proof}=await issueProof({secret,requestId,email:'client@example.com',now});
+ let customer={request_id:requestId,email:'client@example.com',verified_at:Math.floor(now/1000),revoked_at:null};
+ let artifact={job_id:runId,download_expires_at:Math.floor(now/1000)+3600,revoked_at:null};
+ const db={prepare(sql){return {bind(...args){return {async first(){if(sql.includes('mz_customer_delivery'))return args[0]==='MZ-TEST123'?customer:null;if(sql.includes('ss_artifacts'))return args[0]===runId&&args[1]===requestId?artifact:null;throw Error('unexpected SQL');}}}}}};
+ const check=(changes={})=>authorizeCustomerDownload({db,secret,reference:'MZ-TEST123',email:'client@example.com',proof,runId,now,...changes});
+ assert.deepEqual(await check(),{ok:true,requestId,runId});
+ assert.equal((await check({email:'attacker@example.com'})).ok,false);
+ assert.equal((await check({runId:otherId})).ok,false);
+ assert.equal((await check({reference:'MZ-OTHER'})).ok,false);
+ customer={...customer,verified_at:null};assert.equal((await check()).ok,false);
+ customer={...customer,verified_at:Math.floor(now/1000),revoked_at:Math.floor(now/1000)};assert.equal((await check()).ok,false);
+ customer={...customer,revoked_at:null};artifact={...artifact,revoked_at:Math.floor(now/1000)};assert.equal((await check()).ok,false);
+ artifact={...artifact,revoked_at:null,download_expires_at:Math.floor(now/1000)};assert.equal((await check()).ok,false);
+});
