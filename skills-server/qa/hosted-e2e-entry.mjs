@@ -43,7 +43,7 @@ async function get(db,key){
 async function run(name,env){
   const db=env.SKILLS_DB,now=Math.floor(Date.now()/1000);
   if(name==='init'){
-    const old=await db.prepare("SELECT count(*) n FROM sqlite_master WHERE type='table' AND name LIKE 'ss_%'").first();
+    const old=await db.prepare("SELECT count(*) n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'").first();
     check(old?.n===0,'REFUSE_NONEMPTY_DATABASE');
     await db.exec(baseSchema);
     // Old historical row gives a genuinely expired purge fixture after 0002 backfill.
