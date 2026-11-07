@@ -4,6 +4,7 @@ import {requireThat,fields,id,seal,unseal,capability,readJson,ApiError} from './
 import {first,stmt,all,mutation,registry} from './store.mjs';
 import {claim,complete} from './queue.mjs';
 import {zipFiles} from './zip.mjs';
+import {mayDownloadArtifact} from './delivery-policy.mjs';
 
 const versionOK=v=>typeof v==='string' && /^(0|[1-9]\d{0,2})\.(0|[1-9]\d{0,2})\.(0|[1-9]\d{0,2})$/.test(v);
 const reviewed=id=>typeof id==='string' && Object.hasOwn(catalog,id);
@@ -93,16 +94,30 @@ export async function route(req,env,actor,path) {
         job,item,r.skill_id,s.active_version,s.digest)],response:{id:job,version:s.active_version}};
     });
   }
+  if(runId&&path.length===5&&asset==='revoke'&&method==='POST'){
+    owner(actor);
+    fields(await readJson(req),[]);
+    const j=await first(db,'SELECT id FROM ss_jobs WHERE request_id=? AND id=?',item,runId);
+    requireThat(j,404,'not_found');
+    const v=await first(db,'SELECT job_id FROM ss_artifacts WHERE job_id=?',j.id);
+    requireThat(v,404,'not_found');
+    return mutation(db,req,'owner/delivery-revoke/'+item+'/'+runId,{},env,async()=>({
+      statements:[stmt(db,'UPDATE ss_artifacts SET revoked_at=unixepoch() WHERE job_id=? AND revoked_at IS NULL',j.id)],
+      response:{ok:true,revoked:true,run_id:j.id}
+    }));
+  }
   if(method==='GET'&&runId){
     const j=await first(db,'SELECT id,skill_id,version,status,result,error_code FROM ss_jobs WHERE request_id=? AND id=?',item,runId);
     requireThat(j,404,'not_found');
     if(path.length===4)return {...j,result:j.result?JSON.parse(j.result):null};
     if(path.length===5&&asset==='artifact'){
       requireThat(j.status==='succeeded',409,'artifact_unavailable');
-      const v=await first(db,'SELECT cipher FROM ss_artifacts WHERE job_id=?',j.id);
-      requireThat(v,404,'not_found');
+      const v=await first(db,'SELECT cipher,download_expires_at,purge_after,revoked_at FROM ss_artifacts WHERE job_id=?',j.id);
+      requireThat(mayDownloadArtifact(v),404,'not_found');
       const files=await unseal(env,'artifact/'+j.id,v.cipher);
-      return new Response(zipFiles(files),{headers:{'Content-Type':'application/zip','Content-Disposition':'attachment; filename="mz-project-'+j.id+'.zip"'}});
+      return new Response(zipFiles(files),{headers:{'Content-Type':'application/zip',
+        'Content-Disposition':'attachment; filename="mz-project-'+j.id+'.zip"',
+        'Cache-Control':'no-store'}});
     }
   }
   return notFound();

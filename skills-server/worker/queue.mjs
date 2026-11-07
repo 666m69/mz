@@ -41,7 +41,7 @@ export async function complete(env,req,jobId,body) {
         const bytes=artifactNames.reduce((n,k)=>n+size(body.files[k]),0);
         result={files:artifactNames.length,bytes,sha256:await hash(canonical(body.files))};
         requireThat(matches(JSON.parse(job.manifest).output_schema,result),422,'invalid_artifact');
-        statements.push(stmt(db,'INSERT INTO ss_artifacts(job_id,cipher) VALUES(?,?)',jobId,await seal(env,'artifact/'+jobId,body.files)));
+        statements.push(stmt(db,`INSERT INTO ss_artifacts(job_id,cipher,download_expires_at,purge_after)\n          VALUES(?,?,unixepoch()+1209600,unixepoch()+2592000)`,jobId,await seal(env,'artifact/'+jobId,body.files)));
       }
     }
     statements.unshift(stmt(db,'INSERT INTO ss_finishes(job_id,lease,status,result,error_code) VALUES(?,?,?,?,?)',

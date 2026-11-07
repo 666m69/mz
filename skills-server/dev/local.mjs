@@ -13,6 +13,7 @@ export function localBinding(sqlite) {
     rows(){return sqlite.prepare(this.sql).all(...this.args);}
     async first(){return this.rows()[0]??null;}
     async all(){return {results:this.rows()};}
+    async run(){const result=sqlite.prepare(this.sql).run(...this.args);return {meta:{changes:result.changes}};}
   }
   return {prepare:sql=>new Statement(sql),async batch(list){
     sqlite.exec('BEGIN IMMEDIATE');
@@ -24,12 +25,19 @@ export async function localEnvironment(file=':memory:',secrets){
   if(file!==':memory:'&&!secrets)throw Error('Stable local credentials required');
   const sqlite=new DatabaseSync(file);sqlite.exec('PRAGMA foreign_keys=ON; PRAGMA busy_timeout=2500');
   const migration=await readFile(new URL('../migrations/0001_skills.sql',import.meta.url),'utf8');
+  const deliveryMigration=await readFile(new URL('../migrations/0002_delivery_retention.sql',import.meta.url),'utf8');
+  const retentionHardening=await readFile(new URL('../migrations/0003_delivery_null_guard.sql',import.meta.url),'utf8');
   sqlite.exec('BEGIN IMMEDIATE');
   try{
     if(!sqlite.prepare("SELECT 1 FROM sqlite_master WHERE name='ss_skills'").get()){
       if(sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").get())throw Error('Expected a dedicated empty database');
       sqlite.exec(migration);
     }
+    // Local QA database is upgraded in-place; production migrations remain manual.
+    const columns=sqlite.prepare('PRAGMA table_info(ss_artifacts)').all().map(x=>x.name);
+    if(!columns.includes('download_expires_at'))sqlite.exec(deliveryMigration);
+    if(!sqlite.prepare("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name='ss_artifacts_revocation_monotonic'").get())
+      sqlite.exec(retentionHardening);
     sqlite.exec('COMMIT');
   }catch(e){sqlite.exec('ROLLBACK');sqlite.close();throw e;}
   const {owner,runner,data,capability}=secrets??newSecrets(),digest=s=>createHash('sha256').update(s).digest('hex');
