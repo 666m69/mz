@@ -7,7 +7,7 @@ import {capability} from '../worker/security.mjs';
 import {purgeExpiredArtifacts,mayDownloadArtifact} from '../worker/delivery-policy.mjs';
 import {baseSchema,retentionSchema,nullGuardSchema} from './migrations.mjs';
 
-const names=['init','release','review','activate','intake-a','intake-b','build-a','claim-a','finish-a','verify-a','revoke-a','build-b','claim-b','finish-b','verify-b','sql-guard','purge'];
+export const names=['init','release','review','activate','intake-a','intake-b','build-a','claim-a','finish-a','verify-a','revoke-a','build-b','claim-b','finish-b','verify-b','sql-guard','purge'];
 const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow','X-Content-Type-Options':'nosniff'};
 const fixtureId='qa-expired-artifact-20261107';
 const files={
@@ -40,7 +40,7 @@ async function get(db,key){
   check(!!row,'MISSING_QA_STATE_'+key);
   return row.value;
 }
-async function run(name,env){
+async function perform(name,env){
   const db=env.SKILLS_DB,now=Math.floor(Date.now()/1000);
   if(name==='init'){
     const old=await db.prepare("SELECT count(*) n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'").first();
@@ -153,11 +153,35 @@ async function run(name,env){
   }
   throw Error('UNKNOWN_PHASE');
 }
+// State transitions are strictly one-time and ordered. This is a disposable QA
+// harness only; a failed phase requires destroying the throwaway database.
+export async function runQaPhase(name,env){
+  check(names.includes(name),'UNKNOWN_PHASE');
+  const db=env.SKILLS_DB;
+  if(name!=='init'){
+    const index=names.indexOf(name);
+    const previous=names[index-1];
+    const lock=await db.prepare(
+      "UPDATE qa_state SET value=? WHERE key='qa_step' AND value=? RETURNING value"
+    ).bind('running:'+name,previous).first();
+    check(lock?.value==='running:'+name,'QA_PHASE_OUT_OF_ORDER');
+  }
+  const result=await perform(name,env);
+  if(name==='init'){
+    await db.prepare("INSERT INTO qa_state(key,value) VALUES('qa_step','init')").run();
+  }else{
+    const done=await db.prepare(
+      "UPDATE qa_state SET value=? WHERE key='qa_step' AND value=? RETURNING value"
+    ).bind(name,'running:'+name).first();
+    check(done?.value===name,'QA_PHASE_COMMIT_FAILED');
+  }
+  return result;
+}
 function page(prefix){
   return '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Private MZcode E2E</title>'
   +'<pre id="progress">Private QA running</pre><script>'
   +'(async()=>{var steps='+JSON.stringify(names)+',out=[];for(var name of steps){try{'
-  +'var r=await fetch('+JSON.stringify(prefix)+'+"step/"+name,{cache:"no-store"});'
+  +'var r=await fetch('+JSON.stringify(prefix)+'+"step/"+name,{method:"POST",cache:"no-store"});'
   +'var j=await r.json();out.push({step:name,ok:r.ok&&j.ok,result:j.result||{},error:j.error||null});'
   +'if(!r.ok||!j.ok)break;}catch(e){out.push({step:name,ok:false,error:"BROWSER_FETCH_FAILED"});break;}}'
   +'var result={ok:out.length===steps.length&&out.every(x=>x.ok),executed:out.length,tests:out};'
@@ -169,16 +193,16 @@ export default {
   async fetch(req,env){
     const url=new URL(req.url),until=Date.parse(env.QA_CLOSE_AT||'');
     const prefix='/__private_mzcode_qa/'+env.QA_ROUTE_SECRET+'/';
-    if(req.method!=='GET'||url.protocol!=='https:'||url.hostname!==env.QA_HOST
+    if(!['GET','POST'].includes(req.method)||url.protocol!=='https:'||url.hostname!==env.QA_HOST
       ||!Number.isFinite(until)||Date.now()>=until
       ||!env.QA_ROUTE_SECRET||url.search||!url.pathname.startsWith(prefix)){
       return new Response('Not found',{status:404,headers});
     }
     const path=url.pathname.slice(prefix.length);
-    if(path==='run')return new Response(page(prefix),{headers:{...headers,'Content-Type':'text/html; charset=utf-8',
+    if(path==='run'&&req.method==='GET')return new Response(page(prefix),{headers:{...headers,'Content-Type':'text/html; charset=utf-8',
       'Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'"}});
-    if(!path.startsWith('step/')||!names.includes(path.slice(5)))return new Response('Not found',{status:404,headers});
-    try{return Response.json({ok:true,phase:path.slice(5),result:await run(path.slice(5),env)},{headers})}
+    if(req.method!=='POST'||!path.startsWith('step/')||!names.includes(path.slice(5)))return new Response('Not found',{status:404,headers});
+    try{return Response.json({ok:true,phase:path.slice(5),result:await runQaPhase(path.slice(5),env)},{headers})}
     catch(e){
       const error=String(e?.message||'failed').replace(/[0-9a-f]{32,}/gi,'[redacted]').slice(0,160);
       return Response.json({ok:false,phase:path.slice(5),error},{status:500,headers});
