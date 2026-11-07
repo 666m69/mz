@@ -6,7 +6,7 @@
     "node": ">=22.13"
   },
   "scripts": {
-    "build": "node --test skills-server/test/registry-integrity.test.mjs skills-server/test/intent-guard.test.mjs orchestrator/test/*.test.mjs && python3 -B -m unittest discover -s skills-server/test -p test_service.py -v && python3 -B skills-server/test/isolation.py && node --test skills-server/test/boundary.test.mjs skills-server/test/control.test.mjs skills-server/test/restart.test.mjs skills-server/test/runner.test.mjs && node catalog.mjs && node build.mjs && node pilot/build-lab.mjs && node --test tests/*.test.mjs pilot/tests/*.test.mjs",
+    "build": "node --test skills-server/test/registry-integrity.test.mjs skills-server/test/intent-guard.test.mjs skills-server/test/delivery-policy.test.mjs orchestrator/test/*.test.mjs && python3 -B -m unittest discover -s skills-server/test -p 'test_*.py' -v && python3 -B skills-server/test/isolation.py && node --test skills-server/test/boundary.test.mjs skills-server/test/control.test.mjs skills-server/test/restart.test.mjs skills-server/test/runner.test.mjs && node catalog.mjs && node build.mjs && node pilot/build-lab.mjs && node --test tests/*.test.mjs pilot/tests/*.test.mjs",
     "test": "npm run build && node --test tests/*.test.mjs pilot/tests/*.test.mjs"
   }
 }
