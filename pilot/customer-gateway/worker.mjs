@@ -14,7 +14,7 @@ const fail=(status,code)=>json({error:code},status);
 const hex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
 const hash=async s=>hex(new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(s))));
 const to64=b=>btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-const from64=s=>Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')+'='),c=>c.charCodeAt(0));
+const from64=s=>{if(!/^[A-Za-z0-9_-]+$/.test(s))throw Error('invalid_base64url');const value=s.replaceAll('-','+').replaceAll('_','/');return Uint8Array.from(atob(value.padEnd(Math.ceil(value.length/4)*4,'=')),c=>c.charCodeAt(0))};
 const randomToken=()=>{const b=new Uint8Array(32);crypto.getRandomValues(b);return to64(b)};
 const key=s=>{if(typeof s!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(s))throw Error('gateway_secret_not_configured');return from64(s)};
 const mac=async(secret,message)=>hex(new Uint8Array(await crypto.subtle.sign('HMAC',
