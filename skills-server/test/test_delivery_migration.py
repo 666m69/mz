@@ -28,6 +28,7 @@ class DeliveryMigrationTest(unittest.TestCase):
         )
         self.db.execute("INSERT INTO ss_artifacts(job_id,cipher) VALUES(?,?)", (JOB,"sealed-value"))
         self.db.executescript((ROOT / "0002_delivery_retention.sql").read_text())
+        self.db.executescript((ROOT / "0003_delivery_null_guard.sql").read_text())
 
     def tearDown(self):
         self.db.close()
@@ -48,6 +49,17 @@ class DeliveryMigrationTest(unittest.TestCase):
     def test_expiry_extension_is_immutable(self):
         with self.assertRaisesRegex(sqlite3.IntegrityError, "immutable_artifact_retention"):
             self.db.execute("UPDATE ss_artifacts SET download_expires_at=download_expires_at+86400 WHERE job_id=?",(JOB,))
+
+    def test_nulling_retention_does_not_bypass_immutability(self):
+        for column in ("download_expires_at", "purge_after"):
+            with self.subTest(column=column):
+                with self.assertRaisesRegex(sqlite3.IntegrityError, "immutable_artifact_retention"):
+                    self.db.execute(f"UPDATE ss_artifacts SET {column}=NULL WHERE job_id=?",(JOB,))
+
+    def test_revocation_cannot_be_reversed(self):
+        self.db.execute("UPDATE ss_artifacts SET revoked_at=unixepoch() WHERE job_id=?",(JOB,))
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "immutable_artifact_revocation"):
+            self.db.execute("UPDATE ss_artifacts SET revoked_at=NULL WHERE job_id=?",(JOB,))
 
     def test_missing_retention_is_rejected(self):
         with self.assertRaises(sqlite3.IntegrityError):
