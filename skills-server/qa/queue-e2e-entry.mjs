@@ -2,7 +2,7 @@
 // Triggered by authenticated Cloudflare Queue API, never by a public HTTP route.
 // No customer data, production hostname, browser, payment system or email.
 import {names,runQaPhase} from './hosted-e2e-entry.mjs';
-const errorCode=e=>String(e?.message||'failure').replace(/[0-9a-f]{24,}/gi,'[redacted]').slice(0,120);
+const errorCode=e=>String(e?.message||'failure').replace(/[0-9a-f]{24,}/gi,'[redacted]').slice(0,420);
 export default {
   async fetch(){return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}})},
   async queue(batch,env){
