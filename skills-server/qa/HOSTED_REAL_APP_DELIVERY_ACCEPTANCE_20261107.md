@@ -46,6 +46,6 @@ Cloudflare Pages Preview for commit `ad04c0e96f1ef8d86b22b3b29f6e211e9426dd4b` s
 
 ## Resource lifecycle
 
-After evidence capture, all disposable resources (Queue consumer, QA Worker, Queue, D1 and KV) must be deleted and a separate Cloudflare account check performed. Do not claim cleanup success without that check. Production `mzcodehub.com` and real customer D1 were not targeted by this test.
+**Verified complete cleanup:** Cloudflare API confirmed successful deletion of the disposable Queue consumer, QA Worker, Queue, D1 and KV. A separate account read then returned **5 D1 databases, 0 Queues and 0 KV namespaces**; disposable D1 absent, original Skills QA Worker still closed. Production Pages SHA `b6bc35d8` has `success`, `production_deployments_enabled=false`, and the visitor maintenance redirect remains enabled. No live customer D1 or production routes were touched.
 
 **PR:** #44, isolated staging branch `feat/d1-delivery-retention-20261107`.
