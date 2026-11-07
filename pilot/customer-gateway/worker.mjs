@@ -241,7 +241,33 @@ async function admin(req,env,operation){
   }
   return fail(404,'not_found');
 }
-export default {async fetch(req,env){
+// Expired proofs, session credentials and rate buckets contain no customer ideas.
+// Run through an explicitly configured Cron Trigger; no cron is enabled by source.
+export async function purgeExpiredCustomerProofs(env){
+  prepared(env);
+  const challenges=await stmt(env.GATEWAY_DB,
+    'DELETE FROM cv_challenges WHERE expires_at<=unixepoch() OR consumed_at<unixepoch()-3600').run();
+  const sessions=await stmt(env.GATEWAY_DB,
+    'DELETE FROM cv_sessions WHERE expires_at<=unixepoch()').run();
+  const limits=await stmt(env.GATEWAY_DB,
+    'DELETE FROM cv_limits WHERE hour_bucket<cast(unixepoch()/3600 as integer)-48').run();
+  return {challenges:challenges.meta?.changes||0,sessions:sessions.meta?.changes||0,
+    limits:limits.meta?.changes||0};
+}
+async function logout(req,env){
+  const cookies=[...(req.headers.get('Cookie')||'').matchAll(/(?:^|;\\s*)mzcode_session=([A-Za-z0-9_-]{43})(?=;|$)/g)];
+  if(cookies.length===1)await stmt(env.GATEWAY_DB,
+    'DELETE FROM cv_sessions WHERE token_hash=?',await hash(cookies[0][1])).run();
+  return json({ok:true},200,{'Set-Cookie':
+    'mzcode_session=; Path=/api/customer; Max-Age=0; HttpOnly; Secure; SameSite=Strict'});
+}
+export default {
+  async scheduled(_controller,env,ctx){
+    const p=purgeExpiredCustomerProofs(env);
+    if(ctx?.waitUntil){ctx.waitUntil(p);return}
+    return p;
+  },
+  async fetch(req,env){
   try{
     prepared(env);
     const u=new URL(req.url),path=u.pathname,method=req.method;
@@ -250,6 +276,7 @@ export default {async fetch(req,env){
       if(!originOk(req))return fail(403,'foreign_origin');
       if(path==='/api/customer/verification/start')return start(req,env);
       if(path==='/api/customer/verification/confirm')return confirm(req,env);
+      if(path==='/api/customer/session/logout')return logout(req,env);
       if(path==='/api/customer/admin/link')return admin(req,env,'link');
       if(path==='/api/customer/admin/revoke')return admin(req,env,'revoke');
     }
