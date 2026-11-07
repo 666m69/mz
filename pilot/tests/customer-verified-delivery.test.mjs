@@ -212,3 +212,40 @@ test('logout revokes the HttpOnly session and cron purge removes only expired pr
  assert.equal(ctx.sql.prepare('SELECT count(*) n FROM cv_deliveries').get().n,1,
   'Scheduled cleanup must never delete delivery bindings or customer records');
 });
+
+
+test('Cloudflare free QA email binding sends only to its verified test recipient',async t=>{
+ const ctx=await setup(t),a=await ctx.addClient(0),b=await ctx.addClient(1);
+ const sent=[];
+ delete ctx.env.TEST_MAILER;
+ ctx.env.QA_VERIFIED_TO=a.email;
+ ctx.env.QA_EMAIL={async send(payload){sent.push(payload);return {messageId:'qa-test-message'}}};
+ const first=await ctx.call('/api/customer/verification/start',{reference:a.reference,email:a.email});
+ assert.equal(first.status,202);
+ assert.equal(sent.length,1);
+ assert.equal(sent[0].to,a.email);
+ assert.equal(sent[0].from,'info@mzcodehub.com');
+ assert.match(sent[0].text,/\d{8}/);
+ const other=await ctx.call('/api/customer/verification/start',{reference:b.reference,email:b.email});
+ assert.equal(other.status,202);
+ assert.equal(sent.length,1,'unverified destinations must not receive any email');
+ assert.equal(ctx.sql.prepare('SELECT challenge_id FROM cv_challenges WHERE idea_id=?').get(b.ideaId),undefined,
+   'unsent challenge is deleted');
+ const missing=await ctx.call('/api/customer/verification/start',{
+   reference:'MZ-000000000000',email:a.email
+ });
+ assert.equal(missing.status,202);
+ assert.equal(sent.length,1,'unrecognized reference never triggers email');
+});
+test('Cloudflare test-mail binding fails closed when missing verified recipient or receipt',async t=>{
+ const ctx=await setup(t),a=await ctx.addClient(0);
+ delete ctx.env.TEST_MAILER;
+ let sent=0;
+ ctx.env.QA_EMAIL={async send(){sent++;return {}}};
+ ctx.env.QA_VERIFIED_TO=a.email;
+ const result=await ctx.call('/api/customer/verification/start',{reference:a.reference,email:a.email});
+ assert.equal(result.status,202);
+ assert.equal(sent,1);
+ assert.equal(ctx.sql.prepare('SELECT challenge_id FROM cv_challenges WHERE idea_id=?').get(a.ideaId),
+  undefined,'failed mail must not leave a redeemable challenge');
+});
