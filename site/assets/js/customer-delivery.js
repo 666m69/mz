@@ -72,6 +72,16 @@ confirm.addEventListener('submit',async event=>{
  finally{busy($('confirm'),false)}
 });
 $('refresh').addEventListener('click',refresh);
+$('logout').addEventListener('click',async()=>{
+ busy($('logout'),true);
+ try{
+  await request('/api/customer/session/logout',{});
+  project.hidden=true;codePanel.hidden=true;download.hidden=true;
+  download.removeAttribute('href');reference=null;
+  note('تم إنهاء جلسة الاستلام. يمكنك طلب رمز جديد متى احتجت.');
+ }catch(e){note(e.message||'تعذر إنهاء الجلسة الآن.',true)}
+ finally{busy($('logout'),false)}
+});
 download.addEventListener('click',event=>{
  if(download.hidden||!reference||download.getAttribute('href')!==
    '/api/customer/requests/'+encodeURIComponent(reference)+'/artifact')event.preventDefault();
