@@ -99,7 +99,7 @@ export function buildReviewedEdgeApp(skillId,input){
   const config={id:appId,title:blueprint.title,category:blueprint.category,schemaVersion:1};
   const files={
     'app.js':PINNED_RUNTIME,
-    'blueprint.json':JSON.stringify(blueprint,null,2)+'\\n',
+    'blueprint.json':JSON.stringify(blueprint,null,2)+'\n',
     'index.html':htmlFor(blueprint,config),
     'styles.css':PINNED_STYLES
   };
