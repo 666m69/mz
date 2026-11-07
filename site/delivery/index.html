@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'">
+<meta name="theme-color" content="#07111d">
+<title>استلام مشروعك | MZcode</title>
+<link rel="icon" href="/assets/images/mz-mark.svg">
+<link rel="stylesheet" href="/assets/css/customer-delivery.css">
+<script src="/assets/js/customer-delivery.js" defer></script>
+</head>
+<body>
+<header class="top">
+<a href="/" class="brand" aria-label="MZcode — الصفحة الرئيسية"><img src="/assets/images/mz-mark.svg" alt="" width="42" height="42"><span dir="ltr">MZcode</span></a>
+<a href="/idea">قدّم فكرة جديدة</a>
+</header>
+<main>
+<p class="eyebrow">استلام المشروع · خاص بالعميل</p>
+<h1>مشروعك، بين يديك.</h1>
+<p class="intro">تحقق من البريد المسجّل في الطلب، ثم تابع حالة تنفيذ مشروعك ونزّل ملف ZIP عندما يصبح جاهزًا. رقم الطلب وحده لا يفتح الملفات.</p>
+<section class="card" aria-labelledby="verify-title">
+<h2 id="verify-title">الخطوة ١ — إثبات ملكية البريد</h2>
+<form id="start-form" autocomplete="on">
+<label for="reference">رقم الطلب</label>
+<input id="reference" required maxlength="15" pattern="MZ-[A-Fa-f0-9]{12}" dir="ltr" placeholder="MZ-XXXXXXXXXXXX" autocapitalize="characters">
+<label for="email">البريد المستخدم عند تقديم الفكرة</label>
+<input id="email" type="email" required maxlength="254" dir="ltr" autocomplete="email" placeholder="you@example.com">
+<button type="submit" id="request-code">أرسل رمز التحقق إلى بريدي</button>
+</form>
+<p class="note">إذا كان رقم الطلب والبريد متطابقين، فستصلك رسالة تحتوي على رمز صالح لمدة ١٠ دقائق. قد تحتاج مراجعة البريد غير الهام.</p>
+</section>
+<section class="card" id="code-panel" aria-labelledby="code-title" hidden>
+<h2 id="code-title">الخطوة ٢ — تأكيد الرمز</h2>
+<form id="confirm-form" autocomplete="off">
+<label for="code">الرمز المكوّن من ٨ أرقام</label>
+<input id="code" type="text" required inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" dir="ltr" placeholder="00000000">
+<button id="confirm" type="submit">تحقق وافتح متابعة المشروع</button>
+</form>
+</section>
+<section class="card" id="project-panel" aria-labelledby="project-title" hidden>
+<h2 id="project-title">حالة الطلب</h2>
+<p id="project-state">نتحقق من جاهزية الملف…</p>
+<button id="refresh" type="button" class="secondary">تحديث الحالة</button>
+<button id="logout" type="button" class="secondary">تسجيل الخروج من الجلسة</button>
+<a id="download" class="download" hidden>تنزيل المشروع ZIP</a>
+<p class="note">الملف خاص بطلبك؛ يبقى تنزيله متاحًا وفق سياسة الاحتفاظ المحددة لكل تسليم، وقد يُلغى من لوحة الإدارة.</p>
+</section>
+<p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+<footer>لا تشارك رمز البريد أو ملف مشروعك مع الآخرين. للمساعدة: <a href="mailto:info@mzcodehub.com">info@mzcodehub.com</a></footer>
+</main>
+</body>
+</html>
