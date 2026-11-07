@@ -1,6 +1,6 @@
 # MZcode — email OTP acceptance, Nov 7, 2026 (staging)
 
-**Status: NOT PASSED for live mail OTP. Code tests passed; no production integration was enabled.**
+**Status: PASS for one real restricted-recipient owner email sent via isolated Cloudflare Worker (19:42 UTC / 22:42 Saudi). Live OTP verification and public customer delivery are NOT YET PASSED. Production was untouched.**
 
 ## Verified facts
 
@@ -9,7 +9,7 @@
 - Cloudflare Email Service on Workers Free may send to **pre-verified destination addresses**, not arbitrary customers. Customer-wide sending requires a separately authorized transactional mail integration (e.g., a configured and verified Resend account, with its credential stored as a server-side Cloudflare secret). **No paid upgrade is authorized.**
 - A new `QA_EMAIL` fallback was added to `pilot/customer-gateway/worker.mjs`, with an exact `QA_VERIFIED_TO` recipient comparison. It returns `false` without sending to any other address; only an accepted Cloudflare message receipt counts as a send.
 - Dedicated simulated tests validate recipient restrictions, generic enumeration-resistant responses, sender identity and deletion of unsent OTP challenges, plus the existing 5-attempt/10-minute TTL/session isolation tests.
-- Live one-off test infrastructure: a disposable Queue and KV were created and successfully deleted. The tool's safety gate blocked uploading the proposed private email-sending QA Worker. **No live OTP was sent**; no attempt was made to bypass the block.
+- Earlier one-off QA attempt: a temporary Queue and KV were removed after upload of an earlier private mail QA Worker was blocked; no live OTP was sent in that attempt. See the successful independent email delivery test below.
 - Cloudflare Pages Preview SHA `049df3d2544406db8cf8bd47fdb333f7ad1e065e` succeeded with **48/48 Node tests, 17 Python tests and 7 Linux isolation tests** (other test groups passed, zero failures). An intermittent proof-tampering test was fixed by ensuring the altered signature character actually differs.
 - No customer record, production D1, Cloudflare Access policy, production domain, or existing email route was modified. No additional paid plan was activated.
 
@@ -25,3 +25,12 @@
 - Never deploy `QA_EMAIL` on the public site or use it as arbitrary-recipient transport. A Cloudflare binding must have `destination_address` limited to `666m69@gmail.com`, and `QA_VERIFIED_TO` set to exactly the same value.
 - The gateway uses `TEST_MAILER` only in automated tests, `QA_EMAIL` only when bound in staging, and `RESEND_API_KEY` only when explicitly provisioned as a secret. If no sender is available, verification returns a 503 and no code is accepted.
 - The gateway never returns the OTP, session token or Skills capability to the browser except the HttpOnly session cookie after successful verification.
+
+## New independent live email delivery proof — 2026-11-07 19:42 UTC
+
+- **PASS** for a **single non-OTP** real email via a newly created disposable private Worker `mzcode-mail-qa-once-20261107` with Cloudflare `send_email` binding restricted to the account-verified destination `666m69@gmail.com`. Source sender was `info@mzcodehub.com`.
+- Worker had **workers.dev subdomain disabled** and `fetch` always returned 404. The only invocation was a one-off authenticated temporary Queue `mzcode-mail-qa-once-q-20261107` with consumer batch size 1 and retries 0. Queue message accepted by Cloudflare; backlog returned to zero.
+- The connected owner Gmail independently showed **exact subject** `[MZcode QA] isolated verified-recipient email check 2026-11-07`, message timestamp `2026-11-07T19:42:24Z`, and the expected unique body. Gmail message ID `1a1b788a527f56dc` (not an OTP).
+- Cleaned up **consumer, Queue and Worker** via Cloudflare API and checked they are absent. Verified Cloudflare then had **0 Queues, 0 KV**, and the preexisting **5 D1 databases** were unchanged. Pages production SHA still `b6bc35d8087f`; production automatic deployment disabled.
+- **No external Resend API key was available or used. No customer OTP was transmitted or verified end to end.** The free Cloudflare sending route is limited to account-verified recipients; it is not a general client email solution.
+- Next required commercial gate: a properly provisioned transactional sender in an isolated staging Worker plus real idea→OTP→verified session→private ZIP download test; no production rollout without that proof.
