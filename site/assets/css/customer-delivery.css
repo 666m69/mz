@@ -1,0 +1,21 @@
+:root{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color-scheme:dark;color:#eaf5fc;background:#07111d}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100dvh;background:radial-gradient(ellipse 65% 45% at 95% 5%,#12364a,#07111d 85%)}
+.top{max-width:950px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px}
+.top a{text-decoration:none;color:#a4d5f0}.top .brand{display:flex;align-items:center;gap:12px;font-size:25px;font-weight:800;color:white}
+.brand img{border-radius:12px}main{max-width:760px;padding:28px 22px 64px;margin:auto}
+.eyebrow{color:#5de5bf;font-weight:700;font-size:13px;margin:12px 0}.intro{color:#b5c7d8;font-size:17px;line-height:1.9;margin:0 0 28px}
+h1{font-size:clamp(32px,6vw,55px);margin:0 0 12px}h2{font-size:20px;margin:0 0 20px}
+.card{border:1px solid #294258;border-radius:22px;background:#101e2d;padding:27px;margin:18px 0;box-shadow:0 15px 35px #0003}
+.card[hidden],#download[hidden]{display:none}
+label{display:block;margin:18px 0 8px;font-weight:700;font-size:14px}
+input{display:block;background:#071422;color:white;border:1px solid #435b6d;padding:13px 16px;border-radius:12px;width:100%;min-height:50px;font-size:16px}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #77bfff;outline-offset:3px}
+button,.download{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;min-height:48px;margin-top:23px;padding:12px 19px;font-size:15px;font-weight:750;text-decoration:none;cursor:pointer;color:#071c20;background:#63e5c1}
+button:disabled{opacity:.6;cursor:wait}.secondary{background:#243e56;color:#e0ecfa}
+.download{background:#b5d2ff;margin-inline-start:10px}
+.note{font-size:13px;line-height:1.8;color:#aec2d6;margin:14px 0 0}
+#project-state{color:#c6d7e6;font-size:16px}
+.feedback{min-height:25px;color:#a6e4d2;line-height:1.8}
+.feedback[data-error="true"]{color:#ffb8bf}
+footer{color:#7895aa;line-height:1.8;font-size:13px;margin-top:30px}footer a{color:#b5e7e0}
+@media(max-width:520px){main{padding:17px 16px 60px}.top{padding:14px 16px}.card{padding:19px;border-radius:17px}.download{display:flex;margin:12px 0 0}}
