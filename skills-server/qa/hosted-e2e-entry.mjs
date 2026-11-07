@@ -3,19 +3,14 @@
 // No production domains, real customer data, email or public /api/* endpoints.
 import core from '../worker/index.mjs';
 import {checks} from '../worker/catalog.mjs';
-import {capability} from '../worker/security.mjs';
+import {capability,unseal,canonical,hash} from '../worker/security.mjs';
+import {buildReviewedEdgeApp} from './reviewed-edge-builder.mjs';
 import {purgeExpiredArtifacts,mayDownloadArtifact} from '../worker/delivery-policy.mjs';
 import {baseSchema,retentionSchema,nullGuardSchema,migrationStatements} from './migrations.mjs';
 
 export const names=['init','release','review','activate','intake-a','intake-b','build-a','claim-a','finish-a','verify-a','revoke-a','build-b','claim-b','finish-b','verify-b','sql-guard','purge'];
 const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow','X-Content-Type-Options':'nosniff'};
 const fixtureId='qa-expired-artifact-20261107';
-const files={
-  'index.html':'<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>MZcode QA</title><h1>مهام تجريبية</h1><script src="app.js"></script></html>',
-  'app.js':'document.querySelector("h1").textContent="قائمة مهامي اليومية";',
-  'styles.css':'html{direction:rtl;font-family:system-ui}body{margin:2rem}',
-  'blueprint.json':'{"app":"local-checklist","qa":true,"version":1}'
-};
 function check(ok,message){if(!ok)throw Error(message)}
 async function requestApi(env,who,path,body){
   const token=who==='owner'?env.TEST_OWNER_TOKEN:who==='runner'?env.TEST_RUNNER_TOKEN:who;
@@ -77,7 +72,7 @@ async function perform(name,env){
     const label=name.slice(-1);
     const r=await api(env,'owner','requests',{
       skill_id:'local-checklist',
-      input:{idea:'أريد قائمة مهام يومية محلية للاستخدام على هذا الجهاز فقط'},
+      input:label==='a'?{idea:'أريد تطبيق قائمة مهام يومية محلية تحفظ الأعمال على هذا الجهاز فقط',title:'مهامي اليومية'}:{idea:'أريد قائمة مشتريات للبقالة تحفظ المنتجات محليًا على الجهاز مع إضافة وحذف العناصر',title:'مشترياتي اليومية'},
       private_prototype_consent:true
     });
     check(/^[0-9a-f-]{36}$/.test(r.request_id),'INVALID_REQUEST_ID');
@@ -100,11 +95,21 @@ async function perform(name,env){
   }
   if(name==='finish-a'||name==='finish-b'){
     const label=name.slice(-1),id=await get(db,'run_'+label),lease=await get(db,'lease_'+label);
-    await api(env,'runner','runner/jobs/'+id+'/complete',{lease,ok:true,files});
+    const job=await db.prepare('SELECT j.skill_id,j.request_id,j.status,q.input_cipher FROM ss_jobs j JOIN ss_requests q ON q.id=j.request_id WHERE j.id=?').bind(id).first();
+    check(job?.status==='running','JOB_NOT_RUNNING');
+    const input=await unseal(env,'input/'+job.request_id,job.input_cipher);
+    // Generate from decrypted real request input. Not a hard-coded ZIP fixture.
+    const built=buildReviewedEdgeApp(job.skill_id,input);
+    check(built.blueprint.category===(label==='a'?'tasks':'shopping'),'WRONG_RENDERED_CATEGORY');
+    const files=built.files;
+    const receipt=await api(env,'runner','runner/jobs/'+id+'/complete',{lease,ok:true,files});
+    check(receipt.status==='succeeded'&&receipt.result?.sha256===await hash(canonical(files)),'RECEIPT_MISMATCH');
     const row=await db.prepare('SELECT cipher,download_expires_at,purge_after,revoked_at FROM ss_artifacts WHERE job_id=?').bind(id).first();
     check(row && mayDownloadArtifact(row,now),'ARTIFACT_NOT_DOWNLOADABLE');
-    check(!row.cipher.includes('مهام تجريبية'),'ARTIFACT_NOT_ENCRYPTED');
-    return {client:label,encrypted:true,downloadDays:14,purgeDays:30};
+    check(!row.cipher.includes(built.blueprint.title)&&!row.cipher.includes('<!doctype html>'),'ARTIFACT_NOT_ENCRYPTED');
+    await put(db,'category_'+label,built.blueprint.category);
+    await put(db,'title_'+label,built.blueprint.title);
+    return {client:label,generated:true,category:built.blueprint.category,encrypted:true,files:4,downloadDays:14,purgeDays:30};
   }
   if(name==='verify-a'||name==='verify-b'){
     const label=name.slice(-1),other=label==='a'?'b':'a';
@@ -113,12 +118,32 @@ async function perform(name,env){
     const own=await requestApi(env,await capability(env,rid),path);
     check(own.status===200,'DOWNLOAD_HTTP_'+own.status);
     const bin=new Uint8Array(await own.arrayBuffer());
-    check(bin.length>150&&bin[0]===80&&bin[1]===75&&bin[2]===3&&bin[3]===4,'INVALID_ZIP');
+    check(bin.length>8000&&bin[0]===80&&bin[1]===75&&bin[2]===3&&bin[3]===4,'INVALID_GENERATED_ZIP');
+    // The ZIP is STORE-only, source-pinned and validated in Node CRC parity tests.
+    // Independently read member contents from actual authenticated HTTP bytes.
+    const view=new DataView(bin.buffer,bin.byteOffset,bin.byteLength);
+    const decoder=new TextDecoder(),members={};let offset=0;
+    while(offset+30<=bin.length&&view.getUint32(offset,true)===0x04034b50){
+      const size=view.getUint32(offset+18,true),nameLen=view.getUint16(offset+26,true),extra=view.getUint16(offset+28,true);
+      check(view.getUint16(offset+8,true)===0&&size<=49152&&nameLen<80,'ZIP_MEMBER_INVALID');
+      const filename=decoder.decode(bin.slice(offset+30,offset+30+nameLen));
+      check(['app.js','blueprint.json','index.html','styles.css'].includes(filename)&&!Object.hasOwn(members,filename),'ZIP_UNREVIEWED_MEMBER');
+      const start=offset+30+nameLen+extra,end=start+size;
+      check(end<=bin.length,'ZIP_TRUNCATED');
+      members[filename]=decoder.decode(bin.slice(start,end));offset=end;
+    }
+    check(Object.keys(members).length===4,'ZIP_MEMBER_COUNT');
+    const blueprint=JSON.parse(members['blueprint.json']);
+    const expectedCategory=await get(db,'category_'+label),expectedTitle=await get(db,'title_'+label);
+    check(blueprint.title===expectedTitle&&blueprint.category===expectedCategory&&
+      members['index.html'].includes('<h1 id="app-title">'+expectedTitle+'</h1>')&&
+      members['index.html'].includes('dir="rtl"')&&
+      members['app.js'].includes('localStorage'),'GENERATED_CONTENT_NOT_DELIVERED');
     await api(env,await capability(env,otherId),path,undefined,404);
     await api(env,'runner',path,undefined,403);
     const anon=await core.fetch(new Request('https://mzcode-qa.internal/api/'+path),env);
     check(anon.status===401,'ANONYMOUS_DOWNLOAD');
-    return {client:label,zipBytes:bin.length,crossClientDenied:true,anonymousDenied:true,runnerDenied:true};
+    return {client:label,realGenerated:true,category:expectedCategory,zipBytes:bin.length,crossClientDenied:true,anonymousDenied:true,runnerDenied:true};
   }
   if(name==='revoke-a'){
     const rid=await get(db,'request_a'),job=await get(db,'run_a');
