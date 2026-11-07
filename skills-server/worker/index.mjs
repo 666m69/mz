@@ -1,13 +1,22 @@
 import {authenticate,requireThat,ApiError} from './security.mjs';
 import {rate,dbError} from './store.mjs';
 import {route} from './routes.mjs';
+import {purgeExpiredArtifacts} from './delivery-policy.mjs';
 const guardHeaders={
   'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-Frame-Options':'DENY',
   'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
   'Permissions-Policy':'camera=(), microphone=(), geolocation=()'
 };
 function protect(r){const h=new Headers(r.headers);for(const [k,v] of Object.entries(guardHeaders))h.set(k,v);return new Response(r.body,{status:r.status,headers:h});}
-export default {async fetch(req,env){
+export default {
+  // Runs only when an explicit Cloudflare Cron Trigger is configured.
+  // No automatic schedule is enabled as part of this source change.
+  async scheduled(_controller,env,ctx){
+    const purge=purgeExpiredArtifacts(env);
+    if(ctx?.waitUntil){ctx.waitUntil(purge);return;}
+    return purge;
+  },
+  async fetch(req,env){
   try {
     const url=new URL(req.url);
     if(['/', '/admin.js','/admin.css'].includes(url.pathname)&&req.method==='GET'&&env.ASSETS)
