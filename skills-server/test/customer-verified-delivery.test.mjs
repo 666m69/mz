@@ -9,7 +9,7 @@ test('mailbox proof is scoped to the exact customer, email, and 10-minute expiry
  assert.equal(await verifyProof({secret,requestId:otherId,email:'client@example.com',proof,now}),false);
  assert.equal(await verifyProof({secret,requestId,email:'attacker@example.com',proof,now}),false);
  assert.equal(await verifyProof({secret,requestId,email:'client@example.com',proof,now:now+600001}),false);
- assert.equal(await verifyProof({secret,requestId,email:'client@example.com',proof:proof.slice(0,-1)+'0',now}),false);
+ assert.equal(await verifyProof({secret,requestId,email:'client@example.com',proof:proof.slice(0,-1)+(proof.endsWith('0')?'1':'0'),now}),false);
  assert.throws(()=>normalizeEmail('not-an-email'),/invalid_email/);
  await assert.rejects(issueProof({secret:'short',requestId,email:'client@example.com',now}),/verification_secret_missing/);
 });
