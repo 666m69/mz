@@ -89,7 +89,10 @@ async function prove(ctx,c){
  const cookie=response.headers.get('set-cookie');
  assert.match(cookie,/HttpOnly; Secure; SameSite=Strict/);
  assert.match(cookie,/Max-Age=1800/);
- assert.doesNotMatch(JSON.stringify(await response.json()),/\d{8}/);
+ const confirmed=await response.json();
+ assert.deepEqual(confirmed,{ok:true,reference:c.reference,expires_in:1800});
+ assert.equal(Object.hasOwn(confirmed,'code'),false);
+ assert.equal(Object.hasOwn(confirmed,'token'),false);
  return cookie.split(';')[0];
 }
 test('verified recipient gets distinct encrypted ZIP from two real generated apps; cross-client access denied',async t=>{
