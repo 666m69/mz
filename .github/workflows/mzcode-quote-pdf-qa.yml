@@ -1,0 +1,36 @@
+name: MZcode PDF and mobile browser QA (one-off)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - pilot/pdf-live-browser.mjs
+      - .github/workflows/mzcode-quote-pdf-qa.yml
+
+permissions:
+  contents: read
+
+jobs:
+  pdf-mobile-qa:
+    if: github.head_ref == 'qa/commercial-acceptance-20261103' && github.event.pull_request.head.repo.full_name == '666m69/mz'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm Chrome is available
+        run: command -v google-chrome
+      - name: Generate and inspect real PDF from production with mobile Chrome
+        run: node pilot/pdf-live-browser.mjs
+      - name: Read-only live site links and project URL audit
+        run: node pilot/links-live-readonly.mjs
+      - name: Preserve QA-only screenshot and PDF evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mzcode-pdf-rtl-qa-20261103
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 7
