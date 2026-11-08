@@ -1,0 +1,32 @@
+name: Skills Server isolated auto-service acceptance
+on:
+  push:
+    branches:
+      - qa/skills-autopoll-20261108
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mzcode-skills-qa-autoservice
+  cancel-in-progress: false
+
+jobs:
+  synthetic-autoservice:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify Linux runner isolation prerequisites
+        run: |
+          python3 -c "import ctypes; ctypes.CDLL('libseccomp.so.2')"
+          python3 -B skills-server/test/isolation.py
+      - name: Test controlled service lifecycle
+        run: python3 -B -m unittest discover -s skills-server/test -p test_service.py -v
+      - name: Exercise autonomous synthetic jobs without secrets or hosted services
+        run: node --test skills-server/test/auto-service.test.mjs
+      - name: Verify quotas, access boundaries and stale leases
+        run: node --test skills-server/test/control.test.mjs
