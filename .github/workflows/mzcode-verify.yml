@@ -14,14 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+      - name: Fetch pinned public repository revision without Marketplace actions
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/666m69/mz.git repo
+          git -C repo fetch --quiet --depth 1 origin "$GITHUB_SHA"
+          git -C repo checkout --quiet --detach "$GITHUB_SHA"
+          test "$(git -C repo rev-parse HEAD)" = "$GITHUB_SHA"
       - name: Syntax check (client code)
+        working-directory: repo
         run: |
           node --check pilot/lab/lab.js
           node --check pilot/lab/engine.js
           node --check pilot/lab/prototype.js
       - name: Build and test without paid dependencies
+        working-directory: repo
         run: npm test
