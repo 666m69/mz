@@ -67,7 +67,7 @@ test('legacy homepage intake remains a private execution request without implici
    const response=await ctx.post(legacy);
    assert.equal(response.status,201);
    const row=ctx.sql.prepare('SELECT idea_kind,reuse_permission FROM idea_requests').get();
-   assert.deepEqual(row,{idea_kind:'execution',reuse_permission:0});
+   assert.equal(row.idea_kind,'execution');assert.equal(row.reuse_permission,0);
  }finally{ctx.sql.close()}
 });
 test('visitor flow is illustrated, saved first, and never exports a working app or ZIP',()=>{
