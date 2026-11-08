@@ -29,21 +29,18 @@ test("opening the example preserves the lab tab and its draft", async () => {
   assert.match(link,/target="_blank"/);
   assert.match(link,/rel="noopener"/);
 });
-test("direct intake carries the current idea locally and preserves an edited brief", () => {
-  const elements=new Map();
-  function field(id) {
-    if(!elements.has(id))elements.set(id,{value:"",focused:false,addEventListener(type,cb){this["on"+type]=cb;},focus(){this.focused=true;}});
-    return elements.get(id);
-  }
-  const document={getElementById:field};
-  vm.runInNewContext(readFileSync(new URL("../lab/lab.js",import.meta.url),"utf8"),{document,window:{MZBuilderEngine:{}}});
-  const click=()=>field("direct-request").onclick({preventDefault(){},button:0});
-  field("idea").value="فكرة حرة لتنظيم قصص العائلة حسب المكان";
-  click(); assert.equal(field("brief").value,field("idea").value); assert.ok(field("brief").focused);
-  field("idea").value+=" والتاريخ";click();assert.equal(field("brief").value,field("idea").value);
-  field("brief").value="مسودة عدّلها صاحب المشروع ويجب الاحتفاظ بها";
-  field("idea").value="أريد تجربة وصف آخر";click();
-  assert.equal(field("brief").value,"مسودة عدّلها صاحب المشروع ويجب الاحتفاظ بها");
+test("visual concept and execution inquiry remain separate and no app is delivered by visitor actions", async () => {
+  const html=await (await publicPage("/idea")).text();
+  const script=readFileSync(new URL("../lab/lab.js",import.meta.url),"utf8");
+  assert.match(html,/id="archive-consent" required/);
+  assert.match(html,/id="workspace" hidden/);
+  assert.match(html,/id="intake"/);
+  assert.match(html,/href="#execution"/);
+  assert.match(script,/sendIdea\(body,conceptKey\)/);
+  assert.match(script,/idea_kind:'concept'/);
+  assert.match(script,/idea_kind:'execution'/);
+  assert.doesNotMatch(script,/createObjectURL|MZPrototype|downloadFile\(/);
+  assert.doesNotMatch(html,/id="prototype"|id="download"/);
 });
 test("the public homepage links directly to a demo and still offers a blank idea",async t=>{
   t.mock.method(globalThis,"fetch",async()=>new Response('<!doctype html><html><head><title>MZcode</title></head><body><main><section class="intro"><h1>الرئيسية</h1><p>المقدمة</p></section></main></body></html>',{headers:{"content-type":"text/html"}}));
