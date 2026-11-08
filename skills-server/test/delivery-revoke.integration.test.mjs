@@ -4,9 +4,13 @@ import {randomUUID} from 'node:crypto';
 import {localEnvironment} from '../dev/local.mjs';
 import worker from '../worker/index.mjs';
 import {checks,artifactNames} from '../worker/catalog.mjs';
+import {buildWebApp} from '../../pilot/builder/engine.mjs';
+import {readFile,mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 
 const idea='أريد قائمة مهام محلية تجريبية على هذا الجهاز فقط';
-const files=Object.fromEntries(artifactNames.map(n=>[n,'fixture '+n]));
+
 async function harness(t){
  const env=await localEnvironment();t.after(()=>env.sqlite.close());
  const send=async(token,path,body,verb,extra={})=>{
@@ -39,6 +43,11 @@ async function harness(t){
  const runA=await submit(a);
  const job=(await json(env.runner,'runner/claim',{})).body.job;
  assert.equal(job.id,runA);
+ const out=await mkdtemp(join(tmpdir(),'mz-delivery-real-'));
+ t.after(()=>rm(out,{recursive:true,force:true}));
+ const built=await buildWebApp({idea},{outputRoot:out});
+ const files=Object.fromEntries(await Promise.all(artifactNames.map(async name=>
+  [name,await readFile(join(built.directory,name),'utf8')])));
  assert.equal((await json(env.runner,'runner/jobs/'+job.id+'/complete',
   {lease:job.lease,ok:true,files})).status,200);
  return {env,json,send,a,b,runA,submit};
@@ -63,5 +72,5 @@ test('independent request identities: real encrypted ZIP download then owner rev
  assert.ok(stored.revoked_at>0);
  assert.ok(stored.download_expires_at>Math.floor(Date.now()/1000));
  assert.ok(stored.purge_after>stored.download_expires_at);
- assert.ok(!stored.cipher.includes('fixture'));
+ assert.ok(!stored.cipher.includes(idea));
 });

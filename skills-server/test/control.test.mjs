@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
+import {readFile,mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {buildWebApp} from '../../pilot/builder/engine.mjs';
 import {localEnvironment} from '../dev/local.mjs';
 import worker from '../worker/index.mjs';
 import {checks} from '../worker/catalog.mjs';
@@ -140,10 +144,18 @@ test('untrusted output paths, anomalous artifacts and missing encryption keys fa
   assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_requests').get().n,0);
   env.DATA_KEY=dataKey;const a=(await call(owner,'requests',input)).b;
   await call(owner,'requests/'+a.request_id+'/runs',{});const {job}=(await call(runner,'runner/claim',{})).b;
-  const files={'app.js':'a','index.html':'b','styles.css':'c','blueprint.json':'{}'};
+  const root=await mkdtemp(join(tmpdir(),'mz-artifact-contract-'));
+  t.after(()=>rm(root,{recursive:true,force:true}));
+  const built=await buildWebApp(input.input,{outputRoot:root});
+  const files=Object.fromEntries(await Promise.all(['app.js','index.html','styles.css','blueprint.json']
+    .map(async name=>[name,await readFile(join(built.directory,name),'utf8')])));
   const finish=f=>call(runner,'runner/jobs/'+job.id+'/complete',{lease:job.lease,ok:true,files:f});
   assert.equal((await finish({...files,'../extra':'bad'})).s,422);
   assert.equal((await finish({...files,'app.js':'a'.repeat(49153)})).s,422);
+  assert.equal((await finish({...files,'app.js':files['app.js']+'\\nfetch("https://tracker.invalid")'})).s,422);
+  assert.equal((await finish({...files,'index.html':files['index.html'].replace("connect-src 'none'","connect-src *")})).s,422);
+  assert.equal((await finish({...files,'blueprint.json':JSON.stringify({...built.blueprint,title:'عنوان مخالف'})})).s,422);
+  assert.equal((await finish({...files,'index.html':files['index.html']+'<img src="https://tracker.invalid/x">'})).s,422);
   assert.equal(sqlite.prepare('SELECT count(*) n FROM ss_artifacts').get().n,0);
   const k=key(),payload={lease:job.lease,ok:true,files};
   const first=await call(runner,'runner/jobs/'+job.id+'/complete',payload,k);

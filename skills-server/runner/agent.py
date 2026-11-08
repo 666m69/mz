@@ -135,6 +135,27 @@ def execute(job):
     return isolated(files, adapter["entry"], [adapter["module"], job["skill_id"]],
                     {"kind": job["kind"], "input": job.get("input")})
 
+class SandboxUnavailable(RuntimeError):
+    """Infrastructure is unsafe: never consume or finalize another job."""
+
+
+class StaleLease(RuntimeError):
+    """An owner withdrew the release or a lease expired; not a runner outage."""
+
+
+def sandbox_ready():
+    """Check isolation BEFORE taking any work from the queue."""
+    try:
+        file = "skills-server/runner/probe.mjs"
+        result = isolated({file: (ROOT / file).read_bytes()}, file, [], {}, probe=True)
+        return result == {
+            "network": "denied", "read": "denied", "write": "denied",
+            "spawn": "denied", "secret": "absent", "limits": "verified"
+        }
+    except (OSError, ValueError, KeyError):
+        return False
+
+
 def post(path, data, idem=None):
     # No redirects, inherited proxy, or bearer forwarding to a second host.
     target = urllib.parse.urlsplit(os.environ["SKILLS_URL"])
@@ -160,13 +181,21 @@ def post(path, data, idem=None):
         conn.request("POST", "/api/runner/" + path, json.dumps(data, ensure_ascii=False).encode(), headers)
         response = conn.getresponse()
         body = response.read(MAX_RESULT + 1)
+        if response.status == 409 and path.startswith("jobs/") and path.endswith("/complete") and len(body) <= MAX_RESULT:
+            try:
+                if json.loads(body).get("error") == "stale_lease":
+                    raise StaleLease("stale_lease")
+            except (ValueError, AttributeError, TypeError):
+                pass
         if response.status != 200 or len(body) > MAX_RESULT:
             raise RuntimeError("control HTTP " + str(response.status))
         return json.loads(body)
     finally:
         conn.close()
 
-def once():
+def once(preflight=True):
+    if preflight and not sandbox_ready():
+        raise SandboxUnavailable("sandbox_unavailable")
     job = post("claim", {})["job"]
     if not job:
         return "idle"
@@ -174,24 +203,36 @@ def once():
         result = execute(job)
     except (ValueError, OSError, KeyError):
         result = {"ok": False, "error": "sandbox_unavailable"}
+    if result.get("error") == "sandbox_unavailable":
+        # A system failure is not an invalid customer request. Leave the lease
+        # pending for bounded recovery rather than consuming a daily/build slot.
+        raise SandboxUnavailable("sandbox_unavailable")
     payload = {**result, "lease": job["lease"]}
     for attempt in range(2):
         try:
             post("jobs/" + job["id"] + "/complete", payload, job["lease"])
             break
+        except StaleLease:
+            # Withdrawn/reclaimed jobs must never be delivered or retried here.
+            return "stale_lease"
         except (OSError, http.client.HTTPException):
             if attempt:
                 raise
     return "succeeded" if result.get("ok") else result["error"]
 
-def serve(poll_seconds=10.0, max_jobs=0, max_seconds=0, *, stop_event=None, run_once=None, clock=None):
+def serve(poll_seconds=10.0, max_jobs=0, max_seconds=0, *, stop_event=None, run_once=None, clock=None, probe_check=None):
     """Process reviewed jobs while a trusted supervisor keeps this process alive.
 
     A control/API error stops the loop (fail closed); the host must decide
     whether to restart. Polling never executes unreviewed code or bypasses D1.
     """
     stop = stop_event if stop_event is not None else threading.Event()
-    work = run_once if run_once is not None else once
+    # A test double may inject its own probe; real service always preflights.
+    health = probe_check if probe_check is not None else (sandbox_ready if run_once is None else lambda: True)
+    if not health():
+        print("sandbox_unavailable", file=sys.stderr)
+        return 1
+    work = run_once if run_once is not None else lambda: once(preflight=False)
     now = clock if clock is not None else time.monotonic
     deadline = now() + max_seconds if max_seconds else None
     processed = 0
@@ -200,6 +241,9 @@ def serve(poll_seconds=10.0, max_jobs=0, max_seconds=0, *, stop_event=None, run_
             break
         try:
             result = work()
+        except SandboxUnavailable:
+            print("sandbox_unavailable", file=sys.stderr)
+            return 1
         except (OSError, ValueError, KeyError, RuntimeError, http.client.HTTPException):
             # Never print an exception: it may contain a URL or private credentials.
             print("control_unavailable", file=sys.stderr)
@@ -250,6 +294,9 @@ def main():
         return serve(opts.poll_seconds, opts.max_jobs, opts.max_seconds, stop_event=stop)
     try:
         print(once())
+    except SandboxUnavailable:
+        print("sandbox_unavailable", file=sys.stderr)
+        return 1
     except (OSError, ValueError, KeyError, RuntimeError, http.client.HTTPException):
         print("control_unavailable", file=sys.stderr)
         return 1

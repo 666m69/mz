@@ -1,6 +1,7 @@
 import {knownDigest,checks,artifactNames,matches} from './catalog.mjs';
 import {requireThat,fields,id,seal,unseal,size,hash,canonical} from './security.mjs';
 import {first,stmt,mutation} from './store.mjs';
+import {validateArtifact} from './artifact-policy.mjs';
 export async function claim(env) {
   const db=env.SKILLS_DB, lease=id();
   // The UPDATE and its conditions execute together on D1. Never issue more than one live lease.
@@ -41,6 +42,12 @@ export async function complete(env,req,jobId,body) {
         const bytes=artifactNames.reduce((n,k)=>n+size(body.files[k]),0);
         result={files:artifactNames.length,bytes,sha256:await hash(canonical(body.files))};
         requireThat(matches(JSON.parse(job.manifest).output_schema,result),422,'invalid_artifact');
+        const inputRow=await first(db,'SELECT input_cipher FROM ss_requests WHERE id=?',job.request_id);
+        requireThat(inputRow,409,'request_unavailable');
+        const input=await unseal(env,'input/'+job.request_id,inputRow.input_cipher);
+        // The runner is not an authority to ship arbitrary HTML/JS. Pin scripts,
+        // enforce CSP and match blueprint to the sealed, owner-approved idea.
+        await validateArtifact(job.skill_id,input,body.files);
         statements.push(stmt(db,`INSERT INTO ss_artifacts(job_id,cipher,download_expires_at,purge_after)\n          VALUES(?,?,unixepoch()+1209600,unixepoch()+2592000)`,jobId,await seal(env,'artifact/'+jobId,body.files)));
       }
     }
