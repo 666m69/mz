@@ -1,0 +1,31 @@
+name: MZcode visual concept and private archive QA
+on:
+  push:
+    branches:
+      - feat/visual-concept-private-archive-20261108
+
+permissions:
+  contents: read
+
+jobs:
+  private_idea_acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Fetch pinned public source without Marketplace actions
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/666m69/mz.git repo
+          git -C repo fetch --quiet --depth 1 origin "$GITHUB_SHA"
+          git -C repo checkout --quiet --detach "$GITHUB_SHA"
+          test "$(git -C repo rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Build preview bundle
+        working-directory: repo
+        run: |
+          node --version
+          node pilot/build-lab.mjs
+      - name: Consent, private archive, visual-only preview and signed delivery gates
+        working-directory: repo
+        run: node --test pilot/tests/visual-archive.test.mjs pilot/tests/customer-receipt.test.mjs pilot/tests/customer-verified-delivery.test.mjs
+      - name: Run existing repository regression suite
+        working-directory: repo
+        run: npm test
