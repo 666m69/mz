@@ -33,6 +33,9 @@ jobs:
             if command -v "$c" >/dev/null 2>&1; then "$c" --version; fi
           done
           node -e "console.log('WebSocket available:',typeof WebSocket)"
+      - name: Verify visual concept in real Chrome mobile emulation
+        working-directory: repo
+        run: node --test pilot/tests/visual-browser.test.mjs
       - name: Run existing repository regression suite
         working-directory: repo
         run: npm test
