@@ -33,3 +33,16 @@ test('quote and property export handlers await font readiness',async()=>{
  assert.equal(file.status,200);
  assert.match(file.headers.get('Content-Type'),/javascript/);
 });
+
+test('quote PDF and property Canvas use the same Arabic-aware stack, not a Latin-only font',async()=>{
+ const pdf=await readFile(new URL('../../site/assets/js/pdf-export.js',import.meta.url),'utf8');
+ const art=await readFile(new URL('../../site/assets/js/art-core.js',import.meta.url),'utf8');
+ const ready=await readFile(new URL('../../site/assets/js/arabic-canvas.js',import.meta.url),'utf8');
+ assert.match(pdf,/import \{ARABIC_FONT,setArabicCanvasText\} from '\.\/arabic-canvas\.js'/);
+ assert.match(pdf,/setArabicCanvasText\(ctx,size\)/);
+ assert.match(art,/import \{setArabicCanvasText\} from '\.\/arabic-canvas\.js'/);
+ assert.match(art,/setArabicCanvasText\(ctx,size\)/);
+ assert.match(ready,/document\.fonts\.load\('24px '\+ARABIC_FONT/);
+ assert.doesNotMatch(pdf,/ctx\.font=\x60\$\{size\}px Tahoma/);
+ assert.doesNotMatch(art,/ctx\.font=\x60\$\{size\}px Tahoma/);
+});
