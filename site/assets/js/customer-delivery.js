@@ -33,7 +33,7 @@ async function refresh(){
    quoted:'تم إعداد عرض السعر',accepted:'تم قبول الطلب',building:'قيد التنفيذ',
    delivered:'تم التسليم',rejected:'الطلب مغلق'};
   $('project-state').textContent='حالة طلبك: '+(states[info.status]||'قيد المتابعة')+
-    (info.delivery==='ready'?' — مشروعك جاهز للاستلام.':' — ملف التسليم لم يصبح جاهزًا بعد.');
+    (info.delivery==='ready'?' — تسليم مشروعك متاح وفق الاتفاق.':info.delivery==='agreement_required'?' — يلزم اعتماد اتفاق التنفيذ قبل إتاحة أي ملف.':' — ملف التسليم لم يصبح جاهزًا بعد.');
   if(info.delivery==='ready'){
    download.href='/api/customer/requests/'+encodeURIComponent(reference)+'/artifact';
    download.hidden=false;
