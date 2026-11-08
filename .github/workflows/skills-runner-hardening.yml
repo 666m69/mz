@@ -1,0 +1,40 @@
+name: MZcode Skills runner and artifact security QA
+on:
+  push:
+    branches:
+      - fix/skills-runner-sandbox-artifact-20261108
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mzcode-skills-runner-hardening
+  cancel-in-progress: false
+
+jobs:
+  safety-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Fetch immutable branch commit without Marketplace actions
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/666m69/mz.git repo
+          git -C repo fetch --quiet --depth 1 origin "$GITHUB_SHA"
+          git -C repo checkout --quiet --detach "$GITHUB_SHA"
+          test "$(git -C repo rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Verify sandbox and native runtime
+        working-directory: repo
+        run: |
+          node --version
+          python3 --version
+          python3 -c "import ctypes; ctypes.CDLL('libseccomp.so.2')"
+          python3 -B skills-server/runner/agent.py --probe
+      - name: Runner failure and stale-lease unit tests
+        working-directory: repo
+        run: python3 -B -m unittest discover -s skills-server/test -p test_service.py -v
+      - name: Check reviewed artifact contract and delivery regressions
+        working-directory: repo
+        run: node --test skills-server/test/control.test.mjs skills-server/test/real-builder-delivery.integration.test.mjs skills-server/test/delivery-revoke.integration.test.mjs
+      - name: Full repository acceptance including actual browser build
+        working-directory: repo
+        run: npm test
