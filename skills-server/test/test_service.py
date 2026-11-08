@@ -107,7 +107,7 @@ class RunnerServiceTests(unittest.TestCase):
         with contextlib.redirect_stderr(log):
             self.assertEqual(agent.serve(run_once=work, probe_check=lambda: False), 1)
         work.assert_not_called()
-        self.assertEqual(log.getvalue(), "sandbox_unavailable\\n")
+        self.assertEqual(log.getvalue(), "sandbox_unavailable\n")
 
     def test_runtime_sandbox_failure_does_not_finalize_job_or_look_successful(self):
         job = {"id": "synthetic-job", "lease": "synthetic-lease"}
@@ -120,7 +120,7 @@ class RunnerServiceTests(unittest.TestCase):
         log = io.StringIO()
         with contextlib.redirect_stderr(log):
             self.assertEqual(agent.serve(run_once=mock.Mock(side_effect=agent.SandboxUnavailable()), probe_check=lambda: True), 1)
-        self.assertEqual(log.getvalue(), "sandbox_unavailable\\n")
+        self.assertEqual(log.getvalue(), "sandbox_unavailable\n")
 
     def test_exact_stale_lease_409_is_skipped_and_next_job_runs(self):
         job = {"id": "synthetic-job", "lease": "synthetic-lease"}
