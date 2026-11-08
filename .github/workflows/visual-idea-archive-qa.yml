@@ -26,6 +26,13 @@ jobs:
       - name: Consent, private archive, visual-only preview and signed delivery gates
         working-directory: repo
         run: node --test pilot/tests/visual-archive.test.mjs pilot/tests/customer-receipt.test.mjs pilot/tests/customer-verified-delivery.test.mjs
+      - name: Inspect preinstalled browsers for zero-dependency visual acceptance
+        working-directory: repo
+        run: |
+          for c in google-chrome chrome chromium chromium-browser; do
+            if command -v "$c" >/dev/null 2>&1; then "$c" --version; fi
+          done
+          node -e "console.log('WebSocket available:',typeof WebSocket)"
       - name: Run existing repository regression suite
         working-directory: repo
         run: npm test
