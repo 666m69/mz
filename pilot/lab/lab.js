@@ -1,187 +1,105 @@
 "use strict";
-const E = window.MZBuilderEngine;
-const field = id => document.getElementById(id);
-const rules = [
-  [/حجز|موعد|مواعيد|booking/i, "عدد المواعيد المتاحة", "حجز موعد", "نفدت المواعيد"],
-  [/منتج|مخزون|طلب شراء|متجر|shop/i, "عدد القطع المتاحة", "تأكيد طلب قطعة واحدة", "نفد المخزون"],
-  [/دفع|فاتور|مدفوع|payment/i, "الرصيد التجريبي بالريال", "تسجيل دفعة تجريبية بقيمة ريال", "الرصيد غير كافٍ"],
-  [/تسجيل|عضوية|صلاحيات|حساب المستخدم/i, "عدد أذونات الدخول المتاحة", "قبول دخول تجريبي لمرة واحدة", "يلزم إذن دخول"],
-  [/رفع|ملفات|صور|تحميل/i, "المساحة المتاحة بالميغابايت", "قبول ملف تجريبي حجمه ١ ميغابايت", "لا تتسع المساحة للملف"],
-];
-function scenario(feature) {
-  return rules.find(([match]) => match.test(feature))?.slice(1) ||
-    ["عدد فرص تنفيذ الخطوة", "إتمام خطوة «" + feature + "»", "شرط التنفيذ غير متاح"];
-}
-function simulate(available, action, failure) {
-  return available > 0 ? {ok:true, left:available-1, detail:action} : {ok:false, left:available, detail:failure};
-}
-let spec, history, quantities, activeSignature, requestKey, lastPayload;
-const nonblankLines = value => value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-const signature = () => JSON.stringify([field("idea").value.trim(),field("project-title").value.trim(),nonblankLines(field("features").value)]);
-function updateSpec() {
-  const title=field("project-title").value.trim(), features=nonblankLines(field("features").value);
-  if(!title || !features.length || features.length>8 || features.some(s=>s.length>125) || new Set(features).size!==features.length){
-    field("live-preview").hidden=true;field("scope-state").textContent="اكتب اسمًا ووظيفة واحدة إلى ثمانٍ، دون تكرار أو تجاوز ١٢٥ حرفًا للوظيفة.";return false;
+const E=window.MZBuilderEngine;
+const byId=id=>document.getElementById(id);
+const clip=(value,n=38)=>String(value||'').replace(/[\x00-\x1F\x7F]/g,' ').trim().slice(0,n);
+const ns="http://www.w3.org/2000/svg";
+const el=(name,attrs={},text)=>{const e=document.createElementNS(ns,name);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));if(text!==undefined)e.textContent=text;return e;};
+let current=null,conceptKey=null,conceptSignature='',executionKey=null,executionSignature='';
+
+function screenImage(spec,section,index){
+  const svg=el('svg',{viewBox:'0 0 340 540',role:'img','aria-label':'تصور واجهة '+section,'focusable':'false'});
+  svg.append(el('rect',{width:340,height:540,rx:26,fill:'#0b1724'}));
+  svg.append(el('rect',{x:8,y:8,width:324,height:524,rx:22,fill:'#eaf2f7'}));
+  svg.append(el('rect',{x:8,y:8,width:324,height:74,rx:22,fill:index===0?'#103c43':'#122a44'}));
+  svg.append(el('text',{x:306,y:35,'text-anchor':'end','font-size':13,fill:'#86e8d0','font-weight':700},'MZ / CONCEPT'));
+  svg.append(el('text',{x:306,y:62,'text-anchor':'end','font-size':19,fill:'#fff','font-weight':700},clip(section,25)));
+  svg.append(el('rect',{x:27,y:100,width:286,height:74,rx:14,fill:'#fff'}));
+  svg.append(el('text',{x:296,y:126,'text-anchor':'end','font-size':13,fill:'#425467'},'مشروع مقترح'));
+  svg.append(el('text',{x:296,y:155,'text-anchor':'end','font-size':15,'font-weight':700,fill:'#0c3445'},clip(spec.title,28)));
+  const features=spec.features.slice(Math.max(0,index-1),Math.max(0,index-1)+3);
+  for(let i=0;i<3;i++){
+    const y=194+i*77;
+    svg.append(el('rect',{x:27,y,width:286,height:65,rx:11,fill:i===0?'#d4efe9':'#fff'}));
+    svg.append(el('circle',{cx:56,cy:y+32,r:15,fill:i===0?'#148d79':'#d6e3ec'}));
+    svg.append(el('text',{x:296,y:y+26,'text-anchor':'end','font-size':14,'font-weight':600,fill:'#253b4e'},clip(features[i]||spec.steps[i]||'خطوة الاستخدام',32)));
+    svg.append(el('text',{x:296,y:y+46,'text-anchor':'end','font-size':11,fill:'#74899a'},'عنصر توضيحي — لا يعمل'));
   }
-  spec=E.buildSpec(field("idea").value,{title,features});
-  if(signature()!==activeSignature) {history=new Map();quantities=new Map();activeSignature=signature();}
-  const options=spec.features.map((f,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=f;return o;});
-  field("case").replaceChildren(...options);field("trial").hidden=false;
-  field("scope-state").textContent="النطاق المعتمد يشمل "+spec.features.length+" وظائف.";
-  field("estimate").textContent="تقدير آلي غير ملزم: "+spec.quote.low.toLocaleString("ar-SA")+"–"+spec.quote.high.toLocaleString("ar-SA")+" ر.س. · مدة استرشادية "+spec.quote.weeks+". هذه محاكاة لقواعد عامة وليست عرض سعر معتمدًا؛ يراجع الفريق الوظائف والتكلفة والمدة قبل الاتفاق.";
-  field("outcome").textContent="";renderHistory();renderRule();renderPreview();return true;
+  svg.append(el('rect',{x:27,y:447,width:286,height:49,rx:11,fill:'#116c61'}));
+  svg.append(el('text',{x:170,y:478,'text-anchor':'middle','font-size':15,fill:'#fff','font-weight':700},clip(['بداية الاستخدام','استعراض الخيارات','عرض النتيجة'][index],26)));
+  const frame=document.createElement('figure');frame.className='concept-frame';
+  frame.append(svg);
+  const title=document.createElement('figcaption');title.textContent=(index+1)+'. '+section;frame.append(title);
+  return frame;
 }
-function renderRule() {
-  const i=Number(field("case").value), [resource,action]=scenario(spec.features[i]);
-  field("rule").textContent="الإجراء: "+action+" · "+resource+": "+(quantities.get(i)??1);
+function showState(id,text){byId(id).textContent=text;}
+async function sendIdea(body,key){
+  const response=await fetch('/api/ideas',{method:'POST',
+    headers:{'Content-Type':'application/json','Idempotency-Key':key},
+    body:JSON.stringify(body),credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(23000)});
+  const data=await response.json().catch(()=>null);
+  if(!response.ok||data?.ok!==true||!/^[0-9a-f-]{36}$/i.test(data.id||'')||!/^MZ-[A-F0-9]{12}$/.test(data.reference||''))throw Error(data?.error||'لم يتم تأكيد حفظ الفكرة. يمكنك إعادة المحاولة دون تكرار السجل.');
+  return data;
 }
-function renderHistory() {
-  field("history").replaceChildren(...Array.from(history.values(),v=>{const li=document.createElement("li");li.textContent=v;return li;}));
-}
-function renderPreview() {
-  // Render customer input with textContent only; no user-controlled HTML is executed.
-  field("preview-heading").textContent=spec.title;
-  field("preview-subtitle").textContent=spec.idea;
-  const cards=spec.features.map((feature,i)=>{
-    const card=document.createElement("article");card.className="preview-card";
-    const number=document.createElement("span");number.className="preview-number";number.textContent=String(i+1).padStart(2,"0");
-    const heading=document.createElement("strong");heading.textContent=feature;
-    const button=document.createElement("button");button.type="button";button.className="preview-action";
-    button.textContent="جرّب الوظيفة";
-    button.addEventListener("click",()=>{field("case").value=String(i);run("current");});
-    card.append(number,heading,button);
-    return card;
-  });
-  field("preview-actions").replaceChildren(...cards);
-  field("preview-status").textContent="اختر وظيفة؛ المحاولة الأولى تنجح، والثانية تختبر نفاد الشرط.";
-  field("live-preview").hidden=false;
-}
-function run(mode) {
-  const i=Number(field("case").value), f=spec.features[i], [resource,action,failure]=scenario(f);
-  const before=mode==="available"?1:mode==="empty"?0:(quantities.get(i)??1);
-  const result=simulate(before,action,failure);quantities.set(i,result.left);
-  const line=f+" — "+(result.ok?"نُفّذ: ":"مُنع: ")+result.detail+" ("+resource+" "+before+" ← "+result.left+").";
-  history.set(i+":"+result.ok,line);field("outcome").textContent=line;field("preview-status").textContent=line;renderRule();renderHistory();
-}
-function results() {return [...history.values()].join("\n")||"لم تُجرَ اختبارات بعد.";}
-field("design").addEventListener("submit",event=>{
-  event.preventDefault();const raw=field("idea").value.trim();
-  if(raw.length<20){field("idea").setCustomValidity("اكتب وصفًا من ٢٠ حرفًا على الأقل.");field("idea").reportValidity();return;}
-  const base=E.buildSpec(raw);field("project-title").value=base.title;field("features").value=base.features.slice(0,8).map(s=>s.slice(0,125)).join("\n");
-  field("scope-state").textContent="";field("trial").hidden=true;field("workspace").hidden=false;field("scope-title").focus();
-});
-let copiedIdea;
-field("direct-request").onclick=event=>{
-  if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button>0)return;
+byId('design').addEventListener('submit',async event=>{
   event.preventDefault();
-  const brief=field("brief");
-  if(!brief.value.trim()||brief.value===copiedIdea){
-    copiedIdea=field("idea").value.trim();
-    brief.value=copiedIdea;
-  }
-  brief.focus();
-};
-field("idea").oninput=()=>{field("idea").setCustomValidity("");field("workspace").hidden=true;field("live-preview").hidden=true;};
-for (const id of ["project-title","features"]) field(id).oninput=()=>{field("trial").hidden=true;field("live-preview").hidden=true;field("scope-state").textContent="اعتمد التعديلات لتحديث التجربة.";};
-field("apply").onclick=updateSpec;field("case").onchange=()=>{field("outcome").textContent="";renderRule();};
-field("preview-request").onclick=()=>field("handoff").click();
-field("preview-reset").onclick=()=>{
-  if(!spec)return;
-  quantities=new Map();history=new Map();
-  field("preview-status").textContent="أُعيدت التجربة؛ يمكنك البدء من جديد.";
-  field("outcome").textContent="";renderRule();renderHistory();
-};
-field("pass").onclick=()=>run("available");field("fail").onclick=()=>run("empty");field("again").onclick=()=>run("current");
-function downloadFile(body,type,name) {
-  const url=URL.createObjectURL(new Blob([body],{type}));
-  const a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
-}
-field("download").onclick=()=>{
-  downloadFile(E.briefMarkdown(spec)+"\n\n## نتائج محاكاة النطاق\n"+results()+"\n","text/markdown;charset=utf-8","MZcode-project-brief.md");
-};
-field("prototype").onclick=async()=>{
-  try {
-    const html=await window.MZPrototype.documentFor(spec,scenario);
-    downloadFile(html,"text/html;charset=utf-8","MZcode-prototype.html");
-    field("export-state").textContent="افتح ملف MZcode-prototype.html في متصفحك لتجربة النموذج دون إنترنت.";
-  } catch {field("export-state").textContent="تعذر إنشاء النموذج. أعد المحاولة أو نزّل الموجز.";}
-};
-field("handoff").onclick=()=>{
-  const base=spec.title+"\n"+spec.idea+"\n\nالوظائف المعتمدة\n"+spec.features.join("\n");
-  const counts="\n\nنتائج التجربة: "+history.size+" حالات من "+spec.features.length*2+" ممكنة.";
-  const full=base+counts+"\n"+results();
-  field("brief").value=full.length<=5000?full:base+counts;
-  field("receipt").textContent=full.length<=5000?"راجع النص قبل إرساله.":"يتضمن الطلب ملخص الاختبارات. تتوفر التفاصيل في ملف الموجز.";
-  field("request").scrollIntoView({block:"start"});field("brief").focus();
-};
-field("intake").addEventListener("submit",async event=>{
-  event.preventDefault();const button=field("send"),receipt=field("receipt");if(button.disabled)return;
-  const body={idea:field("brief").value.trim(),email:field("email").value.trim(),name:field("name").value.trim(),consent:field("consent").checked?"yes":"",website:field("website").value};
+  const idea=byId('idea').value.trim(),email=byId('concept-email').value.trim().toLowerCase();
+  if(idea.length<20||idea.length>3200){showState('concept-state','اكتب وصفًا بين 20 و3200 حرف.');return}
+  if(email&&!byId('concept-email').checkValidity()){showState('concept-state','تحقق من البريد.');return}
+  if(!byId('archive-consent').checked){showState('concept-state','الموافقة على حفظ الفكرة مطلوبة قبل إرسالها للأرشيف.');return}
+  if(!crypto?.randomUUID){showState('concept-state','يتطلب الإرسال متصفحًا حديثًا.');return}
+  const body={idea,name:'',email,website:byId('website').value,consent:'yes',idea_kind:'concept',reuse_permission:byId('reuse-consent').checked};
   const signature=JSON.stringify(body);
-  if(signature!==lastPayload){requestKey=crypto.randomUUID();lastPayload=signature;}
-  button.disabled=true;receipt.textContent="جارٍ حفظ الطلب…";field("receipt-card").hidden=true;
-  try {
-    const res=await fetch("/api/ideas",{method:"POST",headers:{"Content-Type":"application/json","Idempotency-Key":requestKey},body:signature,signal:AbortSignal.timeout(25000)});
-    const data=await res.json();
-    if(!res.ok||data.ok!==true||!/^[a-f0-9-]{36}$/.test(data.id))throw Error(data.error||"لم نتلقَّ تأكيد حفظ. أعد المحاولة.");
-    const reference=data.reference||"MZ-"+data.id.slice(0,8).toUpperCase()+data.id.slice(-4).toUpperCase();
-    field("receipt-code").textContent=reference;
-    const date=Number.isFinite(data.created_ms)?new Intl.DateTimeFormat("ar-SA-u-ca-gregory",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(data.created_ms)):"وقت استلام الطلب";
-    field("receipt-date").textContent="تاريخ الاستلام: "+date+" (بتوقيت السعودية)";
-    const mail={
-     accepted:"قبلت خدمة البريد إرسال رسالة التأكيد إلى "+body.email+". راجع الوارد والبريد غير الهام.",
-     pending_setup:"لم تُرسل رسالة بريد للعميل بعد، لأن خدمة إرسال البريد الخارجي لم تُفعّل. طلبك محفوظ بأمان ويمكن متابعته بهذا الرقم.",
-     failed:"تم حفظ طلبك، لكن تعذر إرسال رسالة التأكيد إلى بريدك. احتفظ بالرقم وتواصل معنا عند الحاجة."
-    };
-    field("receipt-mail-status").textContent=mail[data.receipt_email_status]||"تم حفظ الطلب؛ احتفظ برقم المتابعة.";
-    field("tracking-id").value=reference;
-    field("receipt-card").hidden=false;
-    receipt.textContent="تم حفظ طلبك بنجاح. هذا رقمك المختصر وإيصال الاستلام:";
-    event.target.reset();lastPayload=null;
-  } catch (e) {receipt.textContent=e.name==="TypeError"||e.name==="TimeoutError"?"لم يصلنا تأكيد. أعد الإرسال بنفس البيانات لاسترجاع رقم الطلب.":e.message;}
-  finally{button.disabled=false;}
+  if(signature!==conceptSignature){conceptSignature=signature;conceptKey=crypto.randomUUID();}
+  const button=byId('show-concept');button.disabled=true;showState('concept-state','جارٍ حفظ فكرتك في الأرشيف الخاص…');
+  try{
+    const receipt=await sendIdea(body,conceptKey);
+    current={spec:E.buildSpec(idea),reference:receipt.reference,idea};
+    byId('concept-description').textContent=current.spec.title+' — '+idea;
+    byId('concept-reference').textContent='حُفظت الفكرة برقم: '+receipt.reference+' · احتفظ به للمتابعة.';
+    const views=current.spec.screens.slice(0,3);
+    byId('concept-visuals').replaceChildren(...views.map((name,i)=>screenImage(current.spec,name,i)));
+    byId('concept-steps').replaceChildren(...current.spec.steps.map(step=>{const li=document.createElement('li');li.textContent=step;return li;}));
+    byId('workspace').hidden=false;
+    byId('brief').value='رقم التصور: '+receipt.reference+'\n'+idea+'\nالوظائف المقترحة:\n'+current.spec.features.join('\n');
+    if(email)byId('email').value=email;
+    showState('concept-state','تم حفظ الفكرة وعرض تصور بصري غير تفاعلي. لا يوجد تطبيق للتنزيل.');
+    byId('workspace').scrollIntoView({block:'start',behavior:'smooth'});
+  }catch(err){showState('concept-state',err.name==='TimeoutError'?'انتهت مهلة الاتصال؛ أعد المحاولة بنفس الفكرة، دون تغيير البيانات.':err.message||'تعذر حفظ الفكرة حاليًا.')}
+  finally{button.disabled=false}
 });
-
-
-field("copy-reference").addEventListener("click",async()=>{
- const code=field("receipt-code").textContent;
- try{await navigator.clipboard.writeText(code);field("copy-reference").textContent="تم نسخ الرقم";}
- catch{field("copy-reference").textContent="حدّد الرقم أعلاه لنسخه";}
+byId('concept-new').addEventListener('click',()=>{
+  byId('workspace').hidden=true;
+  byId('design').reset();byId('idea').focus();current=null;
+  conceptSignature='';conceptKey=null;showState('concept-state','');
+  byId('design').scrollIntoView({block:'start'});
 });
-field("receipt-track").addEventListener("click",()=>field("tracking-id").value=field("receipt-code").textContent);
-
-// Request tracking displays only a status. The tracking key must be treated as private.
-const trackingLabels={
- "new":"تم استلام طلبك، وهو في قائمة المراجعة.",
- "reviewing":"الطلب قيد المراجعة.",
- "in_review":"الطلب قيد المراجعة.",
- "contacted":"تواصل الفريق بخصوص طلبك.",
- "quoted":"تم إعداد عرض السعر؛ راجع بريدك للتفاصيل.",
- "accepted":"تم قبول المشروع للبدء بعد الاتفاق.",
- "building":"المشروع قيد التنفيذ.",
- "rejected":"تعذّر قبول المشروع؛ يمكن التواصل لمعرفة التفاصيل.",
- "approved":"تم اعتماد تنفيذ المشروع.",
- "in_progress":"التنفيذ جارٍ.",
- "delivered":"تم تسليم المشروع.",
- "closed":"أُغلق الطلب.",
- "cancelled":"أُغلق الطلب دون تنفيذ."
-};
-field("track-form").addEventListener("submit",async event=>{
- event.preventDefault();
- const id=field("tracking-id").value.trim();
- const result=field("tracking-result"),button=field("track-submit");
- if(!/^MZ-[0-9a-f]{12}$/i.test(id)&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
-  result.textContent="رقم المتابعة غير صحيح. انسخه كاملاً من إيصال الطلب.";return;
- }
- if(button.disabled)return;
- button.disabled=true;result.textContent="جارٍ التحقق من حالة الطلب…";
- try{
-  const response=await fetch("/api/ideas/"+encodeURIComponent(id),{method:"GET",cache:"no-store",signal:AbortSignal.timeout(12000)});
-  if(response.status===404){result.textContent="لم نجد طلباً بهذا الرقم. تأكد من نسخه بصورة صحيحة.";return;}
-  if(!response.ok)throw Error("تعذر الاستعلام حالياً. أعد المحاولة لاحقاً.");
-  const data=await response.json();
-  if(data.ok!==true||typeof data.status!=="string"||(data.reference?.toLowerCase()!==id.toLowerCase()&&data.id?.toLowerCase()!==id.toLowerCase()))throw Error("تعذر قراءة حالة الطلب حالياً.");
-  result.textContent=trackingLabels[data.status]||"تم العثور على الطلب. للحصول على آخر التفاصيل تواصل مع info@mzcodehub.com.";
- }catch(e){result.textContent=e.name==="TimeoutError"?"انتهت مهلة الاستعلام. حاول مجدداً.":e.message||"تعذر الاستعلام حالياً."}
- finally{button.disabled=false;}
+byId('intake').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=byId('send');
+  const idea=byId('brief').value.trim(),email=byId('email').value.trim().toLowerCase(),name=byId('name').value.trim();
+  if(!email||!byId('email').checkValidity()||!byId('consent').checked||idea.length<20||idea.length>5000){showState('receipt','أكمل وصف المشروع والبريد والموافقة على حفظ طلب التنفيذ.');return}
+  const body={idea,email,name,website:'',consent:'yes',idea_kind:'execution',reuse_permission:false};
+  const sig=JSON.stringify(body);
+  if(sig!==executionSignature){executionKey=crypto.randomUUID();executionSignature=sig;}
+  button.disabled=true;showState('receipt','جارٍ حفظ طلب دراسة التنفيذ…');
+  try{
+    const data=await sendIdea(body,executionKey);
+    const emailInfo=data.receipt_email_status==='accepted'?'قبلت خدمة البريد رسالة التأكيد.':'احتفظ برقم المتابعة؛ قد لا تصل رسالة بريد.';
+    showState('receipt','تم حفظ طلب دراسة التنفيذ برقم '+data.reference+'\n'+emailInfo+'\nلا يبدأ بناء أو تسليم أي منتج دون اتفاق.');
+    byId('tracking-id').value=data.reference;
+  }catch(err){showState('receipt',err.message||'تعذر تأكيد الحفظ. أعد المحاولة بنفس البيانات.')}
+  finally{button.disabled=false}
+});
+byId('track-form').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const v=byId('tracking-id').value.trim().toUpperCase();
+  if(!/^MZ-[A-F0-9]{12}$/.test(v)&&!/^[0-9a-f-]{36}$/i.test(v)){showState('tracking-result','رقم متابعة غير صالح.');return}
+  showState('tracking-result','جارٍ التحقق…');
+  try{
+    const r=await fetch('/api/ideas/'+encodeURIComponent(v),{cache:'no-store',signal:AbortSignal.timeout(12000)});
+    const d=await r.json();
+    if(!r.ok||d.ok!==true)throw Error('تعذر العثور على الطلب.');
+    const labels={new:'جديد',reviewing:'قيد المراجعة',quoted:'عُرض السعر',accepted:'تم القبول',building:'قيد التنفيذ',delivered:'تم التسليم',rejected:'مغلق'};
+    showState('tracking-result','حالة الفكرة: '+(labels[d.status]||'قيد المراجعة'));
+  }catch(e){showState('tracking-result',e.message||'تعذر التحقق حاليًا.')}
 });
