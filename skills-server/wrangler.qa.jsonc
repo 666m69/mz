@@ -1,0 +1,16 @@
+{
+  // Isolated synthetic QA only. Not a deployment instruction.
+  // Do not enable public workers.dev or preview URLs without a verified Access gate.
+  "name": "mzcode-skills-qa-20261104",
+  "main": "worker/index.mjs",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {"directory": "./admin", "binding": "ASSETS", "run_worker_first": true},
+  "d1_databases": [{
+    "binding": "SKILLS_DB",
+    "database_name": "mzcode-skills-qa-20261104",
+    "database_id": "5821d775-fa0c-4f7e-a20b-8dab1d0bd50e",
+    "migrations_dir": "migrations"
+  }]
+}
