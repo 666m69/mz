@@ -96,6 +96,63 @@ class RunnerServiceTests(unittest.TestCase):
                             agent.main()
                         self.assertEqual(exit_case.exception.code, 2)
 
+    def test_sandbox_preflight_stops_before_claiming_any_job(self):
+        with mock.patch.object(agent, "sandbox_ready", return_value=False), \
+             mock.patch.object(agent, "post") as post:
+            with self.assertRaises(agent.SandboxUnavailable):
+                agent.once()
+            post.assert_not_called()
+        work = mock.Mock()
+        log = io.StringIO()
+        with contextlib.redirect_stderr(log):
+            self.assertEqual(agent.serve(run_once=work, probe_check=lambda: False), 1)
+        work.assert_not_called()
+        self.assertEqual(log.getvalue(), "sandbox_unavailable\\n")
+
+    def test_runtime_sandbox_failure_does_not_finalize_job_or_look_successful(self):
+        job = {"id": "synthetic-job", "lease": "synthetic-lease"}
+        with mock.patch.object(agent, "sandbox_ready", return_value=True), \
+             mock.patch.object(agent, "post", return_value={"job": job}) as post, \
+             mock.patch.object(agent, "execute", return_value={"ok": False, "error": "sandbox_unavailable"}):
+            with self.assertRaises(agent.SandboxUnavailable):
+                agent.once()
+            post.assert_called_once_with("claim", {})
+        log = io.StringIO()
+        with contextlib.redirect_stderr(log):
+            self.assertEqual(agent.serve(run_once=mock.Mock(side_effect=agent.SandboxUnavailable()), probe_check=lambda: True), 1)
+        self.assertEqual(log.getvalue(), "sandbox_unavailable\\n")
+
+    def test_exact_stale_lease_409_is_skipped_and_next_job_runs(self):
+        job = {"id": "synthetic-job", "lease": "synthetic-lease"}
+        with mock.patch.object(agent, "post", side_effect=[{"job": job}, agent.StaleLease("stale_lease")]) as post, \
+             mock.patch.object(agent, "execute", return_value={"ok": False, "error": "build_failed"}):
+            self.assertEqual(agent.once(preflight=False), "stale_lease")
+            self.assertEqual(post.call_count, 2)
+        tasks = iter(["stale_lease", "succeeded"])
+        self.assertEqual(agent.serve(max_jobs=2, run_once=lambda: next(tasks),
+                                     probe_check=lambda: True), 0)
+
+    def test_only_signed_stale_lease_reply_is_recoverable(self):
+        def response(status, payload):
+            fake = mock.Mock()
+            fake.status = status
+            fake.read.return_value = payload
+            return fake
+        conn = mock.Mock()
+        with mock.patch.dict(agent.os.environ, {
+            "SKILLS_URL": "https://skills.example.test", "SKILLS_RUNNER_TOKEN": "test-only"
+        }), mock.patch.object(agent.http.client, "HTTPSConnection", return_value=conn):
+            conn.getresponse.return_value = response(409, b'{"error":"stale_lease"}')
+            with self.assertRaises(agent.StaleLease):
+                agent.post("jobs/synthetic-job/complete", {}, "synthetic-lease")
+            conn.getresponse.return_value = response(409, b'{"error":"daily_limit"}')
+            with self.assertRaises(RuntimeError):
+                agent.post("jobs/synthetic-job/complete", {}, "synthetic-lease")
+            conn.getresponse.return_value = response(409, b'{"error":"stale_lease"}')
+            with self.assertRaises(RuntimeError):
+                agent.post("claim", {})
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
