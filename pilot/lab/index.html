@@ -1,20 +1,61 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0a1822"><meta name="description" content="اكتب فكرتك، اختر نطاقها واختبر رحلة المستخدم على جهازك قبل طلب التنفيذ."><link rel="icon" href="/assets/images/mz-mark.svg"><title>مختبر الفكرة | MZcode</title><link rel="stylesheet" href="/idea/lab.css"><script defer src="/idea/engine.js"></script><script defer src="/idea/prototype.js"></script><script defer src="/idea/lab.js"></script><link rel="stylesheet" href="/_mz/share.css"><script defer src="/_mz/share.js" data-mz-share-script></script></head>
-<body><header><a class="brand" href="/" aria-label="MZcode الرئيسية"><img src="/assets/images/mz-mark.svg" alt="" width="32" height="32"><b dir="ltr">MZ<span>code</span></b></a><a href="/tools/">الأدوات</a></header>
-<main><p class="eyebrow">مختبر الفكرة <span aria-hidden="true">/</span> MZ Builder</p><h1>اختبر فكرتك.</h1><p class="lead">اكتب فكرتك بأي مجال، شاهد نموذجًا قابلًا للتجربة فورًا، ثم قرّر إن كنت تريد طلب التنفيذ.</p><ol class="flow-steps" aria-label="خطوات تحويل الفكرة إلى مشروع"><li><b>01</b> اكتب الفكرة</li><li><b>02</b> جرّب النموذج</li><li><b>03</b> اطلب التنفيذ</li></ol>
-<section><form id="design"><label for="idea">ماذا تريد أن تبني؟</label><textarea id="idea" minlength="20" maxlength="3200" required placeholder="مثلًا، أريد أن يحجز الزائر موعدًا ويعرف فورًا إن كان متاحًا."></textarea><div class="actions"><button>ابدأ التجربة</button><a href="/idea/demo" target="_blank" rel="noopener">مثال الحجز ↗</a><a id="direct-request" href="#request">أرسل فكرة مباشرة</a></div><small>المسودة على جهازك حتى توافق على الإرسال.</small></form>
-<noscript>تحتاج التجربة إلى JavaScript. للتواصل اكتب إلى info@mzcodehub.com.</noscript></section>
-<section id="workspace" hidden><p class="eyebrow">١ / تحديد النطاق</p><h2 id="scope-title" tabindex="-1">ما الذي تريد اختباره؟</h2><label for="project-title">اسم التصور</label><input id="project-title" maxlength="90"><label for="features">الوظائف، كل وظيفة في سطر مستقل</label><textarea id="features" rows="4"></textarea><small>حتى ثماني وظائف، و١٢٥ حرفًا لكل وظيفة. احذف ما يمكن تأجيله واكتب ما ينقصك.</small>
-<button class="quiet" id="apply" type="button">اعتمد النطاق وابدأ الاختبار</button><p id="scope-state" class="status" role="status"></p>
-<div id="live-preview" class="live-preview" hidden>
-  <div class="preview-intro"><div><span class="eyebrow">نموذج تفاعلي · يعمل هنا</span><h3>جرّب فكرتك قبل أن تطلب تنفيذها</h3></div><button type="button" id="preview-reset" class="quiet">إعادة التجربة</button></div>
-  <div class="preview-device"><div class="preview-toolbar"><span class="preview-dot"></span><span>معاينة محلية · لا تُرسل بياناتك</span><span dir="ltr">MZ / DEMO</span></div>
-  <div class="preview-body"><h3 id="preview-heading"></h3><p id="preview-subtitle"></p><div id="preview-actions" class="preview-actions"></div><p id="preview-status" role="status" aria-live="polite" class="status"></p></div></div>
-  <p id="estimate" class="preview-estimate"></p>
-  <button type="button" id="preview-request">اطلب تنفيذ هذا التصور ←</button>
-</div>
-<div id="trial" hidden><p class="eyebrow">٢ / تجربة محلية</p><h2>اختبار رحلة المستخدم</h2><p>جرّب الحالتين ثم نزّل النتيجة.</p>
-<label for="case">الوظيفة</label><select id="case"></select><p id="rule"></p><div class="actions"><button id="pass" type="button">جرّب عند تحقق الشرط</button><button id="fail" type="button" class="quiet">جرّب عند غياب الشرط</button><button id="again" type="button" class="quiet">كرّر بالحالة الحالية</button></div><p id="outcome" class="status" role="status"></p><ul id="history" aria-label="سجل نتائج الاختبار"></ul>
-<p class="eyebrow">٣ / التسليم</p><h2>موجز التنفيذ</h2><div class="actions"><button type="button" id="prototype">نزّل نموذجًا تفاعليًا يعمل دون إنترنت</button><button type="button" class="quiet" id="download">نزّل الموجز ونتائج الاختبارات</button><button type="button" class="quiet" id="handoff">انقل الموجز إلى طلب التنفيذ</button></div><p id="export-state" class="status" role="status"></p></div></section>
-<section id="request"><p class="eyebrow">طلب تنفيذ خاص</p><h2>دعنا نراجع مشروعك</h2><form id="intake"><label for="brief">ما الذي سيصل إلى الفريق؟</label><textarea id="brief" required minlength="20" maxlength="5000" placeholder="اكتب وصف المشروع، أو انقل الموجز من المختبر وراجعه هنا."></textarea><label for="email">بريد الرد</label><input id="email" type="email" required maxlength="254" autocomplete="email" dir="ltr"><label for="name">الاسم (اختياري)</label><input id="name" maxlength="100" autocomplete="name"><div hidden aria-hidden="true"><label for="website">اترك هذا الحقل فارغًا</label><input id="website" tabindex="-1" autocomplete="off"></div><label class="consent"><input type="checkbox" id="consent" required> أوافق على حفظ هذا الطلب وبيانات التواصل لدراسة المشروع والرد عليه وإرسال إيصال التأكيد إلى بريدي.</label><small><a href="/privacy">سياسة الخصوصية</a> · لا تنشر فكرتك بإرسال الطلب. يراجع الفريق النطاق والتكلفة قبل أي اتفاق.</small><button id="send">أرسل طلب التنفيذ</button><p id="receipt" role="status" class="status"></p></form><div id="receipt-card" class="receipt-card" hidden aria-live="polite"><p class="eyebrow">إيصال استلام الطلب</p><strong id="receipt-code" dir="ltr" class="receipt-code"></strong><p id="receipt-date"></p><p id="receipt-mail-status" role="status"></p><div class="actions"><button id="copy-reference" type="button">نسخ رقم الطلب</button><a id="receipt-track" href="#track">متابعة الطلب</a></div></div></section><section id="track" aria-labelledby="track-title"><p class="eyebrow">متابعة طلب التنفيذ</p><h2 id="track-title">أين وصل طلبك؟</h2><p>أدخل رقم المتابعة الذي ظهر بعد حفظ طلبك. ستظهر حالة العمل فقط دون عرض بياناتك الخاصة.</p><form id="track-form"><label for="tracking-id">رقم المتابعة</label><input type="text" id="tracking-id" dir="ltr" spellcheck="false" autocomplete="off" inputmode="text" minlength="15" maxlength="36" required placeholder="MZ-A1B2C3D4E5F6" aria-describedby="tracking-help"><small id="tracking-help">اكتب رقم الطلب المختصر الذي يبدأ بـ MZ-. ويمكن أيضاً استخدام رقم المتابعة القديم.</small><button id="track-submit" type="submit">تحقق من حالة الطلب</button><p id="tracking-result" class="status" role="status" aria-live="polite"></p></form></section>
-</main><footer><a href="/">الرئيسية</a> · <a href="mailto:info@mzcodehub.com">info@mzcodehub.com</a></footer></body></html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#091721"><meta name="description" content="اكتب فكرتك، احفظها بسرية واحصل على ثلاث صور تصور طريقة استخدامها. لا تسليم لتطبيق قبل الاتفاق.">
+<link rel="icon" href="/assets/images/mz-mark.svg"><title>تصوّر فكرتك | MZcode</title>
+<link rel="stylesheet" href="/idea/lab.css">
+<script src="/idea/engine.js" defer></script><script src="/idea/lab.js" defer></script>
+</head>
+<body>
+<header><a class="brand" href="/" aria-label="MZcode الرئيسية"><img src="/assets/images/mz-mark.svg" alt="" width="32" height="32"><b dir="ltr">MZ<span>code</span></b></a><a href="/tools/">الأدوات المجانية</a></header>
+<main>
+<p class="eyebrow">MZcode / Idea Studio</p>
+<h1>فكرتك، <span class="visual-accent">قدّام عينك.</span></h1>
+<p class="lead">احكِ لنا فكرتك بأي مجال، واعرض تصورًا مصورًا لثلاث شاشات مع خطوات الاستخدام. هذه رسومات أولية لا تمثل تطبيقًا جاهزًا.</p>
+<ol class="flow-steps" aria-label="رحلة الفكرة"><li><b>01</b> اكتب الفكرة ووافق على حفظها</li><li><b>02</b> شاهد صور التصور</li><li><b>03</b> اطلب اتفاق تنفيذ إن أعجبتك</li></ol>
+<section aria-labelledby="idea-title">
+<h2 id="idea-title">ما الذي تريد بناءه؟</h2>
+<form id="design">
+<label for="idea">وصف الفكرة</label>
+<textarea id="idea" required minlength="20" maxlength="3200" placeholder="مثلًا: أحتاج منصة لحجز الشاحنات والقلابات حسب المدينة والوقت، مع متابعة حالة الطلب."></textarea>
+<label for="concept-email">بريد التواصل (اختياري في مرحلة التصور)</label>
+<input id="concept-email" type="email" maxlength="254" dir="ltr" autocomplete="email" placeholder="you@example.com">
+<div hidden aria-hidden="true"><label for="website">اترك هذا الحقل فارغًا</label><input id="website" tabindex="-1" autocomplete="off"></div>
+<label class="consent"><input type="checkbox" id="archive-consent" required> أوافق على حفظ فكرتي وبيانات التواصل التي أقدمها في أرشيف MZcode الخاص لمراجعتها وإعداد تصور مبدئي.</label>
+<label class="consent"><input type="checkbox" id="reuse-consent"> أسمح لـMZcode بدراسة مضمون فكرتي لتطوير منتجات عامة مشابهة، دون مشاركة بياناتي أو استخدام ملفاتي أو أعمالي المحمية. هذا الإذن اختياري، ويمكنني الاستفسار عن سحبه.</label>
+<small>الأفكار خاصة، ولا تُعرض للزوار. يمكنك طلب الاطلاع أو الحذف عبر <a href="mailto:info@mzcodehub.com">info@mzcodehub.com</a>. لا ترسل أسرار أعمال أو معلومات حساسة. <a href="/privacy">سياسة الخصوصية</a> و<a href="/terms">الشروط</a>.</small>
+<button id="show-concept" type="submit">احفظ الفكرة واعرض التصور المصوّر</button>
+<p id="concept-state" role="status" aria-live="polite" class="status"></p>
+</form>
+</section>
+<section id="workspace" hidden aria-labelledby="visual-title">
+<p class="eyebrow">تصور مبدئي · صور توضيحية وليست شاشات من تطبيق عامل</p>
+<h2 id="visual-title" tabindex="-1">كيف قد تبدو فكرتك؟</h2>
+<p id="concept-description"></p>
+<p class="status" id="concept-reference"></p>
+<div id="concept-visuals" class="concept-visuals" aria-label="ثلاث صور تصورية لواجهات المشروع"></div>
+<h3>كيف سيعمل المنتج بعد الاتفاق والتنفيذ؟</h3>
+<ol id="concept-steps" class="concept-steps"></ol>
+<p class="preview-estimate">الصور تصور أولي قابل للمراجعة. لا يوجد تشغيل حقيقي أو دفع أو حسابات أو كود أو ملفات مشروع تُسلّم هنا.</p>
+<div class="actions"><a class="demo-primary" href="#execution" id="request-execution">أريد دراسة تنفيذ المشروع</a><button id="concept-new" type="button" class="quiet">تصوّر فكرة أخرى</button></div>
+</section>
+<section id="execution" aria-labelledby="execution-title">
+<p class="eyebrow">خطوة اختيارية · لا يبدأ العمل تلقائيًا</p>
+<h2 id="execution-title">تريد أن ننفّذ فكرتك؟</h2>
+<p>نراجع النطاق والمدة والسعر، ثم نتفق كتابةً قبل بناء أو تسليم أي تطبيق خاص بك.</p>
+<form id="intake">
+<label for="brief">تفاصيل طلب الاتفاق</label><textarea id="brief" required minlength="20" maxlength="5000" placeholder="صف المشروع المطلوب، أو أنشئ تصورًا بالأعلى لينتقل وصفه هنا."></textarea>
+<label for="email">بريد الرد</label><input id="email" type="email" required maxlength="254" autocomplete="email" dir="ltr">
+<label for="name">الاسم (اختياري)</label><input id="name" maxlength="100" autocomplete="name">
+<label class="consent"><input type="checkbox" id="consent" required> أوافق على حفظ طلب التنفيذ والتواصل معي بشأن العرض والاتفاق.</label>
+<button id="send" type="submit">أرسل طلب دراسة التنفيذ</button>
+<p id="receipt" class="status" role="status" aria-live="polite"></p>
+</form>
+</section>
+<section id="track" aria-labelledby="track-title">
+<h2 id="track-title">متابعة طلبك</h2><p>احتفظ برقم الفكرة أو طلب التنفيذ. تظهر حالة المعالجة فقط دون تفاصيلك الخاصة.</p>
+<form id="track-form"><label for="tracking-id">رقم المتابعة</label><input id="tracking-id" dir="ltr" required maxlength="36" placeholder="MZ-XXXXXXXXXXXX"><button type="submit">تحقق من الحالة</button><p id="tracking-result" class="status" role="status" aria-live="polite"></p></form>
+</section>
+</main><footer><a href="/">الرئيسية</a> · <a href="mailto:info@mzcodehub.com">info@mzcodehub.com</a></footer>
+</body></html>
