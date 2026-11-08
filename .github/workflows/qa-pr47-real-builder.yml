@@ -32,7 +32,7 @@ jobs:
       - name: Check private QA Wrangler bindings and Arabic queue states
         working-directory: repo
         run: node --test skills-server/test/qa-config.test.mjs
-      - name: Actual bounded auto-service: 2 jobs, no manual build invocation
+      - name: 'Actual bounded auto-service: 2 jobs, no manual build invocation'
         working-directory: repo
         run: node --test skills-server/test/auto-service.test.mjs
       - name: Full regression, synthetic visitor to actual interactive app, outage and quotas
