@@ -174,7 +174,7 @@ test('real Chromium mobile: consented idea saves, shows three SVG images, denies
  assert.equal(artifact.status,200);
  const bytes=Buffer.from(await artifact.arrayBuffer());
  assert.equal(bytes.subarray(0,2).toString(),'PK');
- assert.equal((await endpoint('invalid',path+'/artifact')).status,403);
+ assert.equal((await endpoint('invalid',path+'/artifact')).status,401,'missing authorization must be rejected');
  const folder=await mkdtemp(join(tmpdir(),'mz-qa-real-app-'));
  t.after(()=>rm(folder,{recursive:true,force:true}));
  const zip=join(folder,'app.zip');await writeFile(zip,bytes);
