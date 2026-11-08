@@ -1,0 +1,40 @@
+name: MZcode QA — actual visitor-to-app and runner failure acceptance
+on:
+  push:
+    branches:
+      - qa/pr47-real-builder-acceptance-20261108
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mzcode-pr47-real-qa
+  cancel-in-progress: false
+
+jobs:
+  real-builder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Fetch pinned source without Marketplace actions
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/666m69/mz.git repo
+          git -C repo fetch --quiet --depth 1 origin "$GITHUB_SHA"
+          git -C repo checkout --quiet --detach "$GITHUB_SHA"
+          test "$(git -C repo rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Verify runtime and Linux isolation
+        working-directory: repo
+        run: |
+          node --version
+          python3 --version
+          google-chrome --version
+          python3 -c "import ctypes; ctypes.CDLL('libseccomp.so.2')"
+      - name: Check private QA Wrangler bindings and Arabic queue states
+        working-directory: repo
+        run: node --test skills-server/test/qa-config.test.mjs
+      - name: Actual bounded auto-service: 2 jobs, no manual build invocation
+        working-directory: repo
+        run: node --test skills-server/test/auto-service.test.mjs
+      - name: Full regression, synthetic visitor to actual interactive app, outage and quotas
+        working-directory: repo
+        run: npm test
