@@ -40,3 +40,14 @@ CREATE TRIGGER IF NOT EXISTS cv_delivery_no_unrevoke
   BEFORE UPDATE OF revoked_at ON cv_deliveries
   WHEN OLD.revoked_at IS NOT NULL AND NEW.revoked_at IS NULL
   BEGIN SELECT RAISE(ABORT,'delivery_revocation_immutable'); END;
+
+-- A verified mailbox never implies authorization to deliver an executable ZIP.
+CREATE TABLE IF NOT EXISTS cv_delivery_agreements (
+ idea_id TEXT PRIMARY KEY REFERENCES cv_deliveries(idea_id),
+ agreement_sha256 TEXT NOT NULL CHECK(length(agreement_sha256)=64),
+ approved_at INTEGER NOT NULL CHECK(approved_at>0)
+);
+CREATE TRIGGER IF NOT EXISTS cv_agreement_immutable BEFORE UPDATE ON cv_delivery_agreements
+BEGIN SELECT RAISE(ABORT,'agreement_immutable'); END;
+CREATE TRIGGER IF NOT EXISTS cv_agreement_no_delete BEFORE DELETE ON cv_delivery_agreements
+BEGIN SELECT RAISE(ABORT,'agreement_immutable'); END;

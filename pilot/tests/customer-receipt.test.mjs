@@ -22,7 +22,7 @@ function mockDb(){
        events.push({sql,params});
        if(sql.includes('INSERT INTO idea_requests')){
         if(saved)return {success:true,meta:{changes:0}};
-        saved={id:params[0],idea:params[1],email:params[2],name:params[3],created_ms:params[5],receipt_email_status:'pending_setup',status:'new'};
+        saved={id:params[0],idea:params[1],email:params[2],name:params[3],created_ms:params[5],idea_kind:params[6],reuse_permission:params[7],receipt_email_status:'pending_setup',status:'new'};
         return {success:true,meta:{changes:1}};
        }
        if(sql.includes('receipt_email_status=?'))saved.receipt_email_status=params[0];

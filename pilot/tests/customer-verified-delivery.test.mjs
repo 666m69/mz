@@ -108,6 +108,12 @@ test('verified recipient gets distinct encrypted ZIP from two real generated app
  const unverified=await ctx.call('/api/customer/requests/'+a.reference+'/artifact');
  assert.equal(unverified.status,404);
  const cookieA=await prove(ctx,a),cookieB=await prove(ctx,b);
+ const prior=await ctx.call('/api/customer/requests/'+a.reference,undefined,{Cookie:cookieA});
+ assert.deepEqual(await prior.json(),{ok:true,reference:a.reference,status:'building',delivery:'agreement_required'});
+ assert.equal((await ctx.call('/api/customer/requests/'+a.reference+'/artifact',undefined,{Cookie:cookieA})).status,409,
+   'verified email without a signed contract must not download an application');
+ assert.equal((await ctx.owner('approve',{reference:a.reference,agreement_sha256:sha('signed test agreement A')})).status,200);
+ assert.equal((await ctx.owner('approve',{reference:b.reference,agreement_sha256:sha('signed test agreement B')})).status,200);
  const aStatus=await ctx.call('/api/customer/requests/'+a.reference,undefined,{Cookie:cookieA});
  assert.deepEqual(await aStatus.json(),{ok:true,reference:a.reference,status:'building',delivery:'ready'});
  const ar=await ctx.call('/api/customer/requests/'+a.reference+'/artifact',undefined,{Cookie:cookieA});

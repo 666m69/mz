@@ -57,3 +57,17 @@ button:not(:disabled):hover{filter:brightness(1.07);transform:translateY(-1px)}
 .receipt-card>p{color:#d1e7ed;overflow-wrap:anywhere}
 .receipt-card .actions a{font-weight:700}
 #tracking-id{direction:ltr;text-align:left;font-family:ui-monospace,Consolas,monospace;letter-spacing:.025em}
+
+
+/* Non-executable, owner-archived visitor concept mockups. */
+.visual-accent{color:var(--mint)}
+.concept-visuals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start;margin:24px 0}
+.concept-frame{margin:0;min-width:0;overflow:hidden;border:1px solid #426578;border-radius:17px;background:#0a1926;padding:11px;box-shadow:0 14px 35px rgba(0,0,0,.16)}
+.concept-frame svg{display:block;width:100%;height:auto;max-height:520px;aspect-ratio:340/540}
+.concept-frame figcaption{text-align:center;margin-top:8px;color:#b9e9dd;font-size:.91rem;overflow-wrap:anywhere}
+.concept-steps{padding-inline-start:25px;line-height:2}
+#workspace{scroll-margin-top:20px}
+#concept-reference{border:1px solid #437d7c;padding:12px;border-radius:10px;background:#0a2a2d}
+#archive-consent,#reuse-consent,#consent{margin-inline-end:8px}
+@media(max-width:650px){.concept-visuals{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding-bottom:10px}.concept-frame{min-width:min(80vw,286px);max-width:286px;scroll-snap-align:center}.concept-frame svg{max-height:445px}}
+@media(prefers-reduced-motion:reduce){.concept-visuals{scroll-behavior:auto}}

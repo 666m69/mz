@@ -190,6 +190,15 @@ async function customerStatus(req,env,ref,download=false){
   if(!link||link.revoked_at!==null){
     return download?fail(404,'not_found'):json({ok:true,reference:ref,status:idea.status,delivery:'not_ready'});
   }
+  // A mailbox proof is not a commercial agreement. Never expose a working app
+  // until the owner records evidence of an explicit signed agreement for this idea.
+  const contract=await stmt(env.GATEWAY_DB,
+    'SELECT agreement_sha256 FROM cv_delivery_agreements WHERE idea_id=? AND approved_at IS NOT NULL',
+    idea.id).first();
+  if(!contract){
+    return download?fail(409,'agreement_required'):
+      json({ok:true,reference:ref,status:idea.status,delivery:'agreement_required'});
+  }
   if(!env.SKILLS_SERVICE)return fail(503,'delivery_unavailable');
   let token;
   try{token=await decryptToken(env,idea.id,link.request_token_cipher)}
@@ -241,6 +250,21 @@ async function admin(req,env,operation){
     if(saved.meta?.changes!==1)return fail(409,'already_linked');
     return json({ok:true,reference:ref,delivery:'linked'});
   }
+  if(operation==='approve'){
+    if(!fields(b,['reference','agreement_sha256'])||!ref||
+       typeof b.agreement_sha256!=='string'||!/^[0-9a-f]{64}$/.test(b.agreement_sha256))
+      return fail(422,'invalid_fields');
+    const idea=await lookup(env,ref);
+    if(!idea||!idea.email)return fail(404,'not_found');
+    const linked=await stmt(env.GATEWAY_DB,
+      'SELECT idea_id FROM cv_deliveries WHERE idea_id=? AND revoked_at IS NULL',idea.id).first();
+    if(!linked)return fail(409,'delivery_not_linked');
+    const result=await stmt(env.GATEWAY_DB,
+      'INSERT INTO cv_delivery_agreements(idea_id,agreement_sha256,approved_at) VALUES(?,?,unixepoch()) ON CONFLICT(idea_id) DO NOTHING',
+      idea.id,b.agreement_sha256).run();
+    if(result.meta?.changes!==1)return fail(409,'already_approved');
+    return json({ok:true,reference:ref,agreement_approved:true});
+  }
   if(operation==='revoke'){
     if(!fields(b,['reference'])||!ref)return fail(422,'invalid_fields');
     const idea=await lookup(env,ref);
@@ -290,6 +314,7 @@ export default {
       if(path==='/api/customer/session/logout')return logout(req,env);
       if(path==='/api/customer/admin/link')return admin(req,env,'link');
       if(path==='/api/customer/admin/revoke')return admin(req,env,'revoke');
+      if(path==='/api/customer/admin/approve')return admin(req,env,'approve');
     }
     const route=/^\/api\/customer\/requests\/(MZ-[A-F0-9]{12})(\/artifact)?$/i.exec(path);
     if(method==='GET'&&route)return customerStatus(req,env,route[1].toUpperCase(),Boolean(route[2]));

@@ -5,14 +5,14 @@ const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:
 const friendlyReference=id=>"MZ-"+id.slice(0,8).toUpperCase()+id.slice(-4).toUpperCase();
 const dateForCustomer=ms=>new Intl.DateTimeFormat("ar-SA-u-ca-gregory",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Riyadh"}).format(new Date(ms));
 const receiptResult=(id,created_ms,receipt_email_status)=>({ok:true,id,reference:friendlyReference(id),created_ms,receipt_email_status});
-async function sendCustomerReceipt(env,{id,created_ms,idea,email,name}){
+async function sendCustomerReceipt(env,{id,created_ms,idea,email,name,idea_kind}){
  if(!email)return {status:'not_requested',providerId:null,error:null};
  if(!env.RESEND_API_KEY)return {status:"pending_setup",providerId:null,error:null};
  const reference=friendlyReference(id);
  const message=[
   "مرحباً "+(name||"بك")+"،",
   "",
-  "تم استلام طلب تنفيذ فكرتك في MZcode Hub، وسنراجعه ثم نرد عليك.",
+  idea_kind==="concept"?"تم حفظ فكرتك في أرشيف MZcode الخاص وإعداد تصور مصور مبدئي. هذا ليس اتفاق تنفيذ.":"تم استلام طلب دراسة تنفيذ فكرتك في MZcode Hub، وسنراجعه ثم نرد عليك.",
   "رقم الطلب: "+reference,
   "تاريخ الاستلام: "+dateForCustomer(created_ms)+" (توقيت السعودية)",
   "الاسم: "+(name||"لم يُذكر"),
@@ -94,6 +94,10 @@ export default {async fetch(request,env){
   if(!data||typeof data!=="object"||Array.isArray(data))return json({error:"Invalid JSON"},400);
  }catch{return json({error:"Invalid JSON"},400)}
  const idea=typeof data.idea==="string"?data.idea.trim():"",email=typeof data.email==="string"?data.email.trim().toLowerCase():"",name=typeof data.name==="string"?data.name.trim():"";
+ const idea_kind=data.idea_kind===undefined?"execution":data.idea_kind;
+ const reuse_permission=data.reuse_permission===undefined?false:data.reuse_permission;
+ if(!["concept","execution"].includes(idea_kind)||typeof reuse_permission!=="boolean"||(reuse_permission&&idea_kind!=="concept"))
+   return json({error:"خيار نوع الفكرة أو إذن إعادة الاستخدام غير صالح"},400);
  if(data.website)return json({error:"تعذر قبول الطلب"},400);
  if(data.consent!=="yes")return json({error:"يجب الموافقة على معالجة البيانات"},400);
  if(idea.length<20||idea.length>5000||email.length>254||(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||name.length>100)return json({error:"تحقق من الفكرة والبريد"},400);
@@ -102,14 +106,15 @@ export default {async fetch(request,env){
  const id=key||crypto.randomUUID(),ip=request.headers.get("CF-Connecting-IP")||"unknown",now=Date.now();
  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(ip+":"+env.HASH_SALT));const ipHash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
  try{
-  const saved=await env.DB.prepare(`INSERT INTO idea_requests(id,idea,email,name,ip_hash,created_ms,status)
-    SELECT ?,?,?,?,?,?,'new' WHERE (SELECT count(*) FROM idea_requests WHERE ip_hash=? AND created_ms>?)<3
-    ON CONFLICT(id) DO NOTHING`).bind(id,idea,email,name,ipHash,now,ipHash,now-3600000).run();
+  const saved=await env.DB.prepare(`INSERT INTO idea_requests(id,idea,email,name,ip_hash,created_ms,idea_kind,reuse_permission,concept_consent_version,status)
+    SELECT ?,?,?,?,?,?,?,?,?,'new' WHERE (SELECT count(*) FROM idea_requests WHERE ip_hash=? AND created_ms>?)<3
+    ON CONFLICT(id) DO NOTHING`).bind(id,idea,email,name,ipHash,now,idea_kind,reuse_permission?1:0,idea_kind==="concept"?"visual-v1-2026-11-08":"execution-v1-2026-11-08",ipHash,now-3600000).run();
   if(!saved.success)throw Error("Write not confirmed");
   if(saved.meta?.changes!==1){
-    const prior=await env.DB.prepare("SELECT idea,email,name,created_ms,receipt_email_status FROM idea_requests WHERE id=?").bind(id).first();
+    const prior=await env.DB.prepare("SELECT idea,email,name,created_ms,receipt_email_status,idea_kind,reuse_permission FROM idea_requests WHERE id=?").bind(id).first();
     if(!prior)return json({error:"تجاوزت حد الطلبات لهذه الساعة"},429);
-    if(prior.idea!==idea||prior.email!==email||prior.name!==name)return json({error:"تغيّر محتوى الطلب. ابدأ طلبًا جديدًا."},409);
+    if(prior.idea!==idea||prior.email!==email||prior.name!==name||prior.idea_kind!==idea_kind||prior.reuse_permission!==(reuse_permission?1:0))
+      return json({error:"تغيّر محتوى الطلب. ابدأ طلبًا جديدًا."},409);
     // Idempotent replay returns the original reference without sending a second email.
     return json(receiptResult(id,prior.created_ms,prior.receipt_email_status));
   }
@@ -121,7 +126,7 @@ export default {async fetch(request,env){
     await env.DB.prepare("UPDATE idea_requests SET notification_status='sent' WHERE id=?").bind(id).run();
    }catch(e){console.error("idea email notification failed");try{await env.DB.prepare("UPDATE idea_requests SET notification_status='failed',notification_error=? WHERE id=?").bind("delivery_failed",id).run()}catch{}}
   }
-  const receipt=await sendCustomerReceipt(env,{id,created_ms:now,idea,email,name});
+  const receipt=await sendCustomerReceipt(env,{id,created_ms:now,idea,email,name,idea_kind});
   try{
    await env.DB.prepare("UPDATE idea_requests SET receipt_email_status=?,receipt_email_provider_id=?,receipt_email_error=? WHERE id=?").bind(receipt.status,receipt.providerId,receipt.error,id).run();
   }catch(e){console.error("customer receipt status persistence failed")}
