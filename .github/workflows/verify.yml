@@ -11,8 +11,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm test
+      - name: Fetch pinned public repository revision without Marketplace actions
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/666m69/mz.git repo
+          git -C repo fetch --quiet --depth 1 origin "$GITHUB_SHA"
+          git -C repo checkout --quiet --detach "$GITHUB_SHA"
+          test "$(git -C repo rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Verify repository tests with preinstalled Node.js
+        working-directory: repo
+        run: npm test
