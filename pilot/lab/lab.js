@@ -16,6 +16,23 @@ function simulate(available, action, failure) {
   return available > 0 ? {ok:true, left:available-1, detail:action} : {ok:false, left:available, detail:failure};
 }
 let spec, history, quantities, activeSignature, requestKey, lastPayload;
+
+// Strict allowlist; label is saved in idea text without changing the production D1 schema.
+const pilotOffer=Boolean(window.location?.search&&new URLSearchParams(window.location.search).get("offer")==="menu-social-199");
+const pilotBrief="أطلب باقة منيو و٣ منشورات لعرض أسبوعي بسعر ١٩٩ ريالًا مع تعديل واحد.\nاسم المنشأة وعدد الأصناف وفكرة العرض: ";
+const selectedService=(()=>{
+ const labels={social:"التواصل الاجتماعي",admin:"الإدارة",teachers:"المعلمون",stores:"المتاجر",custom:"خدمة أخرى"};
+ if(pilotOffer)return "باقة منيو و٣ منشورات — ١٩٩ ريالًا";
+ if(!window.location?.search)return "";
+ const id=new URLSearchParams(window.location.search).get("service");
+ return Object.hasOwn(labels,id)?labels[id]:"";
+})();
+if(selectedService){
+ field("brief").placeholder="اكتب تفاصيل طلبك لخدمة «"+selectedService+"» (٢٠ حرفًا على الأقل).";
+ field("idea").placeholder="صف احتياجك في مجال «"+selectedService+"»";
+}
+if(pilotOffer&&!field("brief").value)field("brief").value=pilotBrief;
+
 const nonblankLines = value => value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
 const signature = () => JSON.stringify([field("idea").value.trim(),field("project-title").value.trim(),nonblankLines(field("features").value)]);
 function updateSpec() {
@@ -116,7 +133,17 @@ field("handoff").onclick=()=>{
 };
 field("intake").addEventListener("submit",async event=>{
   event.preventDefault();const button=field("send"),receipt=field("receipt");if(button.disabled)return;
-  const body={idea:field("brief").value.trim(),email:field("email").value.trim(),name:field("name").value.trim(),consent:field("consent").checked?"yes":"",website:field("website").value};
+  const description=field("brief").value.trim();
+  if(pilotOffer&&description===pilotBrief.trim()){
+    receipt.textContent="أضف اسم المنشأة والأصناف وفكرة العرض قبل الإرسال.";return;
+  }
+  if(description.length<20||description.length>5000){
+    receipt.textContent="اكتب وصف الطلب من ٢٠ إلى ٥٠٠٠ حرف.";return;
+  }
+  const tag=selectedService?"[نوع الخدمة: "+selectedService+"]\n":"";
+  const idea=tag+description;
+  if(idea.length>5000){receipt.textContent="اختصر وصف الطلب قليلًا حتى يمكن حفظ نوع الخدمة معه.";return;}
+  const body={idea,email:field("email").value.trim(),name:field("name").value.trim(),consent:field("consent").checked?"yes":"",website:field("website").value};
   const signature=JSON.stringify(body);
   if(signature!==lastPayload){requestKey=crypto.randomUUID();lastPayload=signature;}
   button.disabled=true;receipt.textContent="جارٍ حفظ الطلب…";field("receipt-card").hidden=true;
