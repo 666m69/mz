@@ -47,6 +47,8 @@ test('preview intake is disabled without explicit QA flag and never enabled in p
  assert.equal(res.status,404);
  const prod=await worker.fetch(new Request('https://mzcodehub.com/api/ideas',{method:'POST'}),{...env,MZ_QA_INTAKE_ENABLED:'yes'});
  assert.equal(prod.status,404);
+ const other=await worker.fetch(new Request('https://unrelated-branch.mz702.pages.dev/api/ideas',{method:'POST'}),{...env,MZ_QA_INTAKE_ENABLED:'yes'});
+ assert.equal(other.status,404);
  const old=await worker.fetch(new Request('https://mz702.pages.dev/idea'),env);
  assert.equal(old.status,302);
 });
