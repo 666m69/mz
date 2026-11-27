@@ -72,7 +72,7 @@ async function handle(req,env){
  // The production and default Pages host are never accepted here.
  if((path==='/api/ideas'||path.startsWith('/api/ideas/')) &&
     previewHost &&
-    (url.hostname==='feat-saudi-home-intake-20261.mz702.pages.dev' || env.MZ_QA_INTAKE_ENABLED==='yes')){
+    (url.hostname==='feat-saudi-home-intake-20261.mz702.pages.dev' || (url.hostname==='feat-services-guide-isolated.mz702.pages.dev' && env.MZ_QA_INTAKE_ENABLED==='yes'))){
   if(!env.DB||!env.MZ_CONTACT_SECRET)return error('خدمة حفظ الطلبات غير متاحة في المعاينة حاليًا.',503);
   return previewIdeasModule.fetch(req,{DB:env.DB,HASH_SALT:env.MZ_CONTACT_SECRET});
  }
