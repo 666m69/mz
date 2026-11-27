@@ -55,20 +55,26 @@ async function saveInterest(req,env,b) {
 }
 async function handle(req,env){
  const url=new URL(req.url),path=url.pathname;
- if(url.hostname.endsWith('.mz702.pages.dev')||url.hostname==='mz702.pages.dev'){
+ const previewHost=url.hostname.endsWith('.mz702.pages.dev');
+ if(url.hostname==='mz702.pages.dev'){
   if(['GET','HEAD'].includes(req.method)&&['/idea','/idea/','/idea/demo','/idea/demo/'].includes(path))
    return Response.redirect('https://mzcodehub.com'+path+url.search,302);
  }
+ // Preview paths stay in the isolated QA origin instead of leaking to production.
+ if(previewHost&&['GET','HEAD'].includes(req.method)&&path==='/idea')
+  return Response.redirect(url.origin+'/idea/'+url.search,308);
  if(url.hostname==='www.mzcodehub.com'){
   url.hostname='mzcodehub.com';
   url.protocol='https:';
   return Response.redirect(url.href,308);
  }
- // This preview-only route never serves production or default Pages addresses.
+ // Only named legacy QA or an explicitly enabled branch preview can write test requests.
+ // The production and default Pages host are never accepted here.
  if((path==='/api/ideas'||path.startsWith('/api/ideas/')) &&
-    url.hostname==='feat-saudi-home-intake-20261.mz702.pages.dev'){
-   if(!env.DB||!env.MZ_CONTACT_SECRET)return error('خدمة حفظ الطلبات غير متاحة في المعاينة حاليًا.',503);
-   return previewIdeasModule.fetch(req,{DB:env.DB,HASH_SALT:env.MZ_CONTACT_SECRET});
+    previewHost &&
+    (url.hostname==='feat-saudi-home-intake-20261.mz702.pages.dev' || env.MZ_QA_INTAKE_ENABLED==='yes')){
+  if(!env.DB||!env.MZ_CONTACT_SECRET)return error('خدمة حفظ الطلبات غير متاحة في المعاينة حاليًا.',503);
+  return previewIdeasModule.fetch(req,{DB:env.DB,HASH_SALT:env.MZ_CONTACT_SECRET});
  }
  if(path==='/api/assistant')return assistantHandle(req,env,{rateAddress,sign});
  if(path==='/api/menus'||path.startsWith('/api/menus/'))return menuHandle(req,env,{json,error,sign,verified,readBody,rateAddress});
