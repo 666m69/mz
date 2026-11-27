@@ -47,6 +47,21 @@ function walk(dir) {
  }
 }
 walk(root.pathname);
+
+// Make the actual idea intake lab available to isolated Pages previews.
+// Production remains maintenance-gated; no production data is read or written.
+for(const [name,publicPath] of [
+ ['index.html','/idea/index.html'],['demo.html','/idea/demo/index.html'],
+ ['lab.css','/idea/lab.css'],['lab.js','/idea/lab.js'],
+ ['engine.js','/idea/engine.js'],['prototype.js','/idea/prototype.js']
+]){
+ const original=fs.readFileSync(new URL('./pilot/lab/'+name,import.meta.url));
+ const contents=name==='index.html'
+  ?Buffer.from(original.toString('utf8').replace('<link rel="stylesheet" href="/_mz/share.css">','').replace('<script defer src="/_mz/share.js" data-mz-share-script></script>',''))
+  :original;
+ addAsset(publicPath,contents,types[path.extname(name)]);
+}
+
 // Preview-only receipt testing uses the same audited ideas handler, isolated in a closure.
 // Its asset route is intentionally empty: Pages already serves the visual shell.
 const ideasSource=fs.readFileSync(new URL('pilot/mz-ideas-worker.js',import.meta.url),'utf8')
