@@ -14,7 +14,7 @@ test("service guide carries four allowlisted category links",()=>{
   assert.ok(guide.includes('/idea?service=custom#request'));
   assert.ok(guide.includes('«وردية» منتج مستقل'));
 });
-function launch(service){
+function launch(service,search){
  const fields=new Map(),requests=[];
  function field(id){
   if(!fields.has(id))fields.set(id,{
@@ -26,7 +26,7 @@ function launch(service){
  }
  const ctx={
   document:{getElementById:field},
-  window:{MZBuilderEngine:{},location:{search:"?service="+encodeURIComponent(service)}},
+  window:{MZBuilderEngine:{},location:{search:search??("?service="+encodeURIComponent(service))}},
   URLSearchParams,AbortSignal,
   crypto:{randomUUID:()=>"12345678-1234-4234-8234-123456789abc"},
   fetch:async (url,options)=>{
@@ -67,4 +67,23 @@ test("short human-written description is rejected",async()=>{
  field("brief").value="قصير";
  await field("intake").onsubmit({preventDefault(){},target:field("intake")});
  assert.equal(requests.length,0);
+});
+
+test("pilot offer query prefills the editable brief and saves offer type",async()=>{
+ const {field,requests}=launch("", "?offer=menu-social-199");
+ assert.ok(field("brief").value.includes("١٩٩ ريالًا"));
+ field("brief").value+="كافتيريا اختبارية، أربعة أصناف، عرض الخميس";
+ field("email").value="qa@example.test";
+ field("consent").checked=true;
+ await field("intake").onsubmit({preventDefault(){},target:field("intake")});
+ assert.equal(requests.length,1);
+ assert.ok(requests[0].body.idea.startsWith("[نوع الخدمة: باقة منيو و٣ منشورات — ١٩٩ ريالًا]\n"));
+ assert.ok(requests[0].body.idea.includes("كافتيريا اختبارية"));
+});
+test("pilot template cannot be sent without customer details",async()=>{
+ const {field,requests}=launch("", "?offer=menu-social-199");
+ field("consent").checked=true;
+ await field("intake").onsubmit({preventDefault(){},target:field("intake")});
+ assert.equal(requests.length,0);
+ assert.match(field("receipt").textContent,/أضف اسم المنشأة/);
 });
